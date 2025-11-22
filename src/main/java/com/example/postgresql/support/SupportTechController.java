@@ -60,15 +60,25 @@ public class SupportTechController {
         alert.showAndWait();
     }
 
-    public void SupportTechPanel(ActionEvent event) {
+    public void SupportTechPanelWithPrefill(String login, String subject, String message) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/postgresql/SupportTechPanel.fxml"));
             Parent root = loader.load();
+            SupportTechController controller = loader.getController();
 
-            Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
-            stage.setTitle("Пользовательское соглашение");
+            controller.subjectField.setText(subject);
+            controller.messageArea.setText(
+                    message + "\n\n" +
+                            "Логин: " + login + "\n" +
+                            "Время обращения: " + java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
+            );
+
+            Stage stage = new Stage();
+            stage.setTitle("Техническая поддержка");
             stage.setScene(new Scene(root));
             stage.centerOnScreen();
+            stage.setResizable(false);
+            stage.show();
 
         } catch (IOException e) {
             e.printStackTrace();

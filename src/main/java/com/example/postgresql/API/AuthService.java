@@ -25,27 +25,44 @@ public class AuthService {
                 });
     }
 
+    // Авторизация пользователей с проверками
     public CompletableFuture<UserAuthResult> authenticate(String login, String password) {
-        System.out.println("Попытка входа: " + login + " / " + password);
         String[] filters = {
                 "login=eq." + login,
                 "password=eq." + password
         };
 
         return supabase.select("users", "*", filters)
-                .thenApply(result -> {
-                    System.out.println("Найдено пользователей: " + (result != null ? result.size() : "null"));
-
-                    if (result != null && result.size() > 0) {
-                        JsonObject user = result.get(0).getAsJsonObject();
-                        boolean active = user.has("status") ? user.get("status").getAsBoolean() : true;
-                        if (!active) {
-                            return new UserAuthResult(false, null, "Аккаунт заблокирован");
-                        }
-                        String role = user.has("role") ? user.get("role").getAsString().trim().toLowerCase() : "user";
-                        return new UserAuthResult(true, role, "Успешный вход");
+                .thenCompose(userResult -> {
+                    if (userResult == null || userResult.size() == 0) {
+                        return CompletableFuture.completedFuture(
+                                new UserAuthResult(false, null, "Неверный логин или пароль")
+                        );
                     }
-                    return new UserAuthResult(false, null, "Неверный логин или пароль");
+
+                    JsonObject user = userResult.get(0).getAsJsonObject();
+                    String role = user.has("role") ? user.get("role").getAsString().trim().toLowerCase() : "user";
+                    boolean isBanned = user.has("status") ? user.get("status").getAsBoolean() : false;
+
+                    if (isBanned && "admin".equals(role)) {
+                        isBanned = false;
+                    }
+
+                    if (!isBanned) {
+                        return CompletableFuture.completedFuture(
+                                new UserAuthResult(true, role, "Успешный вход")
+                        );
+                    }
+
+                    String[] blFilter = {"login=eq." + login};
+                    return supabase.select("blacklist", "reason", blFilter)
+                            .thenApply(blResult -> {
+                                String reason = "Причина не указана";
+                                if (blResult != null && blResult.size() > 0) {
+                                    reason = blResult.get(0).getAsJsonObject().get("reason").getAsString();
+                                }
+                                return new UserAuthResult(false, null, "Аккаунт заблокирован", reason);
+                            });
                 });
     }
 
@@ -118,11 +135,17 @@ public class AuthService {
         public final boolean success;
         public final String role;
         public final String message;
+        public final String blockReason;
 
         public UserAuthResult(boolean success, String role, String message) {
+            this(success, role, message, null);
+        }
+
+        public UserAuthResult(boolean success, String role, String message, String blockReason) {
             this.success = success;
             this.role = role;
             this.message = message;
+            this.blockReason = blockReason;
         }
 
     }

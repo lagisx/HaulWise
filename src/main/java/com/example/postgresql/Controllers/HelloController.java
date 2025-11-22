@@ -73,10 +73,13 @@ public class HelloController {
                                 }
                             } catch (IOException e) {
                                 showStatus("Ошибка при открытии панели");
-                                e.printStackTrace();
                             }
                         } else {
-                            showStatus(authResult.message);
+                            if ("Аккаунт заблокирован".equals(authResult.message) && authResult.blockReason != null) {
+                                showBlockedStatus(authResult.blockReason);
+                            } else {
+                                showStatus(authResult.message);
+                            }
                         }
                     });
                 })
@@ -102,14 +105,21 @@ public class HelloController {
 
         Hyperlink supportLink = new Hyperlink("тех.поддержку");
         supportLink.setStyle("-fx-font-size: 14; -fx-font-weight: bold");
-        supportLink.setOnAction(this::openSupport);
+        supportLink.setOnAction(e -> openSupportWithAutoFill(reason));
 
         statusFlow.getChildren().addAll(t1, supportLink);
     }
+    private void openSupportWithAutoFill(String blockReason) {
+        String currentLogin = username.getText().trim();
 
-    @FXML private void openSupport(ActionEvent event) {
         SupportTechController sup = new SupportTechController();
-        sup.SupportTechPanel(event);
+        sup.SupportTechPanelWithPrefill(
+                currentLogin,
+                "Прошу разблокировать аккаунт",
+                "Здравствуйте!\n\nМой логин: " + currentLogin +
+                        "\nАккаунт заблокирован по причине: " + blockReason +
+                        "\n\nПрошу рассмотреть возможность разблокировки.\nГотов предоставить пояснения.\n\nСпасибо."
+        );
     }
 
     @FXML private void showRegs(ActionEvent event) {
