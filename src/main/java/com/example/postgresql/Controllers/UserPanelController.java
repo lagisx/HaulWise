@@ -159,7 +159,7 @@ public class UserPanelController {
                     if (success) {
                         userCargoContainer.getChildren().remove(card);
                         showSuccess("Груз успешно удалён");
-                        loadAllCargos(); // Обновляем общий список
+                        loadAllCargos();
                     } else {
                         showError("Не удалось удалить груз");
                     }

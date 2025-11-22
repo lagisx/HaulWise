@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
 public class SupabaseClient {
-    private static final String SUPABASE_URL = "https://mkdwltdoayuhuikzycod.supabase.co";
-    private static final String SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rZHdsdGRvYXl1aHVpa3p5Y29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MDc5MTQsImV4cCI6MjA3OTE2NzkxNH0.3z8WeD6-03mNN5y421-Ujl9ZdpdTdfJUaf9ersZG25A";
+    public static final String SUPABASE_URL = "https://mkdwltdoayuhuikzycod.supabase.co";
+    public static final String SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1rZHdsdGRvYXl1aHVpa3p5Y29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM4MDc5MTQsImV4cCI6MjA3OTE2NzkxNH0.3z8WeD6-03mNN5y421-Ujl9ZdpdTdfJUaf9ersZG25A";
     private static final String API_URL = SUPABASE_URL + "/rest/v1";
 
     private final OkHttpClient client;
@@ -21,31 +21,35 @@ public class SupabaseClient {
         this.gson = new Gson();
     }
 
-    public CompletableFuture<JsonArray> select(String table, String select, String[] filters) {
+    public CompletableFuture<JsonArray> select(String table, String select, String filters) {
         CompletableFuture<JsonArray> future = new CompletableFuture<>();
 
         HttpUrl.Builder urlBuilder = HttpUrl.parse(API_URL + "/" + table).newBuilder();
         urlBuilder.addQueryParameter("select", select);
 
-        if (filters != null) {
-            for (String filter : filters) {
-                // ←←←←← ВОТ ЭТА СТРОКА — КЛЮЧЕВАЯ! БЕЗ НЕЁ НЕ РАБОТАЕТ!
-                String[] parts = filter.split("=", 2);  // ← 2, а не просто "="
-                if (parts.length == 2) {
-                    urlBuilder.addQueryParameter(parts[0], parts[1]);
-                } else {
-                    System.err.println("Неправильный фильтр: " + filter);
+        if (filters == null || filters.isEmpty()) {
+            urlBuilder.addQueryParameter("offset", "0");
+        } else {
+            String[] filterParts = filters.split(",");
+            for (String filter : filterParts) {
+                String trimmed = filter.trim();
+                if (trimmed.contains("=")) {
+                    String[] kv = trimmed.split("=", 2);
+                    if (kv.length == 2) {
+                        urlBuilder.addQueryParameter(kv[0].trim(), kv[1].trim());
+                    }
                 }
             }
         }
 
         HttpUrl url = urlBuilder.build();
-        System.out.println("ФИНАЛЬНЫЙ URL: " + url);  // ← добавь эту строку
 
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("apikey", SUPABASE_ANON_KEY)
                 .addHeader("Authorization", "Bearer " + SUPABASE_ANON_KEY)
+                .addHeader("Accept", "application/json")
+                .addHeader("Prefer", "return=representation")
                 .get()
                 .build();
 
@@ -58,14 +62,14 @@ public class SupabaseClient {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                String body = response.body() != null ? response.body().string() : "null";
-                System.out.println("Ответ: " + response.code() + " → " + body);
+                String body = response.body() != null ? response.body().string() : "[]";
 
                 if (response.isSuccessful()) {
                     JsonArray result = gson.fromJson(body, JsonArray.class);
                     future.complete(result);
                 } else {
-                    future.completeExceptionally(new IOException("HTTP " + response.code()));
+                    System.err.println("Supabase SELECT failed: " + response.code() + " " + body);
+                    future.complete(new JsonArray());
                 }
                 response.close();
             }

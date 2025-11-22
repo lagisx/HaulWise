@@ -46,17 +46,21 @@ public class HelloController {
         String pass = visiblePass ? passVisible.getText().trim() : password.getText().trim();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            showStatus("Введите логин и пароль");
+            Platform.runLater(() -> showStatus("Введите логин и пароль"));
             return;
         }
 
+        Platform.runLater(() -> showStatus("Проверка блокировки..."));
+
         AuthService authService = new AuthService();
+
         authService.checkBlacklist(user)
                 .thenCompose(blockStatus -> {
                     if (blockStatus.isBlocked) {
                         Platform.runLater(() -> showBlockedStatus(blockStatus.reason));
                         return CompletableFuture.completedFuture(null);
                     }
+                    Platform.runLater(() -> showStatus("Авторизация..."));
                     return authService.authenticate(user, pass);
                 })
                 .thenAccept(authResult -> {
@@ -71,11 +75,12 @@ public class HelloController {
                                 } else {
                                     UserPanelController.UserPanel(stage, user, pass);
                                 }
-                            } catch (IOException e) {
-                                showStatus("Ошибка при открытии панели");
+                            } catch (Exception e) {
+                                showStatus("Ошибка открытия панели: " + e.getMessage());
+                                e.printStackTrace();
                             }
                         } else {
-                            if ("Аккаунт заблокирован".equals(authResult.message) && authResult.blockReason != null) {
+                            if (authResult.blockReason != null) {
                                 showBlockedStatus(authResult.blockReason);
                             } else {
                                 showStatus(authResult.message);
@@ -84,8 +89,8 @@ public class HelloController {
                     });
                 })
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showStatus("Ошибка при подключении к базе!"));
                     ex.printStackTrace();
+                    Platform.runLater(() -> showStatus("Ошибка соединения с сервером"));
                     return null;
                 });
     }
