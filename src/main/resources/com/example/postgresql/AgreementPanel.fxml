@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="700" prefWidth="950" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.support.AgreementPanelController">
+
+    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets bottom="10" left="25" right="20" top="10" />
+        </padding>
+        <Label onMouseClicked="#goBack" style="-fx-font-size: 32; -fx-text-fill: white; -fx-cursor: hand;" text="←" />
+        <Label style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" text="Пользовательское соглашение" />
+    </HBox>
+
+    <ScrollPane fitToWidth="true" layoutY="80" prefHeight="600" prefWidth="900" style="-fx-background-color: transparent; -fx-padding: 30;" AnchorPane.bottomAnchor="25" AnchorPane.leftAnchor="25" AnchorPane.rightAnchor="25">
+        <content>
+            <VBox alignment="TOP_LEFT" spacing="18" style="-fx-background-color: white;                                                           -fx-background-radius: 16;                                                           -fx-padding: 35;                                                           -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 10, 0, 0, 3);">
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Администрация Биржи грузоперевозок (далее — «Администрация») предоставляет право пользоваться сайтом после регистрации." wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Регистрация осуществляется путём заполнения формы и подтверждения согласия с условиями настоящего Соглашения." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="1. Термины" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- Сайт — веб-ресурс Биржи грузоперевозок." wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- Участник — зарегистрированное лицо с аккаунтом на сайте." wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- Аккаунт — данные о пользователе, включая логин, пароль и информацию, размещаемую на сайте." wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- Сервисы — функционал сайта, включая размещение информации о грузах, поиск перевозчиков, оформление заказов." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="2. Предмет соглашения" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Администрация предоставляет участнику право:" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- просматривать информацию в приложении;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- размещать информацию о грузах;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- пользоваться сервисами приложения;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- использовать сайт в рамках правил." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="3. Права и обязанности сторон" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Администрация обязуется:" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- предоставлять доступ к сайту;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- обеспечивать работу сервисов;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- защищать персональные данные участников." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="4. Права участника" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- пользоваться функционалом сайта;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- получать информацию о доступных грузах и перевозчиках;" wrapText="true" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="- участвовать в рейтингах и оставлять отзывы." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="5. Персональные данные" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Участник даёт согласие на обработку своих данных. Администрация обязуется защищать данные от несанкционированного доступа." wrapText="true" />
+
+                <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa);" text="6. Использование аккаунта" />
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Доступ к сайту возможен только через регистрацию. Аккаунт может быть заблокирован или удалён при нарушении правил." wrapText="true" />
+
+                <Label style="-fx-font-size: 16; -fx-text-fill: #111827;" text="Настоящее Соглашение является публичной офертой. Использование сайта подтверждает согласие с его условиями." wrapText="true" />
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>

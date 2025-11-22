@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.support.SupportTechController">
+
+    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets bottom="10" left="25" right="20" top="10" />
+        </padding>
+        <Label alignment="CENTER_RIGHT" onMouseClicked="#goBack" prefHeight="40.0" prefWidth="24.0" style="-fx-font-size: 28; -fx-text-fill: white; -fx-cursor: hand;" text="←" />
+        <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Техническая поддержка" />
+    </HBox>
+
+    <VBox alignment="TOP_CENTER" layoutX="150" layoutY="120" prefHeight="520" prefWidth="700" spacing="20" style="-fx-background-color: white;                  -fx-background-radius: 16;                  -fx-padding: 40;                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
+
+        <Label style="-fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa); -fx-font-size: 26; -fx-font-weight: bold;" text="Связаться с поддержкой" />
+
+        <Label style="-fx-text-fill: #64748b; -fx-font-size: 14;" text="Опишите вашу проблему или вопрос:" />
+
+        <TextField fx:id="subjectField" promptText="Тема обращения" style="-fx-background-radius: 8;                           -fx-border-color: #e2e8f0;                           -fx-border-radius: 8;                           -fx-padding: 10;" />
+
+        <TextArea fx:id="messageArea" prefHeight="250" promptText="Введите сообщение" style="-fx-background-radius: 8;                          -fx-border-color: #e2e8f0;                          -fx-border-radius: 8;                          -fx-padding: 10;" wrapText="true" />
+
+        <Button fx:id="sendButton" onAction="#sendSupportRequest" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                        -fx-font-weight: bold;                        -fx-text-fill: white;                        -fx-background-radius: 8;                        -fx-font-size: 15;                        -fx-padding: 10 25;                        -fx-cursor: hand;" text="Отправить обращение" />
+    </VBox>
+</AnchorPane>

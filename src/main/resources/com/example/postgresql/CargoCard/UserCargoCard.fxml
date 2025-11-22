@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="120.0" prefWidth="920.0" style="-fx-background-color: linear-gradient(to bottom, #ffffff, #f9fafb);                    -fx-border-color: #e0e0e0;                    -fx-border-width: 1;                    -fx-background-radius: 12;                    -fx-border-radius: 12;                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 8, 0, 0, 2);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.CardControllers.UserCargoCardController">
+
+    <VBox fx:id="leftBox" layoutX="20" layoutY="16" spacing="6">
+        <Label fx:id="typeLabel" style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" />
+        <Label fx:id="vesObemLabel" style="-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #111;" />
+        <Label fx:id="tovarLabel" style="-fx-font-size: 13; -fx-text-fill: #555;" />
+        <Label fx:id="routeLabel" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #333;" />
+    </VBox>
+
+    <VBox fx:id="middleBox" layoutX="270" layoutY="16" spacing="6">
+        <HBox fx:id="infoRow" spacing="30">
+            <VBox fx:id="zagruzBox" spacing="3">
+                <Label style="-fx-font-size: 13; -fx-text-fill: #888;" text="Загр./выгр:" />
+                <Label fx:id="zagruzValue" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #333;" />
+            </VBox>
+            <VBox fx:id="dateBox" spacing="3">
+                <Label style="-fx-font-size: 13; -fx-text-fill: #888;" text="Дата:" />
+                <Label fx:id="dateValue" style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #333;" />
+            </VBox>
+        </HBox>
+        <Label fx:id="cargoTypeLabel" style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #1e40af;" />
+    </VBox>
+    <BorderPane layoutX="432.0" layoutY="14.0" prefHeight="106.0" prefWidth="263.0">
+        <center>
+            <ImageView fx:id="randomImageOnCard" fitHeight="103.0" fitWidth="210.0" nodeOrientation="INHERIT" pickOnBounds="true" preserveRatio="true" BorderPane.alignment="CENTER" />
+        </center>
+    </BorderPane>
+
+    <VBox fx:id="rightBox" alignment="TOP_RIGHT" layoutX="700" layoutY="16" prefHeight="120.0" prefWidth="218.0" spacing="4">
+        <padding>
+            <Insets bottom="10" left="10" right="10" top="8" />
+        </padding>
+
+        <HBox fx:id="pricesBox" spacing="15">
+            <VBox fx:id="priceKartaBox" prefHeight="46.0" prefWidth="131.0" spacing="2">
+                <Label fx:id="priceKartaLabel" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2e7d32;" />
+                <Label alignment="CENTER" prefHeight="17.0" prefWidth="95.0" style="-fx-font-size: 11; -fx-text-fill: #666;" text="На карту" />
+            </VBox>
+            <VBox fx:id="priceNDSBox" prefHeight="46.0" prefWidth="131.0" spacing="2">
+                <Label fx:id="priceNDSLabel" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1976d2;" />
+                <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="17.0" prefWidth="136.0" style="-fx-font-size: 11; -fx-text-fill: #666;" text="С НДС" />
+            </VBox>
+        </HBox>
+
+        <Label prefHeight="17.0" prefWidth="215.0" style="-fx-font-size: 12; -fx-font-weight: bold; -fx-text-fill: #444;" text="Контактные данные:" />
+      <HBox prefHeight="63.0" prefWidth="199.0">
+         <children>
+              <Label fx:id="contactLabel" prefHeight="20.0" prefWidth="140.0" style="-fx-font-size: 12; -fx-text-fill: #2563eb;" wrapText="true" />
+            <Label fx:id="tradeLabel" layoutX="10.0" layoutY="10.0" prefHeight="20.0" prefWidth="73.0" style="-fx-font-size: 12; -fx-text-fill: #2563eb;" wrapText="true" />
+         </children>
+      </HBox>
+    </VBox>
+
+    <Pane layoutX="22.0" layoutY="120.0" prefHeight="1" prefWidth="900" style="-fx-background-color: #e0e0e0;" />
+
+    <Label fx:id="deleteLabel" layoutX="920" layoutY="5" prefHeight="17.0" prefWidth="22.0" style="-fx-font-size: 22; -fx-text-fill: red; -fx-cursor: hand;" text="✖" />
+    <Pane layoutX="260" layoutY="0" opacity="0.08" prefHeight="120" prefWidth="2" style="-fx-background-color: black;" />
+
+</AnchorPane>

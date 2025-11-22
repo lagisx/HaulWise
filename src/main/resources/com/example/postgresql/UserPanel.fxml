@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.UserPanelController">
+
+    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets bottom="10" left="25" right="20" top="10" />
+        </padding>
+        <children>
+            <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Биржа Грузоперевозок" />
+            <Pane HBox.hgrow="ALWAYS" />
+            <Label fx:id="LabelUser" onMouseClicked="#profileClick" style="-fx-font-size: 16; -fx-text-fill: white; -fx-cursor: hand;" text="Пользователь">
+                <contextMenu>
+                    <ContextMenu fx:id="userMenu">
+                        <items>
+                            <MenuItem fx:id="ProfileMenu" text="Профиль" />
+                        </items>
+                    </ContextMenu>
+                </contextMenu>
+            </Label>
+            <Button fx:id="logoutButton" onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e3a8a;                            -fx-font-weight: bold; -fx-background-radius: 8;                            -fx-cursor: hand; -fx-padding: 6 16 6 16;" text="Выйти" />
+        </children>
+    </HBox>
+
+    <TabPane fx:id="tabPane" layoutY="65.0" prefHeight="635.0" prefWidth="1000.0" style="-fx-background-color: transparent;                     -fx-border-color: #e5e7eb;                     -fx-border-width: 2;                     -fx-focus-color: transparent;                     -fx-faint-focus-color: transparent;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="65.0">
+
+        <tabs>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                         -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="🚚 Все грузы">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-border-color: transparent;">
+                        <content>
+                            <VBox fx:id="cargoContainer" spacing="15" style="-fx-padding: 25;                                          -fx-background-color: transparent;" />
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                         -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="👤 Мои грузы">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-border-color: transparent;">
+                        <content>
+                            <VBox fx:id="userCargoContainer" spacing="15" style="-fx-padding: 25;                                          -fx-background-color: transparent;">
+                                <Button fx:id="btnAddCargo" alignment="TOP_RIGHT" contentDisplay="RIGHT" onAction="#AddUsersCargo" prefHeight="35.0" prefWidth="139.0" style="-fx-background-color: #1e3a8a; -fx-text-fill: white;                                                -fx-font-weight: bold; -fx-background-radius: 8;                                                -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="➕ Добавить груз" />
+                        <Pane fx:id="PaneBottomBtn" prefHeight="6.0" prefWidth="945.0" />
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+        </tabs>
+    </TabPane>
+
+</AnchorPane>

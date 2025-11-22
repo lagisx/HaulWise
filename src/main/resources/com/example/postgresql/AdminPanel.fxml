@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="700.0" prefWidth="1285.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.AdminPanelController">
+
+    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets bottom="10" left="25" right="20" top="10" />
+        </padding>
+        <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Панель Администратора" />
+        <Pane HBox.hgrow="ALWAYS" />
+        <Label fx:id="LabelUser" style="-fx-font-size: 16; -fx-text-fill: white;" text="Пользователь" />
+        <Button fx:id="logoutButton" onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e3a8a;                        -fx-font-weight: bold; -fx-background-radius: 8;                        -fx-padding: 6 16 6 16;" text="Выйти" />
+    </HBox>
+
+    <TabPane fx:id="adminTabPane" layoutY="65" prefHeight="635.0" prefWidth="1285.0" style="-fx-background-color: transparent;                     -fx-border-color: #e5e7eb;                     -fx-border-width: 2;                     -fx-focus-color: transparent;                     -fx-faint-focus-color: transparent;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="65.0">
+
+        <tabs>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                                        -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="🚚 Грузы">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true">
+                        <content>
+                            <VBox spacing="15" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Список грузов" />
+                                    <Button fx:id="btnloadUsers1" onAction="#loadCargos" style="-fx-background-radius: 50; -fx-background-color: transe; -fx-font-weight: bold;" text="⟲" />
+                                </HBox>
+                                <TableView fx:id="cargoTable" prefHeight="400" prefWidth="1200">
+                                    <columns>
+                                        <TableColumn fx:id="colCargoId" prefWidth="50" text="ID" />
+                                        <TableColumn fx:id="colCargoOwner" prefWidth="80" text="Заказчик" />
+                                        <TableColumn fx:id="colCargoType" prefWidth="170" text="ТипТС" />
+                                        <TableColumn fx:id="colCargoWeight" prefWidth="80" text="Вес (т)" />
+                                        <TableColumn fx:id="colCargoVolume" prefWidth="100" text="Объем (куб.)" />
+                                        <TableColumn fx:id="colCargoProduct" prefWidth="150" text="Товар" />
+                                        <TableColumn fx:id="colCargoFrom" prefWidth="120" text="Откуда" />
+                                        <TableColumn fx:id="colCargoTo" prefWidth="120" text="Куда" />
+                                        <TableColumn fx:id="colCargoLoadType" prefWidth="120" text="Тип погрузки" />
+                                        <TableColumn fx:id="colCargoLoadDetails" prefWidth="150" text="Детали погрузки" />
+                                        <TableColumn fx:id="colCargoDates" prefWidth="100" text="Даты" />
+                                        <TableColumn fx:id="colCargoPriceCard" prefWidth="120" text="Цена по карте" />
+                                        <TableColumn fx:id="colCargoPriceNDC" prefWidth="120" text="Цена НДС" />
+                                        <TableColumn fx:id="colCargoTorg" prefWidth="100" text="Торг/без торга" />
+                                        <TableColumn fx:id="colCargoContact" prefWidth="150" text="Контактный телефон" />
+                                    </columns>
+                                </TableView>
+                                <HBox alignment="CENTER_RIGHT" spacing="10">
+                                    <Label fx:id="statusLabel" style="-fx-font-size: 13px; -fx-text-fill: red;" />
+                                    <Button fx:id="btnDeleteCargo" onAction="#deleteCargo" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold;" text="🗑 Удалить груз" />
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                                              -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="👤 Пользователи">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-border-color: transparent;">
+                        <content>
+                            <VBox spacing="15" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Список пользователей" />
+                                    <Button fx:id="btnloadUsers" onAction="#loadUsers" style="-fx-background-radius: 50; -fx-background-color: #e5e7eb; -fx-font-weight: bold;" text="⟲" />
+                                </HBox>
+                                <TableView fx:id="userTable" prefHeight="400" prefWidth="1200">
+                                    <columns>
+                                        <TableColumn fx:id="colUserId" prefWidth="50" text="ID" />
+                                        <TableColumn fx:id="colUserLogin" prefWidth="200" text="Логин" />
+                                        <TableColumn fx:id="colUserPassword" prefWidth="150" text="Пароль" />
+                                        <TableColumn fx:id="colUserEmail" prefWidth="300" text="Email" />
+                                        <TableColumn fx:id="colUserPhone" prefWidth="200" text="Телефон" />
+                                        <TableColumn fx:id="colUserCreated_at" prefWidth="200" text="Дата создания" />
+                                        <TableColumn fx:id="colUserStatus" prefWidth="200" text="Статус" />
+                                    </columns>
+                                </TableView>
+                                <HBox alignment="CENTER" spacing="10">
+                                    <Label fx:id="statusLabelUsers" style="-fx-font-size: 13px; -fx-text-fill: red;" />
+                                    <Button fx:id="btnEditUser" onAction="#editUser" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold;" text="Изменить логин/пароль" />
+                                    <Button fx:id="btnBlockUser" onAction="#blockUser" style="-fx-background-color: #107ab0; -fx-text-fill: white; -fx-font-weight: bold;" text="⛔ Заблокировать пользователя" />
+                                    <Button fx:id="btnDeleteUser" onAction="#deleteUser" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold;" text="🗑 Удалить пользователя" />
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                                                -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="🚫 Черный список">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-border-color: transparent;">
+                        <content>
+                            <VBox spacing="15" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Список заблокированных пользователей" />
+                                    <Button fx:id="btnloadBlockUsers" onAction="#loadBlockListUsers" style="-fx-background-radius: 50; -fx-background-color: #e5e7eb; -fx-font-weight: bold;" text="⟲" />
+                                </HBox>
+                                <TableView fx:id="blacklistTable" prefHeight="400" prefWidth="1200">
+                                    <columns>
+                                        <TableColumn fx:id="colBlockUserId" prefWidth="50" text="ID" />
+                                        <TableColumn fx:id="colBlockUserLogin" prefWidth="200" text="Логин" />
+                                        <TableColumn fx:id="colBlockUserEmail" prefWidth="250" text="Email" />
+                                        <TableColumn fx:id="colBlockUserPhone" prefWidth="200" text="Телефон" />
+                                        <TableColumn fx:id="colBlockUserReason" prefWidth="250" text="Причина" />
+                                        <TableColumn fx:id="colBlockUserBlocked_by" prefWidth="150" text="Администратор" />
+                                        <TableColumn fx:id="colBlockUserCreated_at" prefWidth="150" text="Время" />
+                                    </columns>
+                                </TableView>
+                                <HBox alignment="CENTER_RIGHT" spacing="10">
+                                    <Label fx:id="statusLabelBlockUsers" style="-fx-font-size: 13px; -fx-text-fill: red;" />
+                                    <Button fx:id="btnUnblockUser" onAction="#unblockUser" style="-fx-background-color: #107ab0; -fx-text-fill: white; -fx-font-weight: bold;" text="⛔ Разблокировать пользователя" />
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                                               -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="📄 Журнал Аудита">
+                <content>
+                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-border-color: transparent;">
+                        <content>
+                            <VBox spacing="15" style="-fx-padding: 20;">
+                                <HBox alignment="CENTER_LEFT" spacing="10">
+                                    <Label style="-fx-font-size: 18; -fx-font-weight: bold;" text="Отслеживание действий" />
+                                    <Button fx:id="btnloadLogsList" onAction="#loadLogsList" style="-fx-background-radius: 50; -fx-background-color: #e5e7eb; -fx-font-weight: bold;" text="⟲" />
+                                </HBox>
+                                <TableView fx:id="logsListTable" prefHeight="400" prefWidth="1200">
+                                    <columns>
+                                        <TableColumn fx:id="colLogsListId" prefWidth="50" text="ID" />
+                                        <TableColumn fx:id="colLogsListUser" prefWidth="350" text="Пользователь" />
+                                        <TableColumn fx:id="colLogsListDescription" prefWidth="600" text="Описание" />
+                                        <TableColumn fx:id="colLogsListCreated_at" prefWidth="200" text="Время действия" />
+                                    </columns>
+                                </TableView>
+                                <HBox alignment="CENTER_RIGHT" spacing="10">
+                                    <Label fx:id="statusLabelBlockUsers1" style="-fx-font-size: 13px; -fx-text-fill: red;" />
+                                </HBox>
+                            </VBox>
+                        </content>
+                    </ScrollPane>
+                </content>
+            </Tab>
+
+        </tabs>
+    </TabPane>
+</AnchorPane>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="700" prefWidth="1000" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.UserF.ProfileUser">
+
+    <HBox alignment="CENTER_LEFT" prefHeight="66.0" prefWidth="1000.0" spacing="10" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+        <padding>
+            <Insets bottom="10" left="25" right="25" top="10" />
+        </padding>
+        <Label alignment="CENTER_RIGHT" layoutX="14.0" layoutY="5.0" onMouseClicked="#goBackUserPanel" prefHeight="40.0" prefWidth="37.0" style="-fx-font-size: 28; -fx-text-fill: white; -fx-cursor: hand;" text="←" />
+        <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Профиль пользователя" />
+    </HBox>
+
+    <HBox layoutY="80.0" prefHeight="600.0" prefWidth="1000.0" spacing="25" style="-fx-padding: 40;">
+
+        <VBox prefWidth="640" spacing="25" style="-fx-background-color: white;                      -fx-background-radius: 15;                      -fx-padding: 40;                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
+
+            <Label style="-fx-font-size: 26; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" text="Мой профиль" />
+
+            <GridPane hgap="20" vgap="18">
+                <columnConstraints>
+                    <ColumnConstraints prefWidth="130.0" />
+                    <ColumnConstraints prefWidth="320.0" />
+                </columnConstraints>
+
+                <Label style="-fx-font-size: 14; -fx-text-fill: #64748b;" text="Логин" GridPane.rowIndex="0" />
+                <TextField fx:id="login" style="-fx-background-radius: 8;                                   -fx-border-color: #e2e8f0;                                   -fx-border-radius: 8;                                   -fx-padding: 10;" GridPane.columnIndex="1" />
+
+                <Label style="-fx-font-size: 14; -fx-text-fill: #64748b;" text="Пароль" GridPane.rowIndex="1" />
+                <PasswordField fx:id="passwordVIEW" style="-fx-background-radius: 8;                                       -fx-border-color: #e2e8f0;                                       -fx-border-radius: 8;                                       -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                <Label style="-fx-font-size: 14; -fx-text-fill: #64748b;" text="Email" GridPane.rowIndex="2" />
+                <TextField fx:id="email" style="-fx-background-radius: 8;                                   -fx-border-color: #e2e8f0;                                   -fx-border-radius: 8;                                   -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                <Label style="-fx-font-size: 14; -fx-text-fill: #64748b;" text="Телефон" GridPane.rowIndex="3" />
+                <TextField fx:id="phone" style="-fx-background-radius: 8;                                   -fx-border-color: #e2e8f0;                                   -fx-border-radius: 8;                                   -fx-padding: 10;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <rowConstraints>
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+               <RowConstraints />
+            </rowConstraints>
+            </GridPane>
+
+            <HBox spacing="15">
+                <Button fx:id="saveProfileBtn" onAction="#changeParam" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                                -fx-text-fill: white;                                -fx-font-weight: bold;                                -fx-background-radius: 8;                                -fx-padding: 10 20;                                -fx-font-size: 14;                                -fx-cursor: hand;" text="💾 Сохранить" />
+
+                <Button fx:id="deleteUser" onAction="#deleteUser" style="-fx-background-color: #ef4444;                                -fx-text-fill: white;                                -fx-font-weight: bold;                                -fx-background-radius: 8;                                -fx-padding: 10 20;                                -fx-font-size: 14;                                -fx-cursor: hand;" text="🗑 Удалить" />
+            </HBox>
+         <Label fx:id="LabelUser" visible="false" />
+
+            <Label fx:id="statusLabel" style="-fx-font-size: 14; -fx-text-fill: #dc2626;" wrapText="true" />
+        </VBox>
+
+        <VBox alignment="TOP_LEFT" prefWidth="280" spacing="20" style="-fx-background-color: white;                      -fx-background-radius: 15;                      -fx-padding: 30;                      -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
+            <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" text="Информация" />
+            <Label style="-fx-text-fill: #64748b; -fx-font-size: 13;" text="• Проверьте корректность своих данных перед сохранением." wrapText="true" />
+            <Label style="-fx-text-fill: #64748b; -fx-font-size: 13;" text="• Изменения вступают в силу сразу после сохранения." wrapText="true" />
+        </VBox>
+    </HBox>
+</AnchorPane>
