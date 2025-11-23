@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.collections.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" maxWidth="460" minWidth="460" prefWidth="460" spacing="18" style="-fx-background-color: white; -fx-background-radius: 28;              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.AddCargoDialogController">
+
+    <padding>
+        <Insets bottom="32" left="40" right="40" top="32" />
+    </padding>
+
+    <Label style="-fx-font-size: 26px; -fx-font-weight: 800; -fx-text-fill: #0f172a;" text="Добавить груз" />
+
+    <Separator prefWidth="380" style="-fx-background-color: #e2e8f0;" />
+
+    <GridPane alignment="CENTER" hgap="20" vgap="16">
+        <columnConstraints>
+            <ColumnConstraints hgrow="ALWAYS" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <VBox spacing="14" GridPane.columnIndex="0">
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #475569;" text="Тип ТС*" />
+            <TextField fx:id="typeTS" promptText="Тент, Реф, Изотерм..." style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Вес (т)*" />
+            <TextField fx:id="weight" promptText="20" style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Объём (м³)*" />
+            <TextField fx:id="volume" promptText="82" style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Товар*" />
+            <TextField fx:id="product" promptText="Продукты, стройка..." style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Откуда*" />
+            <TextField fx:id="from" promptText="Москва" style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Куда*" />
+            <TextField fx:id="to" promptText="СПб" style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+        </VBox>
+
+        <VBox spacing="14" GridPane.columnIndex="1">
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Тип погрузки*" />
+            <TextField fx:id="loadingType" promptText="Боковая, задняя..." style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Детали погрузки" />
+            <TextField fx:id="details" promptText="Гидроборт, коники, ремни, пирс..." style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Даты погрузки*" />
+            <HBox alignment="CENTER_LEFT" spacing="10">
+                <Label style="-fx-text-fill: #64748b; -fx-font-size: 13px;" text="с" />
+                <DatePicker fx:id="dateFrom" prefWidth="140" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+                <Label style="-fx-text-fill: #64748b; -fx-font-size: 13px;" text="по" />
+                <DatePicker fx:id="dateTo" prefWidth="140" style="-fx-background-radius: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+            </HBox>
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Без НДС (₽)*" />
+            <TextField fx:id="priceCard" promptText="150000" style="-fx-background-radius: 12; -fx-padding: 12; -fx-border-radius: 12; -fx-pref-height: 48; -fx-border-color: #cbd5e1;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #16a34a;" text="С НДС (₽)" />
+            <TextField fx:id="priceNDS" editable="false" promptText="+20%" style="-fx-background-color: #f0fdf4; -fx-background-radius: 12; -fx-border-radius: 12; -fx-padding: 12; -fx-pref-height: 48; -fx-border-color: #86efac; -fx-border-width: 2; -fx-text-fill: #16a34a; -fx-font-weight: bold;" />
+
+            <Label style="-fx-font-size: 13px; -fx-font-weight: 600;" text="Торг*" />
+            <ComboBox fx:id="trade" prefHeight="48" style="-fx-background-radius: 12;">
+                <items>
+                    <FXCollections fx:factory="observableArrayList">
+                        <String fx:value="Без торга" />
+                        <String fx:value="Торг уместен" />
+                    </FXCollections>
+                </items>
+            </ComboBox>
+        </VBox>
+      <rowConstraints>
+         <RowConstraints />
+      </rowConstraints>
+    </GridPane>
+
+    <HBox alignment="CENTER" spacing="16">
+        <Button onAction="#onSave" prefHeight="43.0" prefWidth="168.0" style="-fx-background-color: linear-gradient(to bottom, #16a34a, #15803d);                        -fx-background-radius: 20; -fx-text-fill: white; -fx-font-size: 15px; -fx-font-weight: 700;" text="Опубликовать груз" />
+        <Button onAction="#onCancel" prefHeight="32.0" prefWidth="117.0" style="-fx-background-color: #f8fafc; -fx-text-fill: #475569; -fx-font-weight: 600; -fx-background-radius: 20; -fx-border-radius: 20; -fx-border-color: #cbd5e1; -fx-border-width: 1.5;" text="Отмена" />
+    </HBox>
+
+    <Label fx:id="statusLabel" alignment="CENTER" style="-fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 12 0 8 0;" />
+</VBox>

@@ -28,19 +28,15 @@ public class UserPanelController {
     @FXML private Button btnAddCargo;
     @FXML private Label LabelUser;
     @FXML private TabPane tabPane;
+    @FXML private VBox ndsPriceBox;
 
     private String currentUser;
     private final AuthService authService = new AuthService();
 
     private static final String[] IMAGES = {
-            "/images/BoxImage.png",
-            "/images/CarTwo.png",
-            "/images/CarThreeBox.png",
-            "/images/CarFour.png",
-            "/images/Kran.png",
-            "/images/CargoImage.png",
-            "/images/ThreeCargo.png",
-            "/images/Pallet.png"
+            "/images/BoxImage.png", "/images/CarTwo.png", "/images/CarThreeBox.png",
+            "/images/CarFour.png", "/images/Kran.png", "/images/CargoImage.png",
+            "/images/ThreeCargo.png", "/images/Pallet.png"
     };
     private static final Random random = new Random();
 
@@ -72,14 +68,13 @@ public class UserPanelController {
 
     private void displayAllCargos(JsonArray cargos) {
         cargoContainer.getChildren().clear();
-
         if (cargos == null || cargos.size() == 0) {
             cargoContainer.getChildren().add(createInfoLabel("Нет доступных грузов"));
             return;
         }
 
         Label count = new Label("Найдено " + cargos.size() + " грузов");
-        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0;");
+        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0; -fx-text-fill: #1e293b;");
         cargoContainer.getChildren().add(count);
 
         for (JsonElement el : cargos) {
@@ -103,7 +98,7 @@ public class UserPanelController {
                 node instanceof Label && ((Label) node).getText().contains("Загрузка"));
 
         Label count = new Label("Ваши грузы: " + (cargos != null ? cargos.size() : 0));
-        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0;");
+        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0; -fx-text-fill: #1e293b;");
         userCargoContainer.getChildren().add(0, count);
 
         if (cargos == null || cargos.size() == 0) {
@@ -119,37 +114,48 @@ public class UserPanelController {
 
     private void addCargoCard(JsonObject cargo, VBox container, boolean isOwner) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                    "/com/example/postgresql/CargoCard/UserCargoCard.fxml"));
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CargoCard/UserCargoCard.fxml"));
             AnchorPane card = loader.load();
             UserCargoCardController ctrl = loader.getController();
 
             ctrl.typeLabel.setText("RUS • " + getStr(cargo, "ТипТС"));
-            ctrl.vesObemLabel.setText(format(cargo, "Вес") + " т. / " + format(cargo, "Объем") + " куб.");
-            ctrl.tovarLabel.setText(getStr(cargo, "Товар"));
             ctrl.routeLabel.setText(getStr(cargo, "Откуда") + " → " + getStr(cargo, "Куда"));
-            ctrl.zagruzValue.setText(getStr(cargo, "ТипПогрузки"));
+            ctrl.vesObemLabel.setText(format(cargo, "Вес") + " т • " + format(cargo, "Объем") + " м³");
+            ctrl.tovarLabel.setText(getStr(cargo, "Товар"));
             ctrl.dateValue.setText(getStr(cargo, "Даты"));
-            ctrl.cargoTypeLabel.setText(getStr(cargo, "ДеталиПогрузки"));
             ctrl.randomImageOnCard.setImage(getRandomCargoImage());
+
+            String loadingDetails = getStr(cargo, "ДеталиПогрузки").trim();
+            if (loadingDetails.equals("—") || loadingDetails.isEmpty()) {
+                ctrl.cargoTypeLabel.setVisible(false);
+                ctrl.cargoTypeLabel.setManaged(false);
+            } else {
+                ctrl.cargoTypeLabel.setText(loadingDetails);
+                ctrl.cargoTypeLabel.setVisible(true);
+                ctrl.cargoTypeLabel.setManaged(true);
+            }
 
             ctrl.priceKartaLabel.setText(formatRub(cargo, "ЦенаПоКарте"));
             ctrl.priceNDSLabel.setText(formatRub(cargo, "ЦенаНДС"));
-            ctrl.tradeLabel.setText(getStr(cargo, "Торг_без_торга"));
             ctrl.contactLabel.setText(getStr(cargo, "КонтактныйТелефон"));
+            ctrl.tradeLabel.setText(getStr(cargo, "Торг_без_торга"));
+
 
             if (isOwner) {
                 ctrl.deleteLabel.setVisible(true);
                 ctrl.deleteLabel.setManaged(true);
                 int cargoId = cargo.get("id").getAsInt();
                 ctrl.deleteLabel.setOnMouseClicked(e -> deleteCargo(cargoId, card));
+            } else {
+                ctrl.deleteLabel.setVisible(false);
+                ctrl.deleteLabel.setManaged(false);
             }
 
             container.getChildren().add(card);
 
-        } catch (IOException e) {
-            Platform.runLater(() -> showError("Ошибка загрузки карточки груза"));
+        } catch (Exception e) {
             e.printStackTrace();
+            Platform.runLater(() -> showError("Ошибка загрузки карточки: " + e.getMessage()));
         }
     }
 
@@ -160,6 +166,7 @@ public class UserPanelController {
                         userCargoContainer.getChildren().remove(card);
                         showSuccess("Груз успешно удалён");
                         loadAllCargos();
+                        loadUserCargos();
                     } else {
                         showError("Не удалось удалить груз");
                     }
@@ -169,33 +176,70 @@ public class UserPanelController {
                     return null;
                 });
     }
-
     @FXML
     private void AddUsersCargo() {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("Добавление груза");
-        alert.setHeaderText("Функция в разработке");
-        alert.setContentText("Скоро здесь будет красивая форма для добавления груза!");
-        alert.showAndWait();
+        authService.getUserProfile(currentUser)
+                .thenAccept(profileArray -> {
+                    String phone = "";
+                    if (profileArray != null && profileArray.size() > 0) {
+                        JsonObject userObj = profileArray.get(0).getAsJsonObject();
+                        if (userObj.has("phone") && !userObj.get("phone").isJsonNull()) {
+                            phone = userObj.get("phone").getAsString();
+                        }
+                    }
+
+                    final String finalPhone = phone;
+                    final String finalUser = currentUser;
+
+                    Platform.runLater(() -> openAddCargoDialog(finalUser, finalPhone));
+                })
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showError("Ошибка загрузки профиля: " + ex.getMessage()));
+                    return null;
+                });
+    }
+
+    private void openAddCargoDialog(String user, String phone) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("AddCargoDialog.fxml"));
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load())); // ← здесь падало
+            stage.setTitle("Добавить груз");
+            stage.initOwner(btnAddCargo.getScene().getWindow());
+            stage.setResizable(false);
+
+            AddCargoDialogController ctrl = loader.getController();
+            ctrl.setUser(user, phone, this::refreshAllCargos);
+
+            stage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Не удалось открыть форму добавления груза\n\nПричина: " + e.getMessage());
+        }
+    }
+
+    private void refreshAllCargos() {
+        loadAllCargos();
+        loadUserCargos();
     }
 
     @FXML
     private void profileClick() {
         authService.getUserProfile(currentUser)
                 .thenAccept(array -> {
-                    if (array != null && array.size() > 0) {
-                        JsonObject user = array.get(0).getAsJsonObject();
-                        String email = getStr(user, "email");
-                        String phone = getStr(user, "phone");
-
-                        Platform.runLater(() -> ProfileUser.profilePanel(
-                                (Stage) LabelUser.getScene().getWindow(),
-                                currentUser, "", email, phone, currentUser
-                        ));
+                    if (array == null || array.size() == 0) {
+                        Platform.runLater(() -> showError("Профиль не найден"));
+                        return;
                     }
+                    JsonObject user = array.get(0).getAsJsonObject();
+                    String email = getStr(user, "email");
+                    String phone = getStr(user, "phone");
+
+                    Platform.runLater(() -> ProfileUser.profilePanel(
+                            (Stage) LabelUser.getScene().getWindow(), currentUser, email, phone));
                 })
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showError("Не удалось загрузить профиль"));
+                    Platform.runLater(() -> showError("Ошибка загрузки профиля"));
                     return null;
                 });
     }
@@ -239,7 +283,7 @@ public class UserPanelController {
     }
 
     private String formatRub(JsonObject obj, String key) {
-        return format(obj, key) + " руб";
+        return format(obj, key) + " ₽";
     }
 
     private void showLoading(VBox box) {

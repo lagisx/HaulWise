@@ -19,6 +19,7 @@ module com.example.postgresql {
     requires jdk.compiler;
     requires com.google.gson;
     requires okhttp3;
+    requires java.net.http;
 
     opens com.example.postgresql to javafx.fxml;
     exports com.example.postgresql;

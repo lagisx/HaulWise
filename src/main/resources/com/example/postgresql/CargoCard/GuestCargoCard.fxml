@@ -6,62 +6,45 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.*?>
 
-<AnchorPane prefHeight="156.0" prefWidth="960.0" style="-fx-background-color: white;                    -fx-background-radius: 20;                    -fx-border-radius: 20;                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.09), 20, 0.15, 0, 8);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.CardControllers.GuestCargoCardController">
+<AnchorPane prefHeight="136.0" prefWidth="920.0" style="-fx-background: white; -fx-background-radius: 18; -fx-border-color: f3f3f3; -fx-border-radius: 18; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.08), 16, 0.12, 0, 6);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.CardControllers.GuestCargoCardController">
 
-    <children>
+    <VBox alignment="CENTER_LEFT" spacing="12" AnchorPane.bottomAnchor="16" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20" AnchorPane.topAnchor="16">
 
-        <!-- Левая часть: маршрут и основная информация -->
-        <VBox spacing="10" AnchorPane.bottomAnchor="24" AnchorPane.leftAnchor="28" AnchorPane.topAnchor="24">
-            <Label fx:id="typeLabel" style="-fx-font-size: 16; -fx-font-weight: 800; -fx-text-fill: #1e40af;" text="RUS • Тент" />
+        <HBox alignment="CENTER_LEFT" spacing="14">
+            <Label fx:id="typeLabel" style="-fx-font-size: 15px; -fx-font-weight: 800; -fx-text-fill: #1d4ed8;" text="RUS • Тент" />
 
-            <Label fx:id="routeLabel" style="-fx-font-size: 24; -fx-font-weight: 900; -fx-text-fill: #0f172a;">
-                <graphic>
-                    <Label style="-fx-font-size: 32; -fx-text-fill: #3b82f6; -fx-font-weight: bold;" text=" → " />
-                </graphic>
-            </Label>
+            <Label style="-fx-font-size: 28px; -fx-text-fill: #3b82f6; -fx-font-weight: bold;" text="→" />
 
-            <Label fx:id="vesObemLabel" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
+            <Label fx:id="routeLabel" prefHeight="29.0" prefWidth="163.0" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #0f172a;" text="Москва → СПб" />
+        </HBox>
 
-            <Label fx:id="tovarLabel" style="-fx-font-size: 15; -fx-text-fill: #475569;" />
-        </VBox>
+        <HBox alignment="CENTER_LEFT" spacing="20">
+            <Label fx:id="vesObemLabel" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="20 т • 82 м³" />
 
-        <!-- Центральная часть: детали -->
-        <VBox spacing="12" AnchorPane.leftAnchor="360" AnchorPane.topAnchor="28">
-            <HBox alignment="CENTER_LEFT" spacing="28">
-                <VBox spacing="4">
-                    <Label style="-fx-font-size: 13; -fx-text-fill: #64748b;" text="Погрузка:" />
-                    <Label fx:id="zagruzValue" style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1e293b;" />
-                </VBox>
+            <Label fx:id="tovarLabel" style="-fx-font-size: 14px; -fx-text-fill: #64748b;" text="Стройматериалы" />
+        </HBox>
 
-                <VBox spacing="4">
-                    <Label style="-fx-font-size: 13; -fx-text-fill: #64748b;" text="Дата:" />
-                    <Label fx:id="dateValue" style="-fx-font-size: 14; -fx-font-weight: bold;                                   -fx-background-color: #dbeafe; -fx-text-fill: #1e40af;                                   -fx-padding: 6 14; -fx-background-radius: 20;" />
-                </VBox>
-            </HBox>
+        <HBox alignment="CENTER_LEFT" spacing="16">
+            <Label fx:id="zagruzValue" style="-fx-font-size: 13px; -fx-font-weight: 600; -fx-text-fill: #475569;" text="Боковая" />
 
-            <Label fx:id="cargoTypeLabel" prefHeight="15.0" prefWidth="164.0" style="-fx-font-size: 14; -fx-font-weight: bold;                           -fx-background-color: #fef3c7; -fx-text-fill: #92400e;                           -fx-padding: 7 16; -fx-background-radius: 20;" text="Боковая + верхняя" />
-        </VBox>
+            <Label fx:id="dateValue" style="-fx-font-size: 13px; -fx-font-weight: 600;                           -fx-background-color: #dbeafe; -fx-text-fill: #1e40af;                           -fx-padding: 5 12; -fx-background-radius: 12;" text="25.11 – 30.11" />
 
-        <!-- Правая часть: картинка -->
-        <ImageView fx:id="randomImageOnCard" fitHeight="130.0" fitWidth="200.0" preserveRatio="true" AnchorPane.bottomAnchor="13" AnchorPane.rightAnchor="28" AnchorPane.topAnchor="13">
-            <clip>
-                <Rectangle arcHeight="20" arcWidth="20" height="130" width="200" />
-            </clip>
-        </ImageView>
+            <Label fx:id="cargoTypeLabel" style="-fx-font-size: 13px; -fx-font-weight: 600;                           -fx-background-color: #fef3c7; -fx-text-fill: #92400e;                           -fx-padding: 5 12; -fx-background-radius: 12;" text="Гидроборт" />
+        </HBox>
+    </VBox>
 
-        <!-- Нижняя плашка "Скрыто" -->
-        <VBox alignment="CENTER" prefHeight="56.0" prefWidth="960.0" spacing="6" style="-fx-background-color: #fef3c7; -fx-background-radius: 0 0 20 20;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <padding>
-                <Insets bottom="16" top="14" />
-            </padding>
+    <ImageView fx:id="randomImageOnCard" fitHeight="118.0" fitWidth="152.0" layoutY="7.0" preserveRatio="true" AnchorPane.rightAnchor="12.0" AnchorPane.topAnchor="6.0">
+        <clip>
+            <Rectangle arcHeight="16" arcWidth="16" height="100" width="140" />
+        </clip>
+    </ImageView>
 
-            <Label fx:id="priceHidden" style="-fx-font-size: 17; -fx-font-weight: bold; -fx-text-fill: #b91c1c;" text="Цена и контакты скрыты" />
+    <VBox alignment="CENTER" prefHeight="40.0" prefWidth="920.0" style="-fx-background: linear-gradient(to bottom, transparent, #fffbeb);                  -fx-background-color: #fffbeb; -fx-background-radius: 0 0 18 18;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+        <padding><Insets bottom="10" top="8" /></padding>
 
-            <Label fx:id="contactLabel" style="-fx-font-size: 14; -fx-text-fill: #92400e;" text="Войдите в аккаунт, чтобы увидеть ставку и телефон" />
-        </VBox>
+        <Label fx:id="priceHidden" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #dc2626;" text="Цена и телефон скрыты" />
 
-        <!-- Декоративная вертикальная линия-разделитель -->
-        <Pane prefHeight="100" prefWidth="1.5" style="-fx-background-color: #e2e8f0;" AnchorPane.bottomAnchor="50" AnchorPane.leftAnchor="330" AnchorPane.topAnchor="28" />
+        <Label fx:id="contactLabel" style="-fx-font-size: 13px; -fx-text-fill: #92400e;" text="Войдите, чтобы увидеть ставку и контакты" />
+    </VBox>
 
-    </children>
 </AnchorPane>

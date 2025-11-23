@@ -3,6 +3,8 @@ package com.example.postgresql.Controllers;
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.support.SupportTechController;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -14,6 +16,7 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.sql.*;
@@ -24,6 +27,12 @@ public class HelloController {
     /// TODO СДЕЛАТЬ ФИЛЬТРЫ (ПОИСК ПО МАРШРУТУ
     /// TODO Сделать дату в виде DatePicker
     /// TODO Сделать масштабируемость под окно (полножкранный и обычный)
+    ///
+    ///
+    ///
+    /// БАГИ: При переходе в профиль и обратно (не подключается тот же акк что и был)
+    ///
+
 
 
     public static final String DB_URL = "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require";
@@ -49,8 +58,6 @@ public class HelloController {
             Platform.runLater(() -> showStatus("Введите логин и пароль"));
             return;
         }
-
-        Platform.runLater(() -> showStatus("Проверка блокировки..."));
 
         AuthService authService = new AuthService();
 
@@ -100,6 +107,9 @@ public class HelloController {
         text.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-fill: red;");
         statusFlow.getChildren().add(text);
         statusFlow.setTextAlignment(TextAlignment.CENTER);
+        Timeline hideTimer = new Timeline(new KeyFrame(Duration.seconds(3), e -> statusFlow.getChildren().clear()));
+        hideTimer.setCycleCount(1);
+        hideTimer.play();
     }
 
     private void showBlockedStatus(String reason) {

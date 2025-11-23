@@ -1,219 +1,176 @@
 package com.example.postgresql.UserF;
 
-import com.example.postgresql.Controllers.HelloController;
+import com.example.postgresql.API.AuthService;
 import com.example.postgresql.Controllers.UserPanelController;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.sql.*;
 import java.util.regex.Pattern;
 
 public class ProfileUser {
+
     @FXML private Label LabelUser;
-
-    public String user;
-    public String password;
-
-
-    @FXML public TextField login;
+    @FXML private TextField login;
     @FXML private TextField email;
     @FXML private TextField phone;
     @FXML private PasswordField passwordVIEW;
-
     @FXML private Label statusLabel;
 
-    private int userId;
-    public void setLabelUserText(String user) {
-            LabelUser.setText(user);
-    }
-    public void setPromt(String user, String mail, String phonenum) {
-        if(!user.isEmpty()) {
-            login.setPromptText(user);
-        }
-       if (!mail.isEmpty()) {
-           email.setPromptText(mail);
-       }
-       if (!phonenum.isEmpty()) {
-           phone.setPromptText(phonenum);
-       }
+    private String currentUser;
+    private final AuthService authService = new AuthService();
+
+    @FXML
+    private void initialize() {
+        // Автоочистка полей при фокусе
+        clearFieldOnFocus(login);
+        clearFieldOnFocus(email);
+        clearFieldOnFocus(phone);
     }
 
-    public void SetPassUsername(String user, String password) {
-        this.user = user;
-        this.password = password;
+    private void clearFieldOnFocus(TextField field) {
+        field.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
+            if (isNowFocused && field.getText().isEmpty()) {
+                Platform.runLater(field::clear);
+            }
+        });
     }
 
-    public void changeParam(ActionEvent event) {
+    public void setUserData(String username, String currentEmail, String currentPhone) {
+        this.currentUser = username;
+        LabelUser.setText(username);
+
+        login.setPromptText(username);
+        email.setPromptText(currentEmail.isEmpty() ? "Не указан" : currentEmail);
+        phone.setPromptText(currentPhone.isEmpty() ? "Не указан" : currentPhone);
+    }
+
+    @FXML
+    private void changeParam() {
         String newLogin = login.getText().trim();
         String newEmail = email.getText().trim();
         String newPhone = phone.getText().trim();
-        String newPassword = passwordVIEW.getText().trim();
+        String newPassword = passwordVIEW.getText();
 
         if (newLogin.isEmpty() && newEmail.isEmpty() && newPhone.isEmpty() && newPassword.isEmpty()) {
-            statusLabel.setText("Ошибка! Все поля пустые");
-            return;
-        }
-        if (!newPhone.matches("\\+?\\d{10,15}")) {
-            statusLabel.setText("Введите корректный номер телефона");
+            showStatus("Заполните хотя бы одно поле", "red");
             return;
         }
 
-        if (!isValidEmail(newEmail)) {
-            statusLabel.setText("Введите корректную почту");
+        if (!newPhone.isEmpty() && !newPhone.matches("\\+?\\d{10,15}")) {
+            showStatus("Некорректный номер телефона", "red");
             return;
         }
-        String oldLogin = this.user;
 
-        try (Connection con = DriverManager.getConnection(HelloController.DB_URL, HelloController.DB_USER, HelloController.DB_PASSWORD)) {
+        if (!newEmail.isEmpty() && !isValidEmail(newEmail)) {
+            showStatus("Некорректный email", "red");
+            return;
+        }
 
-            if (!newLogin.isEmpty() && !newLogin.equals(oldLogin)) {
-                String sqlAlter = "ALTER USER \"" + oldLogin + "\" RENAME TO \"" + newLogin + "\"";
-                try (Statement stmt = con.createStatement()) {
-                    stmt.execute(sqlAlter);
-                }
+        if (!newPassword.isEmpty() && (newPassword.length() < 8 || newPassword.length() > 32)) {
+            showStatus("Пароль: 8–32 символа", "red");
+            return;
+        }
 
-                String sqlUpdateLogin = "UPDATE users SET login = ? WHERE login = ?";
-                try (PreparedStatement ps = con.prepareStatement(sqlUpdateLogin)) {
-                    ps.setString(1, newLogin);
-                    ps.setString(2, oldLogin);
-                    ps.executeUpdate();
-                }
+        authService.updateUserProfile(currentUser, newLogin.isEmpty() ? null : newLogin,
+                        newEmail.isEmpty() ? null : newEmail,
+                        newPhone.isEmpty() ? null : newPhone,
+                        newPassword.isEmpty() ? null : newPassword)
+                .thenAccept(success -> Platform.runLater(() -> {
+                    if (success) {
+                        showStatus("Профиль успешно обновлён", "green");
 
-                this.user = newLogin;
-                oldLogin = newLogin;
-            }
+                        // Обновляем данные в текущем окне
+                        if (!newLogin.isEmpty()) {
+                            currentUser = newLogin;
+                            LabelUser.setText(newLogin);
+                        }
 
-            if (!newEmail.isEmpty()) {
-                String sqlUpdateEmail = "UPDATE users SET email = ? WHERE login = ?";
-                try (PreparedStatement ps = con.prepareStatement(sqlUpdateEmail)) {
-                    ps.setString(1, newEmail);
-                    ps.setString(2, oldLogin);
-                    ps.executeUpdate();
-                }
-            }
-
-            if (!newPhone.isEmpty()) {
-                String sqlUpdatePhone = "UPDATE users SET phone = ? WHERE login = ?";
-                try (PreparedStatement ps = con.prepareStatement(sqlUpdatePhone)) {
-                    ps.setString(1, newPhone);
-                    ps.setString(2, oldLogin);
-                    ps.executeUpdate();
-                }
-            }
-
-            if (newPassword != null && !newPassword.isEmpty()) {
-                if (newPassword.length() < 8) {
-                    statusLabel.setText("Пароль должен быть от 8 символов");
-                    statusLabel.setStyle("-fx-text-fill: red;");
-                    return;
-                } else if (newPassword.length() > 15) {
-                    statusLabel.setText("Пароль должен быть не более 15 символов");
-                    statusLabel.setStyle("-fx-text-fill: red;");
-                    statusLabel.setAlignment(Pos.CENTER);
-                    return;
-                } else {
-                    String sqlAlterPassword = "ALTER ROLE \"" + oldLogin + "\" WITH PASSWORD '" + newPassword + "'";
-                    try (Statement stmt = con.createStatement()) {
-                        stmt.execute(sqlAlterPassword);
+                        // Перезагружаем UserPanel с новым именем
+                        reloadUserPanel();
+                    } else {
+                        showStatus("Ошибка обновления профиля", "red");
                     }
-                    String sqlUpdatePass = "UPDATE users SET password = ? WHERE login = ?";
-                    try (PreparedStatement ps = con.prepareStatement(sqlUpdatePass)) {
-                        ps.setString(1, newPassword);
-                        ps.setString(2, oldLogin);
-                        ps.executeUpdate();
-                    }
-                }
-            }
-
-            statusLabel.setText("Данные успешно обновлены");
-            statusLabel.setStyle("-fx-text-fill: green;");
-            setPromt(newLogin, newEmail, newPhone);
-            setLabelUserText(newLogin);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка при обновлении данных");
-        }
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showStatus("Ошибка сервера: " + ex.getMessage(), "red"));
+                    return null;
+                });
     }
 
-    private static boolean isValidEmail(String email) {
-        String emailRegex = "^[\\w-\\.]+@[\\w-\\.]+\\.[a-zA-Z]{2,}$";
-        return Pattern.matches(emailRegex, email);
-    }
-
-    @FXML public void deleteUser(ActionEvent event) {
-        try (Connection conn = DriverManager.getConnection(
-                HelloController.DB_URL, HelloController.DB_USER, HelloController.DB_PASSWORD);
-             PreparedStatement ps = conn.prepareStatement("SELECT delete_user(?, ?)")) {
-
-            ps.setInt(1, userId);
-            ps.setString(2, user);
-            ps.execute();
-
-            try (Statement stmt = conn.createStatement()) {
-                stmt.executeUpdate("REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM \"" + user + "\"");
-                stmt.executeUpdate("REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM \"" + user + "\"");
-                stmt.executeUpdate("REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM \"" + user + "\"");
-                stmt.executeUpdate("REVOKE ALL PRIVILEGES ON SCHEMA public FROM \"" + user + "\"");
-                stmt.executeUpdate("REVOKE ALL PRIVILEGES ON DATABASE \"JavaBD\" FROM \"" + user + "\"");
-                stmt.executeUpdate("DROP USER \"" + user + "\"");
-            }
-
-            Stage stage = (Stage) LabelUser.getScene().getWindow();
-            stage.close();
-            goBack();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-            statusLabel.setText("Ошибка при удалении пользователя");
-        }
-    }
-
-    @FXML public void goBackUserPanel() {
+    private void reloadUserPanel() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/postgresql/UserPanel.fxml"));
-            Scene scene = new Scene(loader.load());
-            UserPanelController controller = loader.getController();
-
             Stage stage = (Stage) LabelUser.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setResizable(false);
-            stage.show();
+            UserPanelController.UserPanel(stage, currentUser, null);
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void profilePanel(Stage stage, String user, String password, String mail, String phonenum, String LabelUser) {
+    @FXML
+    private void goBackUserPanel() {
+        reloadUserPanel();
+    }
+
+    @FXML
+    private void deleteUser() {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Удаление аккаунта");
+        alert.setHeaderText("Вы уверены?");
+        alert.setContentText("Это действие нельзя отменить!");
+
+        alert.showAndWait().ifPresent(response -> {
+            if (response == ButtonType.OK) {
+                authService.deleteUser(currentUser)
+                        .thenAccept(deleted -> Platform.runLater(() -> {
+                            if (deleted) {
+                                showStatus("Аккаунт удалён", "green");
+                                Platform.runLater(() -> {
+                                    try {
+                                        new com.example.postgresql.Controllers.HelloController()
+                                                .goBack((Stage) LabelUser.getScene().getWindow());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                });
+                            } else {
+                                showStatus("Не удалось удалить аккаунт", "red");
+                            }
+                        }))
+                        .exceptionally(ex -> {
+                            Platform.runLater(() -> showStatus("Ошибка: " + ex.getMessage(), "red"));
+                            return null;
+                        });
+            }
+        });
+    }
+
+    private void showStatus(String text, String color) {
+        statusLabel.setText(text);
+        statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+    }
+
+    private boolean isValidEmail(String email) {
+        return Pattern.matches("^[\\w-\\.]+@[\\w-]+\\.[a-zA-Z]{2,}$", email);
+    }
+
+    // Статический метод для открытия профиля
+    public static void profilePanel(Stage stage, String username, String email, String phone) {
         try {
-            FXMLLoader fxmlLoader = new FXMLLoader(ProfileUser.class.getResource("ProfileUser.fxml"));
-            Parent root = fxmlLoader.load();
-            ProfileUser controller = fxmlLoader.getController();
-            controller.SetPassUsername(user, password);
-            controller.setLabelUserText(user);
-            controller.setPromt(user, mail, phonenum);
-            Scene scene = new Scene(root);
+            FXMLLoader loader = new FXMLLoader(ProfileUser.class.getResource("ProfileUser.fxml"));
+            Scene scene = new Scene(loader.load());
+            ProfileUser controller = loader.getController();
+            controller.setUserData(username, email, phone);
+
             stage.setScene(scene);
-            stage.setTitle("Профиль пользователя");
+            stage.setTitle("Профиль • " + username);
+            stage.centerOnScreen();
             stage.show();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    public void goBack() {
-        Stage stage = (Stage) LabelUser.getScene().getWindow();
-        HelloController helloController = new HelloController();
-        helloController.goBack(stage);
-    }
-
 }

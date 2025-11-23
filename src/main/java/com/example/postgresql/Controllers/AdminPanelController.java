@@ -4,6 +4,8 @@ import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,6 +16,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
@@ -264,7 +267,7 @@ public class AdminPanelController {
     @FXML private void unblockUser() {
         JsonObject blocked = blacklistTable.getSelectionModel().getSelectedItem();
         if (blocked == null) {
-            showStatus("Выберите пользователя для разблокировки", "orange");
+            showStatus("Выберите пользователя для разблокировки", "red");
             return;
         }
         String login = safeString(blocked, "login");
@@ -316,19 +319,40 @@ public class AdminPanelController {
                     }));
         }
     }
-    @FXML private void editUser() {
-        showStatus("Функция редактирования в разработке", "blue");
+    @FXML
+    private void editUser() {
+        JsonObject selectedUser = userTable.getSelectionModel().getSelectedItem();
+        if (selectedUser == null) {
+            showStatus("Выберите пользователя для редактирования", "orange");
+            return;
+        }
 
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/postgresql/EditUserDialog.fxml"));
+            Parent root = loader.load();
+            EditUserDialogController controller = loader.getController();
+            controller.setUser(selectedUser, () -> {
+                loadUsers();
+                showStatus("Пользователь обновлён", "green");
+            });
 
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("Редактирование пользователя");
+            dialogStage.setScene(new Scene(root));
+            dialogStage.setResizable(false);
+            dialogStage.initOwner(userTable.getScene().getWindow());
+            dialogStage.show();
 
-
-
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            showStatus("Ошибка: не удалось открыть редактирование", "red");
+        }
     }
 
     private void showStatus(String text, String color) {
         statusLabelUsers.setText(text);
         statusLabelUsers.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+        new Timeline(new KeyFrame(Duration.seconds(10), e -> statusLabelUsers.setText(""))).play();
     }
 
     @FXML private void goBack() throws IOException {

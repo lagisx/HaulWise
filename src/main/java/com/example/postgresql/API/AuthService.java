@@ -7,9 +7,13 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
+import java.net.URI;
 import java.net.URLEncoder;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class AuthService {
@@ -27,9 +31,6 @@ public class AuthService {
 
         CompletableFuture.runAsync(() -> {
             try {
-                System.out.println("ОТПРАВЛЯЮ ЛОГ В БАЗУ → " + description);
-                System.out.println("Тело запроса: " + log);
-
                 var client = new OkHttpClient();
                 var body = RequestBody.create(log.toString(), MediaType.get("application/json"));
 
@@ -44,15 +45,8 @@ public class AuthService {
 
                 try (var response = client.newCall(request).execute()) {
                     String responseBody = response.body() != null ? response.body().string() : "пусто";
-                    if (response.isSuccessful()) {
-                        System.out.println("ЛОГ УСПЕШНО ЗАПИСАН В БАЗУ: " + description);
-                    } else {
-                        System.out.println("ЛОГ НЕ ЗАПИСАН! HTTP " + response.code());
-                        System.out.println("Ответ Supabase: " + responseBody);
-                    }
                 }
             } catch (Exception e) {
-                System.out.println("ИСКЛЮЧЕНИЕ ПРИ ОТПРАВКЕ ЛОГА: " + e.getMessage());
                 e.printStackTrace();
             }
         });
@@ -111,7 +105,7 @@ public class AuthService {
                     return supabase.update("users", update, "id=eq." + userId);
                 })
                 .thenApply(v -> {
-                    logAction(login, "Разблокирован администратором" + blockedBy);
+                    logAction(login, "Разблокирован администратором " + blockedBy);
                     return true;
                 })
                 .exceptionally(ex -> false);
@@ -158,6 +152,90 @@ public class AuthService {
                     }
                     return CompletableFuture.completedFuture(new UserAuthResult(true, role, "Успешный вход"));
                 });
+    }
+
+    public CompletableFuture<Boolean> updateUserProfile(String username, String newLogin, String newEmail, String newPhone, String newPassword) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String encodedLogin = URLEncoder.encode(username, StandardCharsets.UTF_8);
+                return supabase.select("users", "id", "login=eq." + encodedLogin)
+                        .thenCompose(result -> {
+                            if (result.size() == 0) {
+                                return CompletableFuture.completedFuture(false);
+                            }
+
+                            int userId = result.get(0).getAsJsonObject().get("id").getAsInt();
+                            JsonObject update = new JsonObject();
+
+                            if (newLogin != null && !newLogin.isEmpty()) {
+                                update.addProperty("login", newLogin);
+                            }
+                            if (newEmail != null && !newEmail.isEmpty()) {
+                                update.addProperty("email", newEmail);
+                            }
+                            if (newPhone != null && !newPhone.isEmpty()) {
+                                update.addProperty("phone", newPhone);
+                            }
+                            if (newPassword != null && !newPassword.isEmpty()) {
+                                update.addProperty("password", newPassword);
+                            }
+
+                            if (update.size() == 0) {
+                                return CompletableFuture.completedFuture(true);
+                            }
+
+                            return supabase.update("users", update, "id=eq." + userId)
+                                    .thenApply(v -> {
+                                        logAction(username, "Обновил профиль" +
+                                                (newLogin != null ? " (логин → " + newLogin + ")" : "") +
+                                                (newEmail != null ? " (email)" : "") +
+                                                (newPhone != null ? " (телефон)" : "") +
+                                                (newPassword != null ? " (пароль)" : ""));
+                                        return true;
+                                    });
+                        })
+                        .exceptionally(ex -> {
+                            ex.printStackTrace();
+                            return false;
+                        }).join();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        });
+    }
+
+    public CompletableFuture<Boolean> deleteUser(String username) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String encodedLogin = URLEncoder.encode(username, StandardCharsets.UTF_8);
+                return supabase.select("users", "id", "login=eq." + encodedLogin)
+                        .thenCompose(userResult -> {
+                            if (userResult.size() == 0) {
+                                return CompletableFuture.completedFuture(false);
+                            }
+
+                            int userId = userResult.get(0).getAsJsonObject().get("id").getAsInt();
+                            return supabase.delete("gruz", "\"заказчик_id\"=eq." + userId)
+                                    .thenCompose(v -> supabase.delete("users", "login=eq." + encodedLogin))
+                                    .thenApply(deleted -> {
+                                        if (deleted) {
+                                            logAction(username, "Пользователь "+ username + " удалил свой аккаунт");
+                                        }
+                                        return deleted;
+                                    });
+                        })
+                        .exceptionally(ex -> {
+                            ex.printStackTrace();
+                            return false;
+                        }).join();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
+        });
     }
 
     public CompletableFuture<JsonArray> getAllCargos() { return supabase.select("gruz", "*,заказчик_id", null); }

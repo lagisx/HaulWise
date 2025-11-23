@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" prefHeight="620" prefWidth="500" spacing="32" style="-fx-background: white;              -fx-background-radius: 24;              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.EditUserDialogController">
+
+    <padding>
+        <Insets bottom="45" left="55" right="55" top="45" />
+    </padding>
+
+    <Label style="-fx-font-size: 20px; -fx-font-weight: 700; -fx-text-fill: #1e293b;" text="Редактирование пользователя" />
+
+    <Separator prefWidth="380" style="-fx-background-color: #e2e8f0; -fx-pref-height: 2;" />
+
+    <GridPane alignment="CENTER" hgap="20" vgap="22">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="140" />
+            <ColumnConstraints hgrow="ALWAYS" />
+        </columnConstraints>
+
+        <Label style="-fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-size: 14px;" text="Логин" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+        <TextField fx:id="loginField" editable="false" promptText="Логин" style="-fx-background-color: #f8fafc; -fx-background-radius: 14;                           -fx-border-radius: 14; -fx-padding: 14 16;                           -fx-border-color: #cbd5e1; -fx-border-width: 1.5;                           -fx-font-size: 14px; -fx-text-fill: #1e293b;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+        <Label style="-fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-size: 14px;" text="Телефон" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+        <TextField fx:id="phoneField" promptText="+7 (999) 123-45-67" style="-fx-background-color: white; -fx-background-radius: 14;                           -fx-border-radius: 14; -fx-padding: 14 16;                           -fx-border-color: #94a3b8; -fx-border-width: 1.5;                           -fx-font-size: 14px; -fx-prompt-text-fill: #94a3b8;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+        <Label style="-fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-size: 14px;" text="Email" GridPane.columnIndex="0" GridPane.rowIndex="2" />
+        <TextField fx:id="emailField" promptText="user@example.com" style="-fx-background-color: white; -fx-background-radius: 14;                           -fx-border-radius: 14; -fx-padding: 14 16;                           -fx-border-color: #94a3b8; -fx-border-width: 1.5;                           -fx-font-size: 14px; -fx-prompt-text-fill: #94a3b8;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+        <Label style="-fx-text-fill: #475569; -fx-font-weight: 600; -fx-font-size: 14px;" text="Новый пароль" GridPane.columnIndex="0" GridPane.rowIndex="3" />
+        <PasswordField fx:id="passwordField" prefHeight="61.0" prefWidth="230.0" promptText="Оставьте пустым, чтобы не менять" style="-fx-background-color: white; -fx-background-radius: 14;                               -fx-border-radius: 14; -fx-padding: 14 16;                               -fx-border-color: #94a3b8; -fx-border-width: 1.5;                               -fx-font-size: 14px; -fx-prompt-text-fill: #94a3b8;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+
+        <Label fx:id="statusLabel" alignment="CENTER" style="-fx-text-fill: #ef4444; -fx-font-size: 14px; -fx-font-weight: 500;" GridPane.columnIndex="0" GridPane.columnSpan="2" GridPane.rowIndex="4" />
+      <rowConstraints>
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+         <RowConstraints />
+      </rowConstraints>
+    </GridPane>
+
+    <HBox alignment="CENTER" spacing="20" style="-fx-padding: 30 0 10 0;">
+        <Button onAction="#onSave" prefHeight="52" prefWidth="220" style="-fx-background-color: linear-gradient(to bottom, #22c55e, #16a34a);                        -fx-text-fill: white; -fx-font-weight: 700; -fx-font-size: 15px;                        -fx-background-radius: 16; -fx-cursor: hand;                        -fx-effect: dropshadow(gaussian, rgba(34,197,94,0.4), 10, 0, 0, 4);" text="Сохранить изменения">
+            <style>
+                -fx-background-insets: 0;
+            </style>
+            <graphic>
+                <Label style="-fx-font-family: 'Segoe UI Emoji'; -fx-font-size: 18px;" />
+            </graphic>
+        </Button>
+
+        <Button onAction="#onCancel" prefHeight="52" prefWidth="140" style="-fx-background-color: #f1f5f9; -fx-text-fill: #475569;                        -fx-font-weight: 600; -fx-font-size: 15px;                        -fx-background-radius: 16; -fx-cursor: hand;                        -fx-border-color: #cbd5e1; -fx-border-width: 2;                        -fx-border-radius: 16;" text="Отмена">
+            <graphic>
+                <Label style="-fx-font-family: 'Segoe UI Emoji'; -fx-font-size: 18px;" />
+            </graphic>
+        </Button>
+    </HBox>
+
+</VBox>
