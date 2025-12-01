@@ -22,7 +22,7 @@ public class RegController {
     @FXML private Label statusLabel;
     @FXML public TextField email;
     @FXML public TextField phone;
-    @FXML public TextField passVisible;  // текстовое поле для отображения пароля
+    @FXML public TextField passVisible;
     @FXML private Hyperlink agreement;
 
     private boolean visiblePass = false;

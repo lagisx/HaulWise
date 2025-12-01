@@ -15,7 +15,7 @@
 
             <Label style="-fx-font-size: 28px; -fx-text-fill: #3b82f6; -fx-font-weight: bold;" text="→" />
 
-            <Label fx:id="routeLabel" prefHeight="29.0" prefWidth="163.0" style="-fx-font-size: 22px; -fx-font-weight: 900; -fx-text-fill: #0f172a;" text="Москва → СПб" />
+            <Label fx:id="routeLabel" prefHeight="29.0" prefWidth="163.0" style="-fx-font-size: 18px; -fx-font-weight: 900; -fx-text-fill: #0f172a;" text="Москва → СПб" />
         </HBox>
 
         <HBox alignment="CENTER_LEFT" spacing="20">

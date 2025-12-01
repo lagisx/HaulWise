@@ -4,6 +4,7 @@ import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.Controllers.CardControllers.GuestCargoCardController;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.UserF.Cargo;
+import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import javafx.application.Platform;
@@ -21,12 +22,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.CompletableFuture;
 
 public class GuestPanelController {
 
     @FXML private VBox cargoContainer;
-
     private final SupabaseClient supabase = new SupabaseClient();
     private final Random random = new Random();
 
@@ -36,133 +35,115 @@ public class GuestPanelController {
 
     private void loadCargos() {
         cargoContainer.getChildren().clear();
-        cargoContainer.getChildren().add(createLoadingLabel());
+        cargoContainer.getChildren().add(loadingLabel());
 
         supabase.select("gruz", "*", null)
-                .thenAccept(jsonArray -> Platform.runLater(() -> {
-                    cargoContainer.getChildren().clear();
-
-                    List<Cargo> cargos = parseCargos(jsonArray);
-                    int count = cargos.size();
-
-                    Label countLabel = new Label("Найдено " + count + " грузов");
-                    countLabel.setStyle("-fx-font-size: 16; -fx-font-weight: bold; -fx-padding: 15 0 10 15; -fx-text-fill: #333;");
-                    cargoContainer.getChildren().add(countLabel);
-
-                    if (count == 0) {
-                        Label empty = new Label("Пока нет доступных грузов");
-                        empty.setStyle("-fx-font-size: 14; -fx-text-fill: gray; -fx-padding: 20;");
-                        cargoContainer.getChildren().add(empty);
-                        return;
-                    }
-
-                    for (Cargo cargo : cargos) {
-                        try {
-                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/postgresql/CargoCard/GuestCargoCard.fxml"));
-                            AnchorPane card = loader.load();
-                            GuestCargoCardController controller = loader.getController();
-
-                            controller.typeLabel.setText("RUS • " + nullToEmpty(cargo.getTypeTC()));
-                            controller.vesObemLabel.setText(String.format("%.0f т. / %.0f куб.", cargo.getWeight(), cargo.getVolume()));
-                            controller.tovarLabel.setText(nullToEmpty(cargo.getProduct()));
-                            controller.routeLabel.setText(nullToEmpty(cargo.getFrom()) + " → " + nullToEmpty(cargo.getTo()));
-                            controller.zagruzValue.setText(nullToEmpty(cargo.getLoadType()));
-                            controller.dateValue.setText(nullToEmpty(cargo.getDate()));
-                            controller.cargoTypeLabel.setText(nullToEmpty(cargo.getLoadDetails()));
-                            controller.randomImageOnCard.setImage(randomImageGuestCard());
-
-                            controller.priceHidden.setText("Скрыто");
-                            controller.contactLabel.setText("Войдите, чтобы увидеть данные");
-
-                            cargoContainer.getChildren().add(card);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }))
+                .thenAccept(json -> Platform.runLater(() -> showCargos(json)))
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> {
-                        cargoContainer.getChildren().clear();
-                        Label error = new Label("Ошибка загрузки грузов: " + ex.getMessage());
-                        error.setStyle("-fx-text-fill: red; -fx-padding: 20;");
-                        cargoContainer.getChildren().add(error);
-                    });
-                    ex.printStackTrace();
+                    Platform.runLater(() -> error(ex.getMessage()));
                     return null;
                 });
     }
 
-    private List<Cargo> parseCargos(JsonArray array) {
-        List<Cargo> list = new ArrayList<>();
-        if (array == null) return list;
+    private void showCargos(JsonArray array) {
+        cargoContainer.getChildren().clear();
 
-        for (JsonElement el : array) {
+        List<Cargo> cargos = parse(array);
+        Label count = new Label("Найдено " + cargos.size() + " грузов");
+        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: #1d4ed8;");
+        cargoContainer.getChildren().add(count);
+
+        if (cargos.isEmpty()) {
+            cargoContainer.getChildren().add(emptyLabel());
+            return;
+        }
+
+        for (Cargo c : cargos) {
             try {
-                var obj = el.getAsJsonObject();
+                FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CargoCard/GuestCargoCard.fxml"));
+                AnchorPane card = loader.load();
+                GuestCargoCardController ctrl = loader.getController();
 
-                Cargo cargo = new Cargo(
-                        obj.get("id").getAsInt(),
-                        safeString(obj, "ТипТС"),
-                        safeDouble(obj, "Вес"),
-                        safeDouble(obj, "Объем"),
-                        safeString(obj, "Товар"),
-                        safeString(obj, "Откуда"),
-                        safeString(obj, "Куда"),
-                        safeString(obj, "ТипПогрузки"),
-                        safeString(obj, "ДеталиПогрузки"),
-                        safeString(obj, "Даты"),
-                        safeDouble(obj, "ЦенаКарточка"),
-                        safeDouble(obj, "ЦенаНДС"),
-                        safeString(obj, "Торг"),
-                        safeString(obj, "Контакт"),
-                        safeString(obj, "owner_login")
-                );
-                list.add(cargo);
-            } catch (Exception e) {
-                System.err.println("Ошибка парсинга груза: " + e.getMessage());
+                ctrl.typeLabel.setText("RUS • " + nullToEmpty(c.getTypeTC()));
+                ctrl.vesObemLabel.setText(String.format("%.0f т / %.0f м³", c.getWeight(), c.getVolume()));
+                ctrl.tovarLabel.setText(nullToEmpty(c.getProduct()));
+                ctrl.zagruzValue.setText(nullToEmpty(c.getLoadType()));
+                ctrl.dateValue.setText(nullToEmpty(c.getDate()));
+                ctrl.cargoTypeLabel.setText(nullToEmpty(c.getLoadDetails()));
+                ctrl.randomImageOnCard.setImage(randomImage());
+
+                String from = nullToEmpty(c.getFrom()).trim();
+                String to = nullToEmpty(c.getTo()).trim();
+                ctrl.routeLabel.setText(from + " → " + to);
+
+                // Стиль и курсор
+                ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
+
+                // ПРАВИЛЬНАЯ ПРИВЯЗКА КАРТЫ К НАСТОЯЩЕМУ ЛЕЙБЛУ
+                MapManager.getInstance().showOnClick(ctrl.routeLabel, from, to);
+
+                ctrl.priceHidden.setText("Скрыто");
+                ctrl.contactLabel.setText("Войдите, чтобы увидеть контакты");
+
+                cargoContainer.getChildren().add(card);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+        }
+    }
+
+    private String nullToEmpty(String s) { return s == null ? "" : s; }
+
+    private List<Cargo> parse(JsonArray a) {
+        List<Cargo> list = new ArrayList<>();
+        if (a == null) return list;
+        for (JsonElement e : a) {
+            try {
+                var o = e.getAsJsonObject();
+                list.add(new Cargo(
+                        o.get("id").getAsInt(),
+                        s(o, "ТипТС"), d(o, "Вес"), d(o, "Объем"),
+                        s(o, "Товар"), s(o, "Откуда"), s(o, "Куда"),
+                        s(o, "ТипПогрузки"), s(o, "ДеталиПогрузки"),
+                        s(o, "Даты"), d(o, "ЦенаКарточка"), d(o, "ЦенаНДС"),
+                        s(o, "Торг"), s(o, "Контакт"), s(o, "owner_login")
+                ));
+            } catch (Exception ignored) {}
         }
         return list;
     }
 
-    private String safeString(com.google.gson.JsonObject obj, String key) {
-        var el = obj.get(key);
-        return el == null || el.isJsonNull() ? "" : el.getAsString();
+    private String s(com.google.gson.JsonObject o, String k) {
+        var e = o.get(k); return e == null || e.isJsonNull() ? "" : e.getAsString();
+    }
+    private double d(com.google.gson.JsonObject o, String k) {
+        var e = o.get(k); return e == null || e.isJsonNull() ? 0 : e.getAsDouble();
     }
 
-    private double safeDouble(com.google.gson.JsonObject obj, String key) {
-        var el = obj.get(key);
-        if (el == null || el.isJsonNull()) return 0.0;
-        try {
-            return el.getAsDouble();
-        } catch (NumberFormatException e) {
-            return 0.0;
-        }
+    private Label loadingLabel() {
+        Label l = new Label("Загрузка грузов...");
+        l.setStyle("-fx-padding: 30; -fx-font-size: 16; -fx-text-fill: #666;");
+        return l;
     }
 
-    private String nullToEmpty(String s) {
-        return s == null ? "" : s;
+    private Label emptyLabel() {
+        Label l = new Label("Пока нет доступных грузов");
+        l.setStyle("-fx-padding: 40; -fx-font-size: 16; -fx-text-fill: #999;");
+        return l;
     }
 
-    private Label createLoadingLabel() {
-        Label loading = new Label("Загрузка грузов...");
-        loading.setStyle("-fx-font-size: 14; -fx-text-fill: gray; -fx-padding: 20;");
-        return loading;
+    private void error(String msg) {
+        cargoContainer.getChildren().clear();
+        Label l = new Label("Ошибка: " + msg);
+        l.setStyle("-fx-text-fill: red; -fx-padding: 30;");
+        cargoContainer.getChildren().add(l);
     }
 
-    public Image randomImageGuestCard() {
-        String[] images = {
-                "/images/BoxImage.png",
-                "/images/CarTwo.png",
-                "/images/CarThreeBox.png",
-                "/images/CarFour.png",
-                "/images/Kran.png",
-                "/images/CargoImage.png",
-                "/images/ThreeCargo.png",
-                "/images/Pallet.png"
-        };
-        int idx = random.nextInt(images.length);
-        return new Image(getClass().getResourceAsStream(images[idx]));
+    private Image randomImage() {
+        String[] imgs = {"/images/BoxImage.png", "/images/CarTwo.png", "/images/CarThreeBox.png",
+                "/images/CarFour.png", "/images/Kran.png", "/images/CargoImage.png",
+                "/images/ThreeCargo.png", "/images/Pallet.png"};
+        return new Image(getClass().getResourceAsStream(imgs[random.nextInt(imgs.length)]));
     }
 
     @FXML private void goBack() throws IOException { switchTo("main.fxml", "Авторизация"); }
@@ -171,18 +152,16 @@ public class GuestPanelController {
 
     private void switchTo(String fxml, String title) throws IOException {
         Parent root = FXMLLoader.load(HelloApplication.class.getResource(fxml));
-        Stage stage = (Stage) cargoContainer.getScene().getWindow();
-        stage.setScene(new Scene(root));
-        stage.setTitle(title);
-        stage.centerOnScreen();
-        stage.show();
+        Stage s = (Stage) cargoContainer.getScene().getWindow();
+        s.setScene(new Scene(root));
+        s.setTitle(title);
+        s.centerOnScreen();
     }
 
     public static void GuestPanel(Stage stage) throws IOException {
-        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("GuestPanel.fxml"));
-        Scene scene = new Scene(loader.load());
-        stage.setTitle("Панель гостя");
-        stage.setScene(scene);
+        FXMLLoader l = new FXMLLoader(HelloApplication.class.getResource("GuestPanel.fxml"));
+        stage.setScene(new Scene(l.load()));
+        stage.setTitle("Гость • Поиск грузов");
         stage.centerOnScreen();
         stage.show();
     }

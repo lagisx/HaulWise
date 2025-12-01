@@ -4,6 +4,7 @@ import com.example.postgresql.API.AuthService;
 import com.example.postgresql.Controllers.CardControllers.UserCargoCardController;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.UserF.ProfileUser;
+import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -28,7 +29,6 @@ public class UserPanelController {
     @FXML private Button btnAddCargo;
     @FXML private Label LabelUser;
     @FXML private TabPane tabPane;
-    @FXML private VBox ndsPriceBox;
 
     private String currentUser;
     private final AuthService authService = new AuthService();
@@ -68,7 +68,7 @@ public class UserPanelController {
 
     private void displayAllCargos(JsonArray cargos) {
         cargoContainer.getChildren().clear();
-        if (cargos == null || cargos.size() == 0) {
+        if (cargos == null || cargos.isEmpty()) {
             cargoContainer.getChildren().add(createInfoLabel("Нет доступных грузов"));
             return;
         }
@@ -78,8 +78,7 @@ public class UserPanelController {
         cargoContainer.getChildren().add(count);
 
         for (JsonElement el : cargos) {
-            JsonObject cargo = el.getAsJsonObject();
-            addCargoCard(cargo, cargoContainer, false);
+            addCargoCard(el.getAsJsonObject(), cargoContainer, false);
         }
     }
 
@@ -101,14 +100,13 @@ public class UserPanelController {
         count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0; -fx-text-fill: #1e293b;");
         userCargoContainer.getChildren().add(0, count);
 
-        if (cargos == null || cargos.size() == 0) {
+        if (cargos == null || cargos.isEmpty()) {
             userCargoContainer.getChildren().add(1, createInfoLabel("У вас пока нет добавленных грузов"));
             return;
         }
 
         for (JsonElement el : cargos) {
-            JsonObject cargo = el.getAsJsonObject();
-            addCargoCard(cargo, userCargoContainer, true);
+            addCargoCard(el.getAsJsonObject(), userCargoContainer, true);
         }
     }
 
@@ -119,7 +117,15 @@ public class UserPanelController {
             UserCargoCardController ctrl = loader.getController();
 
             ctrl.typeLabel.setText("RUS • " + getStr(cargo, "ТипТС"));
-            ctrl.routeLabel.setText(getStr(cargo, "Откуда") + " → " + getStr(cargo, "Куда"));
+
+            final String fromCity = getStr(cargo, "Откуда").trim();
+            final String toCity   = getStr(cargo, "Куда").trim();
+
+            ctrl.routeLabel.setText(fromCity + " → " + toCity);
+            ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
+
+            MapManager.getInstance().showOnClick(ctrl.routeLabel, fromCity, toCity);
+
             ctrl.vesObemLabel.setText(format(cargo, "Вес") + " т • " + format(cargo, "Объем") + " м³");
             ctrl.tovarLabel.setText(getStr(cargo, "Товар"));
             ctrl.dateValue.setText(getStr(cargo, "Даты"));
@@ -131,8 +137,6 @@ public class UserPanelController {
                 ctrl.cargoTypeLabel.setManaged(false);
             } else {
                 ctrl.cargoTypeLabel.setText(loadingDetails);
-                ctrl.cargoTypeLabel.setVisible(true);
-                ctrl.cargoTypeLabel.setManaged(true);
             }
 
             ctrl.priceKartaLabel.setText(formatRub(cargo, "ЦенаПоКарте"));
@@ -140,11 +144,10 @@ public class UserPanelController {
             ctrl.contactLabel.setText(getStr(cargo, "КонтактныйТелефон"));
             ctrl.tradeLabel.setText(getStr(cargo, "Торг_без_торга"));
 
-
             if (isOwner) {
+                int cargoId = cargo.get("id").getAsInt();
                 ctrl.deleteLabel.setVisible(true);
                 ctrl.deleteLabel.setManaged(true);
-                int cargoId = cargo.get("id").getAsInt();
                 ctrl.deleteLabel.setOnMouseClicked(e -> deleteCargo(cargoId, card));
             } else {
                 ctrl.deleteLabel.setVisible(false);
@@ -165,8 +168,7 @@ public class UserPanelController {
                     if (success) {
                         userCargoContainer.getChildren().remove(card);
                         showSuccess("Груз успешно удалён");
-                        loadAllCargos();
-                        loadUserCargos();
+                        refreshAllCargos();
                     } else {
                         showError("Не удалось удалить груз");
                     }
@@ -176,6 +178,7 @@ public class UserPanelController {
                     return null;
                 });
     }
+
     @FXML
     private void AddUsersCargo() {
         authService.getUserProfile(currentUser)
@@ -187,11 +190,8 @@ public class UserPanelController {
                             phone = userObj.get("phone").getAsString();
                         }
                     }
-
                     final String finalPhone = phone;
-                    final String finalUser = currentUser;
-
-                    Platform.runLater(() -> openAddCargoDialog(finalUser, finalPhone));
+                    Platform.runLater(() -> openAddCargoDialog(currentUser, finalPhone));
                 })
                 .exceptionally(ex -> {
                     Platform.runLater(() -> showError("Ошибка загрузки профиля: " + ex.getMessage()));
@@ -203,7 +203,7 @@ public class UserPanelController {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("AddCargoDialog.fxml"));
             Stage stage = new Stage();
-            stage.setScene(new Scene(loader.load())); // ← здесь падало
+            stage.setScene(new Scene(loader.load()));
             stage.setTitle("Добавить груз");
             stage.initOwner(btnAddCargo.getScene().getWindow());
             stage.setResizable(false);
@@ -218,16 +218,11 @@ public class UserPanelController {
         }
     }
 
-    private void refreshAllCargos() {
-        loadAllCargos();
-        loadUserCargos();
-    }
-
     @FXML
     private void profileClick() {
         authService.getUserProfile(currentUser)
                 .thenAccept(array -> {
-                    if (array == null || array.size() == 0) {
+                    if (array == null || array.isEmpty()) {
                         Platform.runLater(() -> showError("Профиль не найден"));
                         return;
                     }
@@ -244,16 +239,9 @@ public class UserPanelController {
                 });
     }
 
-    public static void UserPanel(Stage stage, String user, String password) throws IOException {
-        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("UserPanel.fxml"));
-        Scene scene = new Scene(loader.load());
-        UserPanelController controller = loader.getController();
-        controller.setUser(user);
-
-        stage.setScene(scene);
-        stage.setTitle("Панель пользователя • " + user);
-        stage.centerOnScreen();
-        stage.show();
+    private void refreshAllCargos() {
+        loadAllCargos();
+        loadUserCargos();
     }
 
     @FXML
@@ -267,6 +255,18 @@ public class UserPanelController {
         stage.setScene(new Scene(root));
         stage.setTitle(title);
         stage.centerOnScreen();
+    }
+
+    public static void UserPanel(Stage stage, String user, String password) throws IOException {
+        FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("UserPanel.fxml"));
+        Scene scene = new Scene(loader.load());
+        UserPanelController controller = loader.getController();
+        controller.setUser(user);
+
+        stage.setScene(scene);
+        stage.setTitle("Панель пользователя • " + user);
+        stage.centerOnScreen();
+        stage.show();
     }
 
     private void TabHidePunktire() {
