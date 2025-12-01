@@ -45,7 +45,7 @@
                     <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-border-color: transparent;">
                         <content>
                             <VBox fx:id="userCargoContainer" spacing="15" style="-fx-padding: 25;                                          -fx-background-color: transparent;">
-                                <Button fx:id="btnAddCargo" alignment="TOP_RIGHT" contentDisplay="RIGHT" onAction="#AddUsersCargo" prefHeight="35.0" prefWidth="139.0" style="-fx-background-color: #1e3a8a; -fx-text-fill: white;                                                -fx-font-weight: bold; -fx-background-radius: 8;                                                -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="➕ Добавить груз" />
+                                <Button fx:id="btnAddCargo" alignment="CENTER" contentDisplay="CENTER" onAction="#AddUsersCargo" prefHeight="35.0" prefWidth="146.0" style="-fx-background-color: #1e3a8a; -fx-text-fill: white;                                                -fx-font-weight: bold; -fx-background-radius: 8;                                                -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="➕ Добавить груз" />
                         <Pane fx:id="PaneBottomBtn" prefHeight="6.0" prefWidth="945.0" />
                             </VBox>
                         </content>

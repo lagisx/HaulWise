@@ -46,9 +46,6 @@ public class AddCargoDialogController {
             }
         });
 
-        trade.getItems().addAll("Без торга", "Торг уместен");
-        trade.setValue("Без торга");
-
         dateFrom.setValue(LocalDate.now());
         dateTo.setValue(LocalDate.now().plusDays(7));
     }

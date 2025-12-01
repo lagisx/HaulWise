@@ -25,15 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class HelloController {
 
     /// TODO СДЕЛАТЬ ФИЛЬТРЫ (ПОИСК ПО МАРШРУТУ
-    /// TODO Сделать дату в виде DatePicker
     /// TODO Сделать масштабируемость под окно (полножкранный и обычный)
-    ///
-    ///
-    ///
-    /// БАГИ: При переходе в профиль и обратно (не подключается тот же акк что и был)
-    ///
-
-
 
     public static final String DB_URL = "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require";
     public static final String DB_USER = "postgres.mkdwltdoayuhuikzycod";
