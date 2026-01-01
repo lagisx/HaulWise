@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="700" prefWidth="1000" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.UserF.ProfileUser">
+   <VBox prefHeight="80.0" prefWidth="1000.0">
+      <children>
+         <HBox alignment="CENTER_LEFT" prefHeight="68.0" prefWidth="989.0" spacing="20" style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6);                          -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
+            <padding>
+               <Insets bottom="12" left="30" right="30" top="12" />
+            </padding>
+            <children>
+               <Label style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: black;" text="Биржа грузоперевозок">
+                  <font>
+                     <Font name="System Bold" size="26" />
+                  </font>
+               </Label>
+               <Region HBox.hgrow="ALWAYS" />
+               <Button fx:id="logoutButton" onAction="#goBackUserPanel" style="-fx-background-color: white; -fx-text-fill: #1e40af;                                    -fx-font-weight: bold; -fx-font-size: 14px;                                    -fx-padding: 10 24; -fx-background-radius: 12;                                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);                                    -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;                                    -fx-cursor: hand;" text="Назад" />
+            </children>
+         </HBox>
+         <HBox prefHeight="4.0" style="-fx-background-color: #60a5fa;">
+            <children>
+               <Region prefWidth="180" />
+               <Region prefWidth="120" style="-fx-background-color: #fbbf24;" />
+            </children>
+         </HBox>
+      </children>
+   </VBox>
+
+    <ScrollPane fitToWidth="true" pannable="true" style="-fx-background-color: transparent;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="70">
+
+        <HBox alignment="TOP_LEFT" spacing="30" style="-fx-padding: 40;">
+
+            <VBox prefWidth="620" spacing="28" style="-fx-background-color: white;                          -fx-background-radius: 20;                          -fx-padding: 40;                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
+
+                <VBox spacing="8">
+                    <Label style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #1e293b;" text="Мой профиль" />
+
+                    <Label fx:id="LabelUser" style="-fx-font-size: 18; -fx-text-fill: #334155;" text="Пользователь" />
+                </VBox>
+
+                <GridPane hgap="20" vgap="20">
+                    <columnConstraints>
+                        <ColumnConstraints prefWidth="130" />
+                        <ColumnConstraints hgrow="ALWAYS" />
+                    </columnConstraints>
+
+                    <Label text="Логин" GridPane.rowIndex="0" />
+                    <TextField fx:id="login" editable="false" style="-fx-background-radius: 12; -fx-border-radius: 12;                                       -fx-border-color: #e2e8f0; -fx-padding: 12;" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+
+                    <Label text="Пароль" GridPane.rowIndex="1" />
+                    <PasswordField fx:id="passwordVIEW" style="-fx-background-radius: 12; -fx-border-radius: 12;                                           -fx-border-color: #e2e8f0; -fx-padding: 12;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                    <Label text="Email" GridPane.rowIndex="2" />
+                    <TextField fx:id="email" style="-fx-background-radius: 12; -fx-border-radius: 12;                                       -fx-border-color: #e2e8f0; -fx-padding: 12;" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+                    <Label text="Телефон" GridPane.rowIndex="3" />
+                    <TextField fx:id="phone" style="-fx-background-radius: 12; -fx-border-radius: 12;                                       -fx-border-color: #e2e8f0; -fx-padding: 12;" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+               <rowConstraints>
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+               </rowConstraints>
+                </GridPane>
+
+                <VBox spacing="16" style="-fx-background-color: #f0f9ff;
+                      -fx-background-radius: 16;
+                      -fx-padding: 24;
+                      -fx-border-color: #bfdbfe;
+                      -fx-border-width: 1;">
+
+                    <Label style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e40af;" text="🔗 Telegram" />
+
+                    <HBox alignment="CENTER_LEFT" spacing="20">
+                        <Label fx:id="telegramStatusLabel" style="-fx-font-size: 16; -fx-font-weight: 600;" text="Статус: Не привязан" />
+
+                        <Button fx:id="telegramActionButton" onAction="#toggleTelegramLink"
+                                style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 12;
+                       -fx-padding: 12 28;" text="Привязать" />
+                    </HBox>
+
+                    <HBox spacing="12" alignment="CENTER_LEFT">
+                        <Label fx:id="telegramChatIdLabel"
+                               text="ID: —"
+                               style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #1e40af;"
+                               visible="false" />
+
+                        <Button fx:id="copyChatIdButton"
+                                onAction="#copyChatIdToClipboard"
+                                text="📋 Копировать ID"
+                                visible="false"
+                                style="-fx-background-color: #e0e7ff; -fx-text-fill: #1e40af;
+                       -fx-font-weight: bold; -fx-font-size: 13;
+                       -fx-background-radius: 10; -fx-padding: 8 16;
+                       -fx-cursor: hand;" />
+                    </HBox>
+
+                    <VBox fx:id="telegramBindBox" alignment="CENTER" managed="false" spacing="18" visible="false">
+
+                        <ImageView fitHeight="200" preserveRatio="true">
+                            <image>
+                                <Image url="@images/BotQR-CODE.png" />
+                            </image>
+                        </ImageView>
+
+                        <Label text="Отсканируйте QR или отправьте команду боту" wrapText="true" textAlignment="CENTER" />
+
+                        <Label style="-fx-background-color: #e0e7ff;
+                       -fx-background-radius: 12;
+                       -fx-padding: 12 24;
+                       -fx-font-weight: bold;
+                       -fx-text-fill: #1e40af;"
+                               text="/start ваш_логин"
+                               textAlignment="CENTER" />
+
+                        <Button fx:id="openTelegramBtn" onAction="#openTelegramBot"
+                                style="-fx-background-color: #3b82f6; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-background-radius: 12;
+                       -fx-padding: 12 32;"
+                                text="Открыть Telegram" />
+                    </VBox>
+                </VBox>
+
+                <HBox spacing="20">
+                    <Button fx:id="saveProfileBtn" onAction="#changeParam" style="-fx-background-color: #10b981; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-background-radius: 12;                                    -fx-padding: 14 32;" text="💾 Сохранить изменения" />
+
+                    <Button fx:id="deleteUser" onAction="#deleteUser" style="-fx-background-color: #ef4444; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-background-radius: 12;                                    -fx-padding: 14 32;" text="🗑 Удалить аккаунт" />
+                </HBox>
+
+                <Label fx:id="statusLabel" style="-fx-font-size: 14; -fx-text-fill: #dc2626;" wrapText="true" />
+            </VBox>
+
+            <VBox prefWidth="300" spacing="20" style="-fx-background-color: white;                          -fx-background-radius: 20;                          -fx-padding: 32;                          -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
+
+                <Label style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;" text="Подсказки" />
+
+                <Label text="• Перед сохранением проверьте данные." wrapText="true" />
+                <Label text="• Изменения применяются сразу." wrapText="true" />
+                <Label text="• Привязка Telegram помогает восстановить пароль." wrapText="true" />
+            </VBox>
+        </HBox>
+    </ScrollPane>
+
+</AnchorPane>

@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -23,13 +24,17 @@ import java.util.concurrent.CompletableFuture;
 
 public class AdminPanelController {
 
+    @FXML private TableColumn<JsonObject, Void> colCargoActions;
+    @FXML private TableColumn<JsonObject, Void> colUserActions;
+    @FXML private TableColumn<JsonObject, Void> colBlacklistActions;
+
     @FXML private TableView<JsonObject> cargoTable, userTable, blacklistTable, logsListTable;
 
     @FXML private TableColumn<JsonObject, String> colCargoId, colCargoOwner, colCargoType, colCargoWeight,
             colCargoVolume, colCargoProduct, colCargoFrom, colCargoTo, colCargoLoadType,
             colCargoLoadDetails, colCargoDates, colCargoPriceCard, colCargoPriceNDC, colCargoTorg, colCargoContact;
 
-    @FXML private TableColumn<JsonObject, String> colUserId, colUserLogin, colUserPassword,
+    @FXML private TableColumn<JsonObject, String> colUserId, colUserLogin,
             colUserEmail, colUserPhone, colUserCreated_at, colUserStatus;
 
     @FXML private TableColumn<JsonObject, String> colBlockUserId, colBlockUserLogin, colBlockUserEmail,
@@ -54,6 +59,10 @@ public class AdminPanelController {
         setupUserColumns();
         setupBlacklistColumns();
         setupLogsColumns();
+
+        setupCargoActionsColumn();
+        setupUserActionsColumn();
+        setupBlacklistActionsColumn();
 
         cargoTable.setItems(cargos);
         userTable.setItems(users);
@@ -89,7 +98,6 @@ public class AdminPanelController {
     private void setupUserColumns() {
         colUserId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
         colUserLogin.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "login")));
-        colUserPassword.setCellValueFactory(cell -> new SimpleStringProperty("••••••••"));
         colUserEmail.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "email")));
         colUserPhone.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "phone")));
         colUserCreated_at.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "created_at")));
@@ -319,6 +327,8 @@ public class AdminPanelController {
                     }));
         }
     }
+
+
     @FXML
     private void editUser() {
         JsonObject selectedUser = userTable.getSelectionModel().getSelectedItem();
@@ -353,6 +363,130 @@ public class AdminPanelController {
         statusLabelUsers.setText(text);
         statusLabelUsers.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
         new Timeline(new KeyFrame(Duration.seconds(10), e -> statusLabelUsers.setText(""))).play();
+    }
+
+    private void setupCargoActionsColumn() {
+        colCargoActions.setCellValueFactory(param -> null); // Void тип
+
+        colCargoActions.setCellFactory(param -> new TableCell<JsonObject, Void>() {
+            private final Button deleteBtn = new Button("🗑");
+
+            {
+                deleteBtn.setStyle(
+                        "-fx-background-color: #ef4444; -fx-text-fill: white; " +
+                                "-fx-font-weight: bold; -fx-background-radius: 8; " +
+                                "-fx-padding: 6 12; -fx-cursor: hand;"
+                );
+
+                deleteBtn.setOnAction(event -> {
+                    JsonObject cargo = getTableView().getItems().get(getIndex());
+                    if (cargo != null) {
+                        deleteCargoWithConfirmation(cargo);
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : deleteBtn);
+            }
+        });
+    }
+
+    private void deleteCargoWithConfirmation(JsonObject cargo) {
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Удаление груза");
+        alert.setHeaderText("Удалить груз ID " + safeString(cargo, "id") + "?");
+        alert.setContentText("Откуда: " + safeString(cargo, "Откуда") + " → Куда: " + safeString(cargo, "Куда"));
+
+        if (alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK) {
+            authService.deleteCargo(cargo.get("id").getAsInt())
+                    .thenAccept(success -> Platform.runLater(() -> {
+                        if (success) {
+                            cargos.remove(cargo);
+                            showStatus("Груз удалён", "green");
+                        } else {
+                            showStatus("Ошибка удаления груза", "red");
+                        }
+                    }));
+        }
+    }
+
+    private void setupUserActionsColumn() {
+        colUserActions.setCellValueFactory(param -> null);
+        colUserActions.setCellFactory(param -> new TableCell<JsonObject, Void>() {
+            private final Button editBtn = new Button("✏");
+            private final Button blockBtn = new Button("⛔");
+            private final Button deleteBtn = new Button("🗑");
+
+            private final HBox box = new HBox(10, editBtn, blockBtn, deleteBtn);
+
+            {
+                editBtn.setStyle("-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 6 12;");
+                blockBtn.setStyle("-fx-background-color: #f59e0b; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 6 12;");
+                deleteBtn.setStyle("-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-background-radius: 8; -fx-padding: 6 12;");
+
+                editBtn.setOnAction(e -> {
+                    JsonObject user = getTableView().getItems().get(getIndex());
+                    if (user != null) editUser();
+                    userTable.getSelectionModel().select(user);
+                });
+
+                blockBtn.setOnAction(e -> {
+                    JsonObject user = getTableView().getItems().get(getIndex());
+                    if (user != null) {
+                        userTable.getSelectionModel().select(user);
+                        blockUser();
+                    }
+                });
+
+                deleteBtn.setOnAction(e -> {
+                    JsonObject user = getTableView().getItems().get(getIndex());
+                    if (user != null) {
+                        userTable.getSelectionModel().select(user);
+                        deleteUser();
+                    }
+                });
+                box.setStyle("-fx-alignment: center;");
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : box);
+            }
+        });
+    }
+
+    private void setupBlacklistActionsColumn() {
+        colBlacklistActions.setCellValueFactory(param -> null);
+
+        colBlacklistActions.setCellFactory(param -> new TableCell<JsonObject, Void>() {
+            private final Button unblockBtn = new Button("✅");
+
+            {
+                unblockBtn.setStyle(
+                        "-fx-background-color: #3b82f6; -fx-text-fill: white; " +
+                                "-fx-font-weight: bold; -fx-background-radius: 8; " +
+                                "-fx-padding: 8 16; -fx-cursor: hand;"
+                );
+
+                unblockBtn.setOnAction(e -> {
+                    JsonObject blocked = getTableView().getItems().get(getIndex());
+                    if (blocked != null) {
+                        blacklistTable.getSelectionModel().select(blocked);
+                        unblockUser();
+                    }
+                });
+            }
+
+            @Override
+            protected void updateItem(Void item, boolean empty) {
+                super.updateItem(item, empty);
+                setGraphic(empty ? null : unblockBtn);
+            }
+        });
     }
 
     @FXML private void goBack() throws IOException {

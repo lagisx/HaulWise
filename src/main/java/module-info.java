@@ -20,6 +20,7 @@ module com.example.postgresql {
     requires com.google.gson;
     requires okhttp3;
     requires java.net.http;
+    requires telegram.bot.api;
 
     opens com.example.postgresql to javafx.fxml;
     exports com.example.postgresql;

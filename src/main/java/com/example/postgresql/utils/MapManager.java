@@ -84,7 +84,6 @@ public class MapManager {
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {
             if (state == javafx.concurrent.Worker.State.SUCCEEDED) {
                 mapReady = true;
-                System.out.println("Карта загружена и готова!");
             }
         });
     }

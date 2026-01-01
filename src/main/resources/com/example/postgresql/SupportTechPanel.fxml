@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.support.SupportTechController">
-
-    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <padding>
-            <Insets bottom="10" left="25" right="20" top="10" />
-        </padding>
-        <Label alignment="CENTER_RIGHT" onMouseClicked="#goBack" prefHeight="40.0" prefWidth="24.0" style="-fx-font-size: 28; -fx-text-fill: white; -fx-cursor: hand;" text="←" />
-        <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Техническая поддержка" />
-    </HBox>
+<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.support.SupportTechController">
 
     <VBox alignment="TOP_CENTER" layoutX="150" layoutY="120" prefHeight="520" prefWidth="700" spacing="20" style="-fx-background-color: white;                  -fx-background-radius: 16;                  -fx-padding: 40;                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 10, 0, 0, 3);">
 
-        <Label style="-fx-text-fill: linear-gradient(to right, #1e3a8a, #60a5fa); -fx-font-size: 26; -fx-font-weight: bold;" text="Связаться с поддержкой" />
+        <Label style="-fx-text-fill: black; -fx-font-size: 26; -fx-font-weight: bold;" text="Связаться с поддержкой" />
 
         <Label style="-fx-text-fill: #64748b; -fx-font-size: 14;" text="Опишите вашу проблему или вопрос:" />
 
@@ -26,4 +25,28 @@
 
         <Button fx:id="sendButton" onAction="#sendSupportRequest" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                        -fx-font-weight: bold;                        -fx-text-fill: white;                        -fx-background-radius: 8;                        -fx-font-size: 15;                        -fx-padding: 10 25;                        -fx-cursor: hand;" text="Отправить обращение" />
     </VBox>
+   <VBox layoutX="5.0" prefHeight="80.0" prefWidth="1000.0">
+      <children>
+         <HBox alignment="CENTER_LEFT" prefHeight="76.0" prefWidth="1014.0" spacing="20" style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6);                          -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
+            <padding>
+               <Insets bottom="12" left="30" right="30" top="12" />
+            </padding>
+            <children>
+               <Label style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: black;" text="Тех поддержка">
+                  <font>
+                     <Font name="System Bold" size="26" />
+                  </font>
+               </Label>
+               <Region HBox.hgrow="ALWAYS" />
+               <Button fx:id="logoutButton" onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e40af;                                    -fx-font-weight: bold; -fx-font-size: 14px;                                    -fx-padding: 10 24; -fx-background-radius: 12;                                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);                                    -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;                                    -fx-cursor: hand;" text="Выйти" />
+            </children>
+         </HBox>
+         <HBox prefHeight="4.0" style="-fx-background-color: #60a5fa;">
+            <children>
+               <Region prefWidth="180" />
+               <Region prefWidth="120" style="-fx-background-color: #fbbf24;" />
+            </children>
+         </HBox>
+      </children>
+   </VBox>
 </AnchorPane>

@@ -56,7 +56,6 @@ public class SupabaseClient {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                e.printStackTrace();
                 future.completeExceptionally(e);
             }
 
@@ -68,8 +67,8 @@ public class SupabaseClient {
                     JsonArray result = gson.fromJson(body, JsonArray.class);
                     future.complete(result);
                 } else {
-                    System.err.println("Supabase SELECT failed: " + response.code() + " " + body);
-                    future.complete(new JsonArray());
+                    String errorMsg = "HTTP " + response.code() + ": " + body.trim();
+                    future.completeExceptionally(new IOException(errorMsg));
                 }
                 response.close();
             }
@@ -77,8 +76,9 @@ public class SupabaseClient {
 
         return future;
     }
-    public CompletableFuture<JsonObject> insert(String table, JsonObject data) {
-        CompletableFuture<JsonObject> future = new CompletableFuture<>();
+
+    public CompletableFuture<JsonArray> insert(String table, JsonObject data) {
+        CompletableFuture<JsonArray> future = new CompletableFuture<>();
 
         RequestBody body = RequestBody.create(
                 gson.toJson(data),
@@ -102,18 +102,14 @@ public class SupabaseClient {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                String responseBody = response.body() != null ? response.body().string() : "[]";
+
                 if (response.isSuccessful()) {
-                    String responseBody = response.body().string();
                     JsonArray result = gson.fromJson(responseBody, JsonArray.class);
-                    if (result.size() > 0) {
-                        future.complete(result.get(0).getAsJsonObject());
-                    } else {
-                        future.complete(new JsonObject());
-                    }
+                    future.complete(result);
                 } else {
-                    future.completeExceptionally(
-                            new IOException("Insert failed: " + response.code())
-                    );
+                    String errorMsg = "HTTP " + response.code() + ": " + responseBody.trim();
+                    future.completeExceptionally(new IOException(errorMsg));
                 }
                 response.close();
             }
@@ -121,6 +117,7 @@ public class SupabaseClient {
 
         return future;
     }
+
     public CompletableFuture<Boolean> update(String table, JsonObject data, String filter) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
@@ -131,6 +128,9 @@ public class SupabaseClient {
             if (parts.length == 2) {
                 urlBuilder.addQueryParameter(parts[0], parts[1]);
             }
+        }
+        if (table.equals("users") && data.has("telegram_chat_id")) {
+            data.addProperty("telegram_linked", !data.get("telegram_chat_id").isJsonNull());
         }
 
         RequestBody body = RequestBody.create(
@@ -161,6 +161,7 @@ public class SupabaseClient {
 
         return future;
     }
+
     public CompletableFuture<Boolean> delete(String table, String filter) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 

@@ -44,7 +44,6 @@
         const start = [coords[0][1], coords[0][0]];  // [lat, lon]
         const end   = [coords[coords.length-1][1], coords[coords.length-1][0]];
 
-        // САМЫЙ НАДЁЖНЫЙ СПОСОБ — создаём маршрут и ждём готовности
         multiRoute = new ymaps.multiRouter.MultiRoute({
             referencePoints: [start, end],
             params: { routingMode: 'auto' }
@@ -56,10 +55,8 @@
             boundsAutoApply: false  // ВЫКЛЮЧАЕМ авто-зум здесь
         });
 
-        // Добавляем на карту
         myMap.geoObjects.add(multiRoute);
 
-        // Метки
         const startPm = new ymaps.Placemark(start, {
             balloonContent: `<strong style="color:#0066FF">Откуда:</strong><br><big>${fromCity}</big>`
         }, { preset: 'islands#blueStretchyIcon' });
@@ -72,9 +69,7 @@
         myMap.geoObjects.add(endPm);
         placemarks = [startPm, endPm];
 
-        // ГЛАВНОЕ: ждём, когда маршрут построится
         multiRoute.getRoutes().events.add('ready', () => {
-            // Теперь точно есть линия — делаем зум
             const bounds = multiRoute.getBounds();
             if (bounds) {
                 myMap.setBounds(bounds, {

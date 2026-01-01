@@ -11,8 +11,6 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 public class RegController {

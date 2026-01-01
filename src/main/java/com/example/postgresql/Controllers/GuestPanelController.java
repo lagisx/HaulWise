@@ -7,12 +7,13 @@ import com.example.postgresql.UserF.Cargo;
 import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Label;
+import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -26,11 +27,24 @@ import java.util.Random;
 public class GuestPanelController {
 
     @FXML private VBox cargoContainer;
+
+    @FXML private TextField fromFilter;
+    @FXML private TextField toFilter;
+    @FXML private TextField minWeightFilter;
+    @FXML private TextField maxWeightFilter;
+    @FXML private Button applyFilterButton;
+
     private final SupabaseClient supabase = new SupabaseClient();
     private final Random random = new Random();
 
+    private JsonArray allCargos;
+
     public void initialize() {
         loadCargos();
+
+        if (applyFilterButton != null) {
+            applyFilterButton.setOnAction(e -> applyFilters());
+        }
     }
 
     private void loadCargos() {
@@ -38,9 +52,12 @@ public class GuestPanelController {
         cargoContainer.getChildren().add(loadingLabel());
 
         supabase.select("gruz", "*", null)
-                .thenAccept(json -> Platform.runLater(() -> showCargos(json)))
+                .thenAccept(json -> Platform.runLater(() -> {
+                    allCargos = json;
+                    showCargos(json);
+                }))
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> error(ex.getMessage()));
+                    Platform.runLater(() -> error("Ошибка загрузки: " + ex.getMessage()));
                     return null;
                 });
     }
@@ -49,8 +66,9 @@ public class GuestPanelController {
         cargoContainer.getChildren().clear();
 
         List<Cargo> cargos = parse(array);
+
         Label count = new Label("Найдено " + cargos.size() + " грузов");
-        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: #1d4ed8;");
+        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: black");
         cargoContainer.getChildren().add(count);
 
         if (cargos.isEmpty()) {
@@ -59,36 +77,79 @@ public class GuestPanelController {
         }
 
         for (Cargo c : cargos) {
-            try {
-                FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CargoCard/GuestCargoCard.fxml"));
-                AnchorPane card = loader.load();
-                GuestCargoCardController ctrl = loader.getController();
+            addCargoCard(c);
+        }
+    }
 
-                ctrl.typeLabel.setText("RUS • " + nullToEmpty(c.getTypeTC()));
-                ctrl.vesObemLabel.setText(String.format("%.0f т / %.0f м³", c.getWeight(), c.getVolume()));
-                ctrl.tovarLabel.setText(nullToEmpty(c.getProduct()));
-                ctrl.zagruzValue.setText(nullToEmpty(c.getLoadType()));
-                ctrl.dateValue.setText(nullToEmpty(c.getDate()));
-                ctrl.cargoTypeLabel.setText(nullToEmpty(c.getLoadDetails()));
-                ctrl.randomImageOnCard.setImage(randomImage());
+    private void applyFilters() {
+        if (allCargos == null) return;
 
-                String from = nullToEmpty(c.getFrom()).trim();
-                String to = nullToEmpty(c.getTo()).trim();
-                ctrl.routeLabel.setText(from + " → " + to);
+        String from = fromFilter.getText().trim().toLowerCase();
+        String to = toFilter.getText().trim().toLowerCase();
+        double minWeight = parseDouble(minWeightFilter.getText(), 0);
+        double maxWeight = parseDouble(maxWeightFilter.getText(), Double.MAX_VALUE);
 
-                // Стиль и курсор
-                ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
+        List<Cargo> filtered = new ArrayList<>();
 
-                // ПРАВИЛЬНАЯ ПРИВЯЗКА КАРТЫ К НАСТОЯЩЕМУ ЛЕЙБЛУ
-                MapManager.getInstance().showOnClick(ctrl.routeLabel, from, to);
+        for (Cargo c : parse(allCargos)) {
+            boolean matches = true;
 
-                ctrl.priceHidden.setText("Скрыто");
-                ctrl.contactLabel.setText("Войдите, чтобы увидеть контакты");
+            if (!from.isEmpty() && !c.getFrom().toLowerCase().contains(from)) matches = false;
+            if (!to.isEmpty() && !c.getTo().toLowerCase().contains(to)) matches = false;
+            if (c.getWeight() < minWeight || c.getWeight() > maxWeight) matches = false;
 
-                cargoContainer.getChildren().add(card);
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (matches) filtered.add(c);
+        }
+
+        cargoContainer.getChildren().clear();
+        Label count = new Label("Найдено " + filtered.size() + " грузов");
+        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: black");
+        cargoContainer.getChildren().add(count);
+
+        if (filtered.isEmpty()) {
+            cargoContainer.getChildren().add(emptyLabel());
+        } else {
+            for (Cargo c : filtered) {
+                addCargoCard(c);
             }
+        }
+    }
+
+    private double parseDouble(String text, double defaultValue) {
+        if (text == null || text.trim().isEmpty()) return defaultValue;
+        try {
+            return Double.parseDouble(text.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private void addCargoCard(Cargo c) {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CargoCard/GuestCargoCard.fxml"));
+            AnchorPane card = loader.load();
+            GuestCargoCardController ctrl = loader.getController();
+
+            ctrl.typeLabel.setText("RUS • " + nullToEmpty(c.getTypeTC()));
+            ctrl.vesObemLabel.setText(String.format("%.0f т / %.0f м³", c.getWeight(), c.getVolume()));
+            ctrl.tovarLabel.setText(nullToEmpty(c.getProduct()));
+            ctrl.zagruzValue.setText(nullToEmpty(c.getLoadType()));
+            ctrl.dateValue.setText(nullToEmpty(c.getDate()));
+            ctrl.cargoTypeLabel.setText(nullToEmpty(c.getLoadDetails()));
+            ctrl.randomImageOnCard.setImage(randomImage());
+
+            String from = nullToEmpty(c.getFrom()).trim();
+            String to = nullToEmpty(c.getTo()).trim();
+            ctrl.routeLabel.setText(from + " → " + to);
+            ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
+
+            MapManager.getInstance().showOnClick(ctrl.routeLabel, from, to);
+
+            ctrl.priceHidden.setText("Скрыто");
+            ctrl.contactLabel.setText("Войдите, чтобы увидеть контакты");
+
+            cargoContainer.getChildren().add(card);
+        } catch (IOException e) {
         }
     }
 
@@ -99,24 +160,24 @@ public class GuestPanelController {
         if (a == null) return list;
         for (JsonElement e : a) {
             try {
-                var o = e.getAsJsonObject();
+                JsonObject o = e.getAsJsonObject();
                 list.add(new Cargo(
                         o.get("id").getAsInt(),
                         s(o, "ТипТС"), d(o, "Вес"), d(o, "Объем"),
                         s(o, "Товар"), s(o, "Откуда"), s(o, "Куда"),
                         s(o, "ТипПогрузки"), s(o, "ДеталиПогрузки"),
-                        s(o, "Даты"), d(o, "ЦенаКарточка"), d(o, "ЦенаНДС"),
-                        s(o, "Торг"), s(o, "Контакт"), s(o, "owner_login")
+                        s(o, "Даты"), d(o, "ЦенаПоКарте"), d(o, "ЦенаНДС"),
+                        s(o, "Торг_без_торга"), s(o, "КонтактныйТелефон"), s(o, "owner_login")
                 ));
             } catch (Exception ignored) {}
         }
         return list;
     }
 
-    private String s(com.google.gson.JsonObject o, String k) {
+    private String s(JsonObject o, String k) {
         var e = o.get(k); return e == null || e.isJsonNull() ? "" : e.getAsString();
     }
-    private double d(com.google.gson.JsonObject o, String k) {
+    private double d(JsonObject o, String k) {
         var e = o.get(k); return e == null || e.isJsonNull() ? 0 : e.getAsDouble();
     }
 
@@ -127,14 +188,14 @@ public class GuestPanelController {
     }
 
     private Label emptyLabel() {
-        Label l = new Label("Пока нет доступных грузов");
+        Label l = new Label("Грузы не найдены по вашему запросу");
         l.setStyle("-fx-padding: 40; -fx-font-size: 16; -fx-text-fill: #999;");
         return l;
     }
 
     private void error(String msg) {
         cargoContainer.getChildren().clear();
-        Label l = new Label("Ошибка: " + msg);
+        Label l = new Label("Ошибка загрузки: " + msg);
         l.setStyle("-fx-text-fill: red; -fx-padding: 30;");
         cargoContainer.getChildren().add(l);
     }

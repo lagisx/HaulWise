@@ -3,57 +3,135 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="700.0" prefWidth="1000.0" style="-fx-background-color: linear-gradient(to bottom right, #f3f4f6, #ffffff);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.UserPanelController">
+<AnchorPane prefHeight="760.0" prefWidth="1100.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.UserPanelController">
 
-    <HBox alignment="CENTER_LEFT" prefHeight="65.0" spacing="15" style="-fx-background-color: linear-gradient(to right, #1e3a8a, #60a5fa);                  -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 10, 0, 0, 3);" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-        <padding>
-            <Insets bottom="10" left="25" right="20" top="10" />
-        </padding>
-        <children>
-            <Label style="-fx-font-size: 22; -fx-font-weight: bold; -fx-text-fill: white;" text="Биржа Грузоперевозок" />
-            <Pane HBox.hgrow="ALWAYS" />
-            <Label fx:id="LabelUser" onMouseClicked="#profileClick" style="-fx-font-size: 16; -fx-text-fill: white; -fx-cursor: hand;" text="Пользователь">
-                <contextMenu>
-                    <ContextMenu fx:id="userMenu">
-                        <items>
-                            <MenuItem fx:id="ProfileMenu" text="Профиль" />
-                        </items>
-                    </ContextMenu>
-                </contextMenu>
-            </Label>
-            <Button fx:id="logoutButton" onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e3a8a;                            -fx-font-weight: bold; -fx-background-radius: 8;                            -fx-cursor: hand; -fx-padding: 6 16 6 16;" text="Выйти" />
-        </children>
-    </HBox>
+    <children>
 
-    <TabPane fx:id="tabPane" layoutY="65.0" prefHeight="635.0" prefWidth="1000.0" style="-fx-background-color: transparent;                     -fx-border-color: #e5e7eb;                     -fx-border-width: 2;                     -fx-focus-color: transparent;                     -fx-faint-focus-color: transparent;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="65.0">
+        <!-- Шапка приложения -->
+        <VBox AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <HBox alignment="CENTER_LEFT" prefHeight="76.0" spacing="20" style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6); -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
+                <padding>
+                    <Insets bottom="12" left="30" right="30" top="12" />
+                </padding>
 
-        <tabs>
+                <children>
+                    <Label text="Биржа грузоперевозок">
+                        <font>
+                            <Font name="System Bold" size="26" />
+                        </font>
+                    </Label>
 
-            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                         -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="🚚 Все грузы">
-                <content>
-                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-border-color: transparent;">
-                        <content>
-                            <VBox fx:id="cargoContainer" spacing="15" style="-fx-padding: 25;                                          -fx-background-color: transparent;" />
-                        </content>
-                    </ScrollPane>
-                </content>
-            </Tab>
+                    <Region HBox.hgrow="ALWAYS" />
 
-            <Tab style="-fx-font-weight: bold; -fx-background-radius: 10 10 0 0;                         -fx-background-color: #60a5fa; -fx-text-base-color: white;" text="👤 Мои грузы">
-                <content>
-                    <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: transparent; -fx-border-color: transparent;">
-                        <content>
-                            <VBox fx:id="userCargoContainer" spacing="15" style="-fx-padding: 25;                                          -fx-background-color: transparent;">
-                                <Button fx:id="btnAddCargo" alignment="CENTER" contentDisplay="CENTER" onAction="#AddUsersCargo" prefHeight="35.0" prefWidth="146.0" style="-fx-background-color: #1e3a8a; -fx-text-fill: white;                                                -fx-font-weight: bold; -fx-background-radius: 8;                                                -fx-cursor: hand; -fx-padding: 8 20 8 20;" text="➕ Добавить груз" />
-                        <Pane fx:id="PaneBottomBtn" prefHeight="6.0" prefWidth="945.0" />
-                            </VBox>
-                        </content>
-                    </ScrollPane>
-                </content>
-            </Tab>
+                    <Label fx:id="LabelUser" onMouseClicked="#profileClick" style="-fx-font-size: 16px; -fx-cursor: hand;" text="Пользователь" />
 
-        </tabs>
-    </TabPane>
+                    <Button onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-font-size: 14px;                                    -fx-padding: 10 24; -fx-background-radius: 12; -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;                                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2); -fx-cursor: hand;" text="Выйти" />
+                </children>
+            </HBox>
 
+            <HBox prefHeight="4.0" style="-fx-background-color: #60a5fa;">
+                <children>
+                    <Region prefWidth="180" />
+                    <Region prefWidth="120" style="-fx-background-color: #fbbf24;" />
+                </children>
+            </HBox>
+        </VBox>
+
+        <!-- Основные вкладки -->
+        <TabPane fx:id="tabPane" style="-fx-background-color: transparent;" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80.0">
+
+            <tabs>
+
+                <!-- Вкладка: Все грузы -->
+                <Tab>
+                    <graphic>
+                        <Text style="-fx-font-size: 15px; -fx-font-weight: bold;" text="🚚 Все грузы" />
+                    </graphic>
+                    <content>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: #f8fafc; -fx-border-color: transparent;">
+                            <content>
+                                <VBox spacing="30" style="-fx-padding: 30 40 60 40; -fx-background-color: #f8fafc;">
+
+                                    <!-- Красивая карточка с фильтрами -->
+                                    <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 20;                                                          -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 8);">
+
+                                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e40af;" text="Фильтры поиска" />
+
+                                        <GridPane hgap="20" vgap="15">
+                                            <columnConstraints>
+                                                <ColumnConstraints percentWidth="28" />
+                                                <ColumnConstraints percentWidth="28" />
+                                                <ColumnConstraints percentWidth="22" />
+                                                <ColumnConstraints percentWidth="22" />
+                                            </columnConstraints>
+
+                                            <!-- Откуда и Куда -->
+                                            <Label style="-fx-font-weight: bold; -fx-text-fill: #374151;" text="Откуда" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                            <TextField fx:id="fromFilter" promptText="Например: Москва" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-pref-width: 200;                                                               -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+
+                                            <Label style="-fx-font-weight: bold; -fx-text-fill: #374151;" text="Куда" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                            <TextField fx:id="toFilter" promptText="Например: Екатеринбург" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-pref-width: 200;                                                               -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                                            <!-- Вес -->
+                                            <Label style="-fx-font-weight: bold; -fx-text-fill: #374151;" text="Вес (тонн)" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                            <HBox alignment="CENTER_LEFT" spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                                <TextField fx:id="minWeightFilter" prefWidth="90" promptText="от" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-text-alignment: center;                                                                   -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" />
+                                                <Label style="-fx-font-size: 18; -fx-text-fill: #94a3b8;" text="—" />
+                                                <TextField fx:id="maxWeightFilter" prefWidth="90" promptText="до" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-text-alignment: center;                                                                   -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" />
+                                            </HBox>
+
+                                            <!-- Цена -->
+                                            <Label style="-fx-font-weight: bold; -fx-text-fill: #374151;" text="Цена по НДС (₽)" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                            <HBox alignment="CENTER_LEFT" spacing="10" GridPane.columnIndex="3" GridPane.rowIndex="1">
+                                                <TextField fx:id="minPriceFilter" prefWidth="90" promptText="от" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-text-alignment: center;                                                                   -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" />
+                                                <Label style="-fx-font-size: 18; -fx-text-fill: #94a3b8;" text="—" />
+                                                <TextField fx:id="maxPriceFilter" prefWidth="90" promptText="до" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-text-alignment: center;                                                                   -fx-background-color: #f1f5f9; -fx-border-color: #cbd5e1; -fx-border-radius: 12;" />
+                                            </HBox>
+                                 <rowConstraints>
+                                    <RowConstraints />
+                                    <RowConstraints />
+                                 </rowConstraints>
+                                        </GridPane>
+
+
+                                        <HBox alignment="CENTER_RIGHT">
+                                            <Button fx:id="applyFilterButton" style="-fx-background-color: white; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 8 2; -fx-background-radius: 12; -fx-border-color: #60a5fa; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2); -fx-cursor: hand;" styleClass="filter-apply-button" text="Применить фильтры">
+                                    <font>
+                                       <Font size="10.0" />
+                                    </font></Button>
+                                        </HBox>
+                                    </VBox>
+
+                                    <VBox fx:id="cargoContainer" spacing="20" />
+
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </content>
+                </Tab>
+
+                <Tab>
+                    <graphic>
+                        <Text style="-fx-font-size: 15px; -fx-font-weight: bold;" text="Мои грузы" />
+                    </graphic>
+                    <content>
+                        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: #f8fafc; -fx-border-color: transparent;">
+                            <content>
+                                <VBox fx:id="userCargoContainer" spacing="20" style="-fx-padding: 30 40 50 40; -fx-background-color: #f8fafc;">
+
+                                    <Button fx:id="btnAddCargo" alignment="CENTER" onAction="#AddUsersCargo" style="-fx-background-color: #86efac; -fx-text-fill: #166534; -fx-font-weight: bold; -fx-font-size: 14px;                                                    -fx-padding: 12 36; -fx-background-radius: 12;                                                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2); -fx-cursor: hand;" text="Добавить груз" />
+
+                                    <Region VBox.vgrow="ALWAYS" />
+                                </VBox>
+                            </content>
+                        </ScrollPane>
+                    </content>
+                </Tab>
+
+            </tabs>
+        </TabPane>
+
+    </children>
 </AnchorPane>

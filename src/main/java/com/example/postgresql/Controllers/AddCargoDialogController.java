@@ -29,36 +29,12 @@ public class AddCargoDialogController {
     private Runnable onSuccess;
 
     private final ObservableList<String> cities = FXCollections.observableArrayList(
-            "Москва",
-            "Санкт-Петербург",
-            "Екатеринбург",
-            "Новосибирск",
-            "Казань",
-            "Нижний Новгород",
-            "Челябинск",
-            "Красноярск",
-            "Самара",
-            "Уфа",
-            "Ростов-на-Дону",
-            "Омск",
-            "Краснодар",
-            "Воронеж",
-            "Пермь",
-            "Волгоград",
-            "Саратов",
-            "Тюмень",
-            "Тольятти",
-            "Ижевск",
-            "Барнаул",
-            "Ульяновск",
-            "Иркутск",
-            "Хабаровск",
-            "Ярославль",
-            "Махачкала",
-            "Владивосток",
-            "Оренбург",
-            "Томск",
-            "Кемерово"
+            "Москва", "Санкт-Петербург", "Екатеринбург", "Новосибирск", "Казань",
+            "Нижний Новгород", "Челябинск", "Красноярск", "Самара", "Уфа", "Ростов-на-Дону",
+            "Омск", "Краснодар", "Воронеж", "Пермь", "Волгоград", "Саратов", "Тюмень",
+            "Тольятти", "Ижевск", "Барнаул",
+            "Ульяновск", "Иркутск", "Хабаровск", "Ярославль", "Махачкала",
+            "Владивосток", "Оренбург", "Томск", "Кемерово"
     );
 
     @FXML
@@ -71,7 +47,6 @@ public class AddCargoDialogController {
         setupAutoComplete(from);
         setupAutoComplete(to);
 
-        // Запрет одинаковых городов — реагируем и на выбор, и на ввод текста
         from.valueProperty().addListener((obs, oldVal, newVal) -> preventSameCities(true));
         to.valueProperty().addListener((obs, oldVal, newVal) -> preventSameCities(false));
 
@@ -137,7 +112,6 @@ public class AddCargoDialogController {
         });
     }
 
-    // Метод, который не даёт полям "Откуда" и "Куда" быть одинаковыми
     private void preventSameCities(boolean changedFrom) {
         String fromCity = from.getEditor().getText().trim();
         String toCity   = to.getEditor().getText().trim();
@@ -165,32 +139,89 @@ public class AddCargoDialogController {
 
     @FXML
     private void onSave() {
-        String error = "";
-
-        if (typeTS.getText().trim().isEmpty()) error += "• Тип ТС\n";
-        if (loadingType.getText().trim().isEmpty()) error += "• Тип погрузки\n";
-        if (weight.getText().trim().isEmpty()) error += "• Вес\n";
-        if (volume.getText().trim().isEmpty()) error += "• Объём\n";
-        if (product.getText().trim().isEmpty()) error += "• Товар\n";
-        if (from.getEditor().getText().trim().isEmpty()) error += "• Откуда\n";
-        if (to.getEditor().getText().trim().isEmpty()) error += "• Куда\n";
-        if (dateFrom.getValue() == null) error += "• Дата погрузки (с)\n";
-        if (priceCard.getText().trim().isEmpty()) error += "• Цена без НДС\n";
-        if (trade.getValue() == null) error += "• Торг\n";
-
-        String fromCity = from.getEditor().getText().trim();
-        String toCity   = to.getEditor().getText().trim();
-
-        // Дополнительная проверка на всякий случай при сохранении
-        if (!fromCity.isEmpty() && !toCity.isEmpty()
-                && fromCity.equalsIgnoreCase(toCity)) {
-            error += "• Откуда и Куда не могут быть одним городом!\n";
-        }
-
+        String error = validateFields();
         if (!error.isEmpty()) {
             showStatus("Исправьте ошибки:\n" + error, "#ef4444");
             return;
         }
+
+        JsonObject cargo = buildCargoObject();
+
+        showStatus("Публикация груза...", "#6366f1");
+
+        authService.supabase.select("users", "id",
+                        "login=eq." + URLEncoder.encode(currentUser, StandardCharsets.UTF_8))
+                .thenCompose(result -> {
+                    if (result.isEmpty()) {
+                        throw new RuntimeException("Пользователь не найден в системе");
+                    }
+                    int userId = result.get(0).getAsJsonObject().get("id").getAsInt();
+                    cargo.addProperty("заказчик_id", userId);
+                    return authService.supabase.insert("gruz", cargo);
+                })
+                .thenAccept(v -> Platform.runLater(() -> {
+                    showStatus("Груз успешно опубликован!", "#16a34a");
+                    new Timeline(new KeyFrame(javafx.util.Duration.seconds(1.5), e -> {
+                        if (onSuccess != null) onSuccess.run();
+                        closeWindow();
+                    })).play();
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> {
+                        Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                        String message = cause.getMessage() != null ? cause.getMessage() : "Неизвестная ошибка";
+
+                        if (message.contains("409") ||
+                                message.toLowerCase().contains("conflict") ||
+                                message.contains("duplicate key value violates unique constraint")) {
+
+                            Alert alert = new Alert(Alert.AlertType.WARNING);
+                            alert.setTitle("Груз уже существует");
+                            alert.setHeaderText("Нельзя добавить дублирующий груз");
+                            alert.setContentText(
+                                    "Вы уже опубликовали груз с такими же параметрами:\n" +
+                                            "• Маршрут: " + cargo.get("Откуда").getAsString() + " → " + cargo.get("Куда").getAsString() + "\n" +
+                                            "• Даты: " + cargo.get("Даты").getAsString() + "\n\n" +
+                                            "Если нужно изменить — удалите существующий в разделе «Мои грузы»."
+                            );
+                            alert.getDialogPane().setPrefSize(520, 320);
+                            alert.showAndWait();
+
+                            showStatus("Дубликат не добавлен", "#f59e0b");
+                        }
+                        else {
+                            showStatus("Ошибка публикации: " + message, "#ef4444");
+                        }
+                    });
+                    return null;
+                });
+    }
+    private String validateFields() {
+        StringBuilder error = new StringBuilder();
+
+        if (typeTS.getText().trim().isEmpty()) error.append("• Тип ТС\n");
+        if (loadingType.getText().trim().isEmpty()) error.append("• Тип погрузки\n");
+        if (weight.getText().trim().isEmpty()) error.append("• Вес\n");
+        if (volume.getText().trim().isEmpty()) error.append("• Объём\n");
+        if (product.getText().trim().isEmpty()) error.append("• Товар\n");
+        if (from.getEditor().getText().trim().isEmpty()) error.append("• Откуда\n");
+        if (to.getEditor().getText().trim().isEmpty()) error.append("• Куда\n");
+        if (dateFrom.getValue() == null) error.append("• Дата погрузки (с)\n");
+        if (priceCard.getText().trim().isEmpty()) error.append("• Цена без НДС\n");
+        if (trade.getValue() == null) error.append("• Торг\n");
+
+        String fromCity = from.getEditor().getText().trim();
+        String toCity = to.getEditor().getText().trim();
+        if (!fromCity.isEmpty() && !toCity.isEmpty() && fromCity.equalsIgnoreCase(toCity)) {
+            error.append("• Города отправления и назначения не могут совпадать\n");
+        }
+
+        return error.toString();
+    }
+
+    private JsonObject buildCargoObject() {
+        String fromCity = from.getEditor().getText().trim();
+        String toCity = to.getEditor().getText().trim();
 
         JsonObject cargo = new JsonObject();
         cargo.addProperty("ТипТС", typeTS.getText().trim());
@@ -207,34 +238,13 @@ public class AddCargoDialogController {
         }
         cargo.addProperty("Даты", datesText);
 
-        cargo.addProperty("ДеталиПогрузки", details.getText().trim());
+        cargo.addProperty("ДеталиПогрузки", details.getText().trim().isEmpty() ? "—" : details.getText().trim());
         cargo.addProperty("ЦенаПоКарте", getNumber(priceCard.getText()));
         cargo.addProperty("ЦенаНДС", getNumber(priceNDS.getText()));
         cargo.addProperty("Торг_без_торга", trade.getValue());
         cargo.addProperty("КонтактныйТелефон", userPhone);
 
-        showStatus("Публикация груза...", "#6366f1");
-
-        authService.supabase.select("users", "id",
-                        "login=eq." + URLEncoder.encode(currentUser, StandardCharsets.UTF_8))
-                .thenCompose(result -> {
-                    if (result.isEmpty()) throw new RuntimeException("Пользователь не найден");
-                    int userId = result.get(0).getAsJsonObject().get("id").getAsInt();
-                    cargo.addProperty("заказчик_id", userId);
-                    return authService.supabase.insert("gruz", cargo);
-                })
-                .thenAccept(v -> Platform.runLater(() -> {
-                    showStatus("Груз опубликован!", "#16a34a");
-                    new Timeline(new KeyFrame(javafx.util.Duration.seconds(1.5), e -> {
-                        if (onSuccess != null) onSuccess.run();
-                        closeWindow();
-                    })).play();
-                }))
-                .exceptionally(ex -> {
-                    Platform.runLater(() ->
-                            showStatus("Ошибка: " + ex.getMessage(), "#ef4444"));
-                    return null;
-                });
+        return cargo;
     }
 
     @FXML

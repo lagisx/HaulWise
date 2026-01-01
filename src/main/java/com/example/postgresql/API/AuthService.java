@@ -7,13 +7,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class AuthService {

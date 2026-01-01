@@ -24,7 +24,6 @@ import java.util.concurrent.CompletableFuture;
 
 public class HelloController {
 
-    /// TODO СДЕЛАТЬ ФИЛЬТРЫ (ПОИСК ПО МАРШРУТУ
     /// TODO Сделать масштабируемость под окно (полножкранный и обычный)
 
     public static final String DB_URL = "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require";
@@ -59,7 +58,6 @@ public class HelloController {
                         Platform.runLater(() -> showBlockedStatus(blockStatus.reason));
                         return CompletableFuture.completedFuture(null);
                     }
-                    Platform.runLater(() -> showStatus("Авторизация..."));
                     return authService.authenticate(user, pass);
                 })
                 .thenAccept(authResult -> {

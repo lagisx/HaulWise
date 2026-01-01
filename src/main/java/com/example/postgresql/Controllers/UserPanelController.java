@@ -30,7 +30,18 @@ public class UserPanelController {
     @FXML private Label LabelUser;
     @FXML private TabPane tabPane;
 
-    private String currentUser;
+    // Фильтры
+    @FXML private TextField fromFilter;
+    @FXML private TextField toFilter;
+    @FXML private TextField minWeightFilter;
+    @FXML private TextField maxWeightFilter;
+    @FXML private TextField minPriceFilter;
+    @FXML private TextField maxPriceFilter;
+    @FXML private Button applyFilterButton;
+
+    private JsonArray allCargos;
+
+    private static String currentUser;
     private final AuthService authService = new AuthService();
 
     private static final String[] IMAGES = {
@@ -45,13 +56,24 @@ public class UserPanelController {
         return new Image(UserPanelController.class.getResourceAsStream(IMAGES[idx]));
     }
 
+    public static void setCurrentUser(String username) {
+        currentUser = username;
+    }
+
+    public static String getCurrentUser() {
+        return currentUser;
+    }
+
     @FXML
     private void initialize() {
         TabHidePunktire();
+        if (applyFilterButton != null) {
+            applyFilterButton.setOnAction(e -> applyFilters());
+        }
     }
 
     public void setUser(String login) {
-        this.currentUser = login.toLowerCase().trim();
+        this.currentUser = login;
         LabelUser.setText(login);
         loadAllCargos();
         loadUserCargos();
@@ -62,7 +84,10 @@ public class UserPanelController {
         showLoading(cargoContainer);
 
         authService.getAllCargos()
-                .thenAccept(array -> Platform.runLater(() -> displayAllCargos(array)))
+                .thenAccept(array -> Platform.runLater(() -> {
+                    allCargos = array;
+                    displayAllCargos(array);
+                }))
                 .exceptionally(ex -> handleError(cargoContainer, ex));
     }
 
@@ -74,12 +99,82 @@ public class UserPanelController {
         }
 
         Label count = new Label("Найдено " + cargos.size() + " грузов");
-        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0; -fx-text-fill: #1e293b;");
+        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: black");
         cargoContainer.getChildren().add(count);
 
         for (JsonElement el : cargos) {
             addCargoCard(el.getAsJsonObject(), cargoContainer, false);
         }
+    }
+
+    private void applyFilters() {
+        if (allCargos == null || allCargos.isEmpty()) {
+            return;
+        }
+
+        String from = fromFilter.getText().trim().toLowerCase();
+        String to = toFilter.getText().trim().toLowerCase();
+        double minWeight = parseDouble(minWeightFilter.getText(), 0);
+        double maxWeight = parseDouble(maxWeightFilter.getText(), Double.MAX_VALUE);
+        double minPrice = parseDouble(minPriceFilter.getText(), 0);
+        double maxPrice = parseDouble(maxPriceFilter.getText(), Double.MAX_VALUE);
+
+        JsonArray filtered = new JsonArray();
+
+        for (JsonElement el : allCargos) {
+            JsonObject cargo = el.getAsJsonObject();
+
+            String cargoFrom = getStr(cargo, "Откуда").toLowerCase().trim();
+            String cargoTo = getStr(cargo, "Куда").toLowerCase().trim();
+            double cargoWeight = getDouble(cargo, "Вес", 0);
+            double cargoPrice = getDouble(cargo, "ЦенаПоКарте", 0);
+
+            boolean match = true;
+
+            if (!from.isEmpty() && !cargoFrom.contains(from)) {
+                match = false;
+            }
+
+            if (!to.isEmpty() && !cargoTo.contains(to)) {
+                match = false;
+            }
+
+            if (cargoWeight < minWeight || cargoWeight > maxWeight) {
+                match = false;
+            }
+
+            if (cargoPrice < minPrice || cargoPrice > maxPrice) {
+                match = false;
+            }
+
+            if (match) {
+                filtered.add(cargo);
+            }
+        }
+
+        displayAllCargos(filtered);
+    }
+
+    private double parseDouble(String text, double defaultValue) {
+        if (text == null || text.trim().isEmpty()) {
+            return defaultValue;
+        }
+        try {
+            return Double.parseDouble(text.trim());
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private double getDouble(JsonObject obj, String key, double defaultValue) {
+        if (obj.has(key) && !obj.get(key).isJsonNull()) {
+            try {
+                return obj.get(key).getAsDouble();
+            } catch (Exception e) {
+                return defaultValue;
+            }
+        }
+        return defaultValue;
     }
 
     private void loadUserCargos() {
@@ -97,7 +192,7 @@ public class UserPanelController {
                 node instanceof Label && ((Label) node).getText().contains("Загрузка"));
 
         Label count = new Label("Ваши грузы: " + (cargos != null ? cargos.size() : 0));
-        count.setStyle("-fx-font-weight: bold; -fx-padding: 10 0; -fx-text-fill: #1e293b;");
+        count.setStyle("-fx-font-weight: bold; -fx-font-size: 17; -fx-padding: 15 0 10 15; -fx-text-fill: black");
         userCargoContainer.getChildren().add(0, count);
 
         if (cargos == null || cargos.isEmpty()) {
@@ -157,7 +252,6 @@ public class UserPanelController {
             container.getChildren().add(card);
 
         } catch (Exception e) {
-            e.printStackTrace();
             Platform.runLater(() -> showError("Ошибка загрузки карточки: " + e.getMessage()));
         }
     }
@@ -213,14 +307,14 @@ public class UserPanelController {
 
             stage.show();
         } catch (Exception e) {
-            e.printStackTrace();
             showError("Не удалось открыть форму добавления груза\n\nПричина: " + e.getMessage());
         }
     }
 
     @FXML
     private void profileClick() {
-        authService.getUserProfile(currentUser)
+        String username = currentUser;
+        authService.getUserProfile(username)
                 .thenAccept(array -> {
                     if (array == null || array.isEmpty()) {
                         Platform.runLater(() -> showError("Профиль не найден"));
@@ -231,11 +325,7 @@ public class UserPanelController {
                     String phone = getStr(user, "phone");
 
                     Platform.runLater(() -> ProfileUser.profilePanel(
-                            (Stage) LabelUser.getScene().getWindow(), currentUser, email, phone));
-                })
-                .exceptionally(ex -> {
-                    Platform.runLater(() -> showError("Ошибка загрузки профиля"));
-                    return null;
+                            (Stage) LabelUser.getScene().getWindow(), username, email, phone));
                 });
     }
 
@@ -318,7 +408,6 @@ public class UserPanelController {
             box.getChildren().clear();
             box.getChildren().add(createInfoLabel("Ошибка загрузки: " + ex.getMessage()));
         });
-        ex.printStackTrace();
         return null;
     }
 }

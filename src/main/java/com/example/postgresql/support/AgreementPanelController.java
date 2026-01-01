@@ -27,7 +27,7 @@ public class AgreementPanelController {
         }
     }
     @FXML
-    private void goBack(MouseEvent event) {
+    private void goBack(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/postgresql/reg.fxml"));
             Parent root = loader.load();
@@ -36,7 +36,6 @@ public class AgreementPanelController {
             stage.setTitle("Регистрация");
             stage.setScene(new Scene(root));
             stage.centerOnScreen();
-            System.out.println("goBack clicked");
 
         } catch (IOException e) {
             e.printStackTrace();

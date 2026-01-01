@@ -8,15 +8,13 @@
 <AnchorPane prefHeight="760.0" prefWidth="1100.0" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.GuestPanelController">
 
     <children>
-
-        <!-- ========================== ШАПКА ========================== -->
         <VBox AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-            <HBox alignment="CENTER_LEFT" prefHeight="76.0" style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6);                          -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
+            <HBox alignment="CENTER_LEFT" prefHeight="76.0" spacing="15" style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6); -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
                 <padding>
                     <Insets bottom="12" left="30" right="30" top="12" />
                 </padding>
 
-                <Label style="-fx-font-size: 26px; -fx-font-weight: 900;" text="Биржа грузоперевозок">
+                <Label text="Биржа грузоперевозок">
                     <font>
                         <Font name="System Bold" size="26" />
                     </font>
@@ -24,17 +22,13 @@
 
                 <Region HBox.hgrow="ALWAYS" />
 
-                <Button onMouseClicked="#goAutoriz" style="-fx-background-color: #bae6fd; -fx-text-fill: #1e40af;                                -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12;                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);                                -fx-cursor: hand;" text="Войти">
-                </Button>
+                <Button onMouseClicked="#goAutoriz" style="-fx-background-color: #bae6fd; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12; -fx-cursor: hand;" text="Войти" />
 
-                <Button onMouseClicked="#goReg" style="-fx-background-color: #86efac; -fx-text-fill: #166534;                                -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12;                                -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2);                                -fx-cursor: hand;" text="Регистрация">
-                </Button>
+                <Button onMouseClicked="#goReg" style="-fx-background-color: #86efac; -fx-text-fill: #166534; -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12; -fx-cursor: hand;" text="Регистрация" />
 
-                <Button fx:id="logoutButton1" onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e40af;                                -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12;                                -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;                                -fx-cursor: hand;" text="Назад">
-                </Button>
+                <Button onAction="#goBack" style="-fx-background-color: white; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-font-size: 14px;                                -fx-padding: 10 24; -fx-background-radius: 12; -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;                                -fx-cursor: hand;" text="Назад" />
             </HBox>
 
-            <!-- Подчеркивание активной вкладки -->
             <HBox prefHeight="4.0" style="-fx-background-color: #60a5fa;">
                 <children>
                     <Region prefWidth="180" />
@@ -43,26 +37,49 @@
             </HBox>
         </VBox>
 
-        <!-- ========================== ОСНОВНОЙ КОНТЕНТ ========================== -->
-        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: #f8fafc; -fx-border-color: transparent;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80">
+        <ScrollPane fitToHeight="true" fitToWidth="true" style="-fx-background: #f8fafc;" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="80">
             <content>
-                <VBox fx:id="cargoContainer" spacing="20" style="-fx-padding: 30 40 50 40;                              -fx-background-color: #f8fafc;">
+                <VBox spacing="30" style="-fx-padding: 30 40 60 40; -fx-background-color: #f8fafc;">
 
-                    <!-- Этот VBox будет заполняться карточками из контроллера -->
+                    <VBox spacing="20" style="-fx-background-color: white; -fx-background-radius: 20;                                          -fx-padding: 25; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 8);">
+                        <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e40af;" text="Поиск грузов" />
+
+                        <GridPane hgap="20" vgap="15">
+                            <columnConstraints>
+                                <ColumnConstraints percentWidth="40" />
+                                <ColumnConstraints percentWidth="40" />
+                                <ColumnConstraints percentWidth="20" />
+                            </columnConstraints>
+
+                            <Label style="-fx-font-weight: bold;" text="Откуда" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                            <TextField fx:id="fromFilter" promptText="Например: Москва" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-background-color: #f1f5f9;" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+
+                            <Label style="-fx-font-weight: bold;" text="Куда" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                            <TextField fx:id="toFilter" promptText="Например: Екатеринбург" style="-fx-background-radius: 12; -fx-padding: 12; -fx-font-size: 14; -fx-background-color: #f1f5f9;" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+                            <Label style="-fx-font-weight: bold;" text="Вес (т)" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                            <HBox alignment="CENTER" spacing="10" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                <TextField fx:id="minWeightFilter" prefWidth="90" promptText="от" style="-fx-background-radius: 12; -fx-padding: 12; -fx-text-alignment: center; -fx-background-color: #f1f5f9;" />
+                                <Label style="-fx-font-size: 18; -fx-text-fill: #94a3b8;" text="—" />
+                                <TextField fx:id="maxWeightFilter" prefWidth="90" promptText="до" style="-fx-background-radius: 12; -fx-padding: 12; -fx-text-alignment: center; -fx-background-color: #f1f5f9;" />
+                            </HBox>
+                     <rowConstraints>
+                        <RowConstraints />
+                        <RowConstraints />
+                     </rowConstraints>
+                        </GridPane>
+
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button fx:id="applyFilterButton" style="-fx-background-color: white; -fx-text-fill: #1e40af; -fx-font-weight: bold; -fx-font-size: 12px; -fx-padding: 8 2; -fx-background-radius: 12; -fx-border-color: #60a5fa; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 4, 0, 0, 2); -fx-cursor: hand;" styleClass="filter-apply-button" text="Применить фильтры">
+                                <font>
+                                    <Font size="10.0" />
+                                </font></Button>
+                        </HBox>
+                    </VBox>
+                    <VBox fx:id="cargoContainer" spacing="20" />
+
                 </VBox>
             </content>
         </ScrollPane>
-
-        <!-- ========================== ПЛАШКА "ВОЙДИТЕ, ЧТОБЫ УВИДЕТЬ КОНТАКТЫ" ========================== -->
-        <VBox fx:id="guestOverlay" style="-fx-background-color: rgba(255,255,255,0.95);" visible="false" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
-            <padding>
-                <Insets bottom="20" top="20" />
-            </padding>
-            <children>
-                <Label alignment="CENTER" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e40af;" text="Войдите в аккаунт, чтобы видеть контакты и цены" />
-                <Button onMouseClicked="#goAutoriz" style="-fx-background-color: #3b82f6; -fx-text-fill: white;                                -fx-font-weight: bold; -fx-font-size: 16px;                                -fx-padding: 12 40; -fx-background-radius: 30;                                -fx-cursor: hand;" text="Войти сейчас" />
-            </children>
-        </VBox>
-
     </children>
 </AnchorPane>
