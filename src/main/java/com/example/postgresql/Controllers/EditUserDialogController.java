@@ -50,10 +50,6 @@ public class EditUserDialogController {
         if (!password.isEmpty()) {
             update.addProperty("password", password);
         }
-
-        statusLabel.setText("Сохранение...");
-        statusLabel.setStyle("-fx-text-fill: blue;");
-
         int userId = user.get("id").getAsInt();
 
         authService.supabase.update("users", update, "id=eq." + userId)

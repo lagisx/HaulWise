@@ -15,6 +15,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -366,7 +367,7 @@ public class AdminPanelController {
     }
 
     private void setupCargoActionsColumn() {
-        colCargoActions.setCellValueFactory(param -> null); // Void тип
+        colCargoActions.setCellValueFactory(param -> null);
 
         colCargoActions.setCellFactory(param -> new TableCell<JsonObject, Void>() {
             private final Button deleteBtn = new Button("🗑");
@@ -506,6 +507,9 @@ public class AdminPanelController {
         ctrl.LabelUser.setText(user);
         stage.setScene(scene);
         stage.setTitle("Админ-панель");
+        stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
         stage.centerOnScreen();
         stage.show();
     }

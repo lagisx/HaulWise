@@ -20,7 +20,7 @@ public class TelegramBindBot {
         while (true) {
             getUpdates();
             try {
-                Thread.sleep(1000); // Пауза между запросами
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;

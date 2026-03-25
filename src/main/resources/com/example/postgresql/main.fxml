@@ -5,7 +5,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="700" prefWidth="1000" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.HelloController">
+<AnchorPane prefHeight="650" prefWidth="1000" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.HelloController">
 
     <children>
 

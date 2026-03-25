@@ -20,8 +20,9 @@ public class HelloApplication extends Application {
         }).start();
 
         FXMLLoader fxmlLoader = new FXMLLoader(HelloApplication.class.getResource("main.fxml"));
-        Scene scene = new Scene(fxmlLoader.load(), 1000, 700);
+        Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Биржа грузоперевозок");
+        stage.setResizable(false);
         stage.setScene(scene);
         stage.centerOnScreen();
         stage.show();

@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -224,6 +225,9 @@ public class GuestPanelController {
         stage.setScene(new Scene(l.load()));
         stage.setTitle("Гость • Поиск грузов");
         stage.centerOnScreen();
+        stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        stage.setMaximized(true);
+        stage.setFullScreenExitHint("");
         stage.show();
     }
 }

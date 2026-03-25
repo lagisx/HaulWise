@@ -15,6 +15,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -30,7 +31,6 @@ public class UserPanelController {
     @FXML private Label LabelUser;
     @FXML private TabPane tabPane;
 
-    // Фильтры
     @FXML private TextField fromFilter;
     @FXML private TextField toFilter;
     @FXML private TextField minWeightFilter;
@@ -355,6 +355,9 @@ public class UserPanelController {
 
         stage.setScene(scene);
         stage.setTitle("Панель пользователя • " + user);
+        stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        stage.setFullScreen(true);
+        stage.setFullScreenExitHint("");
         stage.centerOnScreen();
         stage.show();
     }

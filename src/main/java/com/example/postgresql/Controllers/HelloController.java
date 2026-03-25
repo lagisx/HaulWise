@@ -23,9 +23,6 @@ import java.sql.*;
 import java.util.concurrent.CompletableFuture;
 
 public class HelloController {
-
-    /// TODO Сделать масштабируемость под окно (полножкранный и обычный)
-
     public static final String DB_URL = "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require";
     public static final String DB_USER = "postgres.mkdwltdoayuhuikzycod";
     public static final String DB_PASSWORD = "lagisx";
@@ -135,6 +132,7 @@ public class HelloController {
             Stage currentStage = (Stage) username.getScene().getWindow();
             currentStage.centerOnScreen();
             currentStage.setTitle("Регистрация");
+            currentStage.setResizable(false);
             currentStage.setScene(scene1);
 
         } catch (IOException e) {
@@ -150,6 +148,7 @@ public class HelloController {
 
             Stage currentStage = (Stage) username.getScene().getWindow();
             currentStage.setTitle("Восстановление пароля");
+            currentStage.setResizable(false);
             currentStage.centerOnScreen();
             currentStage.setScene(scene1);
         } catch (IOException e) {
@@ -166,6 +165,7 @@ public class HelloController {
             stage.setScene(scene);
             stage.show();
             stage.centerOnScreen();
+            stage.setResizable(false);
             stage.setTitle("Авторизация");
 
         } catch (IOException e) {

@@ -29,7 +29,7 @@ public class ForgetPasswordController {
     private Long currentChatId;
     private String currentIdentifier;
 
-    private static final String BOT_USERNAME = "HaulwiseAuthCode";
+    private static final String BOT_USERNAME = "HaulwiseBot";
 
     private static String generate(int length) {
         java.util.Random random = new java.util.Random();
@@ -168,6 +168,7 @@ public class ForgetPasswordController {
             Stage stage = (Stage) login.getScene().getWindow();
             stage.setScene(scene);
             stage.setTitle("Смена пароля");
+            stage.setResizable(false);
             stage.centerOnScreen();
         } catch (IOException e) {
             showStatus("Ошибка перехода", "#dc2626");

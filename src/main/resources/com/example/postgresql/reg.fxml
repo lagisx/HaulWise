@@ -5,9 +5,9 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="700" prefWidth="1000" style="-fx-background-color: #f6f7f9;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.RegController">
+<AnchorPane prefHeight="650" prefWidth="1000" style="-fx-background-color: #f6f7f9;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.RegController">
     <children>
-        <AnchorPane prefHeight="702.0" prefWidth="878.0">
+        <AnchorPane prefHeight="650.0" prefWidth="878.0">
             <children>
                 <SVGPath content="M0,0 L450,0 Q600,350 450,700 L0,700 Z" fill="#1e3a8a" stroke="transparent" />
                 <Label alignment="CENTER" layoutX="27.0" layoutY="249.0" prefHeight="73.0" prefWidth="488.0" style="-fx-text-fill: White;" text="Зарегистрируйтесь">

@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.google.gson.JsonNull;
@@ -28,7 +29,6 @@ public class ProfileUser {
 
     @FXML private Label statusLabel;
 
-    // Telegram UI
     @FXML private Label telegramStatusLabel;
     @FXML private Button telegramActionButton;
     @FXML private VBox telegramBindBox;
@@ -250,7 +250,6 @@ public class ProfileUser {
     @FXML
     private void toggleTelegramLink() {
         if (isTelegramLinked) {
-            // Отвязываем
             SupabaseClient supabase = new SupabaseClient();
             JsonObject update = new JsonObject();
             update.addProperty("telegram_linked", false);
@@ -286,6 +285,9 @@ public class ProfileUser {
 
             stage.setScene(scene);
             stage.setTitle("Профиль • " + username);
+            stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+            stage.setFullScreen(true);
+            stage.setFullScreenExitHint("");
             stage.centerOnScreen();
             stage.show();
         } catch (Exception e) {
