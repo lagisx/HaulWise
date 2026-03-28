@@ -15,57 +15,56 @@ import java.util.regex.Pattern;
 
 public class RegController {
 
-    @FXML public TextField login;
+    @FXML public  TextField     login;
     @FXML private PasswordField password;
-    @FXML private Label statusLabel;
-    @FXML public TextField email;
-    @FXML public TextField phone;
-    @FXML public TextField passVisible;
-    @FXML private Hyperlink agreement;
+    @FXML public  TextField     email;
+    @FXML public  TextField     phone;
+    @FXML public  TextField     passVisible;
+    @FXML private Label         statusLabel;
+    @FXML private Hyperlink     agreement;
 
     private boolean visiblePass = false;
+    private final AuthService auth = new AuthService();
 
-    private final AuthService authService = new AuthService();
-
-    @FXML
-    private void AgreementPanelOpen(ActionEvent event) {
-        new AgreementPanelController().AgreementPanel(event);
+    @FXML private void AgreementPanelOpen(ActionEvent e) {
+        new AgreementPanelController().AgreementPanel(e);
     }
 
     @FXML
     private void Register() {
-        String user = login.getText().trim().toLowerCase();
-        String pass = visiblePass ? passVisible.getText().trim() : password.getText().trim();
-        String mail = email.getText().trim();
-        String phonenum = phone.getText().trim();
+        String user  = login.getText().trim().toLowerCase();
+        String pass  = visiblePass ? passVisible.getText().trim() : password.getText().trim();
+        String mail  = email.getText().trim();
+        String tel   = phone.getText().trim();
 
-        if (user.isEmpty() || pass.isEmpty() || phonenum.isEmpty()) {
-            setStatus("Заполните все обязательные поля");
+        
+        if (user.isEmpty() || pass.isEmpty() || tel.isEmpty() || mail.isEmpty()) {
+            setStatus("Заполните все обязательные поля (включая email)");
             return;
         }
-
-        if (pass.length() < 8 || pass.length() > 15) {
-            setStatus("Пароль должен быть от 8 до 15 символов");
+        if (!isValidEmail(mail)) {
+            setStatus("Некорректный адрес email");
             return;
         }
-
-        if (!phonenum.matches("\\+?\\d{10,15}")) {
+        if (pass.length() < 6 || pass.length() > 15) {
+            setStatus("Пароль должен быть от 6 до 15 символов");
+            return;
+        }
+        if (!tel.matches("\\+?\\d{10,15}")) {
             setStatus("Некорректный номер телефона");
             return;
         }
 
-        if (!mail.isEmpty() && !isValidEmail(mail)) {
-            setStatus("Некорректный адрес email");
-            return;
-        }
+        setStatus("Регистрация...");
 
-        authService.registerUser(user, pass, mail.isEmpty() ? "" : mail, phonenum)
-                .thenAccept(success -> Platform.runLater(() -> {
-                    if (success) {
-                        setStatus("Регистрация успешна!");
-                        new Timeline(new KeyFrame(Duration.millis(1200), e -> back())).play();
+        auth.registerUser(user, pass, mail, tel)
+                .thenAccept(error -> Platform.runLater(() -> {
+                    if (error == null) {
+                        
+                        setStatus("Регистрация успешна! Войдите в аккаунт.");
+                        new Timeline(new KeyFrame(Duration.millis(1800), ev -> back())).play();
                     } else {
-                        setStatus("Логин уже занят или ошибка сервера");
+                        setStatus(error);
                     }
                 }))
                 .exceptionally(ex -> {
@@ -74,14 +73,10 @@ public class RegController {
                 });
     }
 
-    @FXML
-    private void goBack(ActionEvent event) {
-        back();
-    }
+    @FXML private void goBack(ActionEvent event) { back(); }
 
     private void back() {
-        Stage stage = (Stage) (login != null ? login.getScene().getWindow() :
-                password.getScene().getWindow());
+        Stage stage = (Stage) login.getScene().getWindow();
         new HelloController().goBack(stage);
         stage.centerOnScreen();
     }
@@ -89,23 +84,16 @@ public class RegController {
     @FXML
     private void PassInText(ActionEvent event) {
         visiblePass = !visiblePass;
-
         if (visiblePass) {
             passVisible.setText(password.getText());
-            passVisible.setVisible(true);
-            passVisible.setManaged(true);
-            password.setVisible(false);
-            password.setManaged(false);
-            passVisible.requestFocus();
-            passVisible.positionCaret(passVisible.getLength());
+            passVisible.setVisible(true);  passVisible.setManaged(true);
+            password.setVisible(false);    password.setManaged(false);
+            passVisible.requestFocus();    passVisible.positionCaret(passVisible.getLength());
         } else {
             password.setText(passVisible.getText());
-            password.setVisible(true);
-            password.setManaged(true);
-            passVisible.setVisible(false);
-            passVisible.setManaged(false);
-            password.requestFocus();
-            password.positionCaret(password.getLength());
+            password.setVisible(true);     password.setManaged(true);
+            passVisible.setVisible(false); passVisible.setManaged(false);
+            password.requestFocus();       password.positionCaret(password.getLength());
         }
     }
 
@@ -114,7 +102,6 @@ public class RegController {
     }
 
     private static boolean isValidEmail(String email) {
-        String regex = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$";
-        return Pattern.compile(regex).matcher(email).matches();
+        return Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$").matcher(email).matches();
     }
 }

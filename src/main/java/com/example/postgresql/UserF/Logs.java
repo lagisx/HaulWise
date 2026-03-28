@@ -1,32 +1,20 @@
 package com.example.postgresql.UserF;
 
 public class Logs {
-    private int id;
-    private String user;
+    private int    id;
+    private String userLogin;
     private String description;
-    private String created_at;
+    private String createdAt;
 
-public Logs(int id, String user, String description, String created_at) {
-    this.id = id;
-    this.user=user;
-    this.description=description;
-    this.created_at=created_at;
-}
-
-    public int getId() {
-        return id;
+    public Logs(int id, String userLogin, String description, String createdAt) {
+        this.id          = id;
+        this.userLogin   = userLogin;
+        this.description = description;
+        this.createdAt   = createdAt;
     }
 
-    public String getUser() {
-        return user;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getCreated_at() {
-        return created_at;
-    }
-
+    public int    getId()          { return id; }
+    public String getUserLogin()   { return userLogin; }
+    public String getDescription() { return description; }
+    public String getCreatedAt()   { return createdAt; }
 }

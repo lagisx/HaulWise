@@ -5,77 +5,60 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="650" prefWidth="1000" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.HelloController">
-
+<AnchorPane prefHeight="620" prefWidth="880" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.postgresql.Controllers.HelloController">
     <children>
 
-        <AnchorPane prefHeight="702.0" prefWidth="878.0">
+        
+        <AnchorPane prefHeight="620" prefWidth="760">
             <children>
-                <SVGPath content="M0,0 L450,0 Q600,350 450,700 L0,700 Z" fill="#1e3b8a" stroke="transparent" />
-            <Label alignment="CENTER" layoutX="288.0" layoutY="35.0" prefHeight="73.0" prefWidth="188.0" style="-fx-text-fill: White;" text="Биржа" textFill="WHITE">
-               <font>
-                  <Font name="System Bold" size="50" />
-               </font>
-            </Label>
-
-              <Label alignment="CENTER" layoutX="477.0" layoutY="35.0" prefHeight="73.0" prefWidth="401.0" style="-fx-text-fill: #111827;" text="грузоперевозок">
-                  <font>
-                      <Font name="System Bold" size="50" />
-                  </font>
-              </Label>
+                <SVGPath content="M0,0 L390,0 Q530,310 390,620 L0,620 Z" fill="#1e3b8a" stroke="transparent" />
+                <Label layoutX="261.0" layoutY="26.0" style="-fx-text-fill: white; -fx-font-size: 42px; -fx-font-weight: bold;" text="Биржа" />
+                <Label layoutX="426.0" layoutY="26.0" style="-fx-text-fill: #111827; -fx-font-size: 42px; -fx-font-weight: bold;" text="грузоперевозок" />
             </children>
         </AnchorPane>
 
-        <VBox layoutX="70" layoutY="220" spacing="10">
-            <Label style="-fx-text-fill: white;" text="Авторизируйтесь">
-                <font>
-                    <Font name="System Bold" size="45" />
-                </font>
-            </Label>
-            <Label style="-fx-text-fill: white;" text="в личном">
-                <font>
-                    <Font name="System Bold" size="45" />
-                </font>
-            </Label>
-            <Label style="-fx-text-fill: white;" text="кабинете">
-                <font>
-                    <Font name="System Bold" size="45" />
-                </font>
-            </Label>
+        
+        <VBox layoutX="52" layoutY="180" spacing="6">
+            <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="Авторизируйтесь" />
+            <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="в личном" />
+            <Label style="-fx-text-fill: white; -fx-font-size: 36px; -fx-font-weight: bold;" text="кабинете" />
         </VBox>
 
-        <AnchorPane layoutX="560" layoutY="150" prefHeight="489.0" prefWidth="401.0" style="-fx-background-color: white; -fx-background-radius: 20; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 15, 0, 0, 5);">
-
+        
+        <AnchorPane layoutX="476" layoutY="94.0" prefHeight="454.0" prefWidth="370" style="-fx-background-color: white; -fx-background-radius: 20;                            -fx-effect: dropshadow(gaussian,rgba(0,0,0,0.18),14,0,0,4);">
             <children>
-                <Label layoutX="120" layoutY="35" style="-fx-text-fill: black; -fx-font-size: 22px; -fx-font-weight: bold;" text="Вход в систему" />
+                <Label layoutX="88" layoutY="26" style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #111827;" text="Вход в систему" />
 
-                <Label layoutX="60" layoutY="110" style="-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px;" text="Логин" />
-                <TextField fx:id="username" layoutX="60" layoutY="135" prefHeight="40" prefWidth="280" promptText="Введите логин" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #cbd5e1; -fx-font-size: 14px;" />
+                
+                <Label layoutX="52" layoutY="76" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;" text="Логин или Email" />
+                <TextField fx:id="username" layoutX="52" layoutY="96" prefHeight="38" prefWidth="266" promptText="Введите логин или email" style="-fx-background-radius:8;-fx-border-radius:8;                                   -fx-border-color:#cbd5e1;-fx-font-size:13px;" />
 
-                <Label layoutX="60" layoutY="195" style="-fx-text-fill: #111827; -fx-font-weight: bold; -fx-font-size: 15px;" text="Пароль" />
-                <StackPane fx:id="passwordTextField" layoutX="62.0" layoutY="219.0" maxWidth="300.0" prefHeight="42.0" prefWidth="280.0">
+                
+                <Label layoutX="52" layoutY="146" style="-fx-font-size: 13px; -fx-font-weight: bold; -fx-text-fill: #374151;" text="Пароль" />
+                <StackPane fx:id="passwordTextField" layoutX="54" layoutY="166" prefHeight="38" prefWidth="266">
                     <children>
-                        <TextField fx:id="passVisible" managed="false" prefHeight="40.0" prefWidth="270.0" promptText="Пароль" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #cbd5e1; -fx-font-size: 14px;" visible="false" />
-                      <PasswordField fx:id="password" prefHeight="40" prefWidth="270.0" promptText="Введите пароль" style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #cbd5e1; -fx-font-size: 14px;" />
+                        <TextField fx:id="passVisible" managed="false" prefHeight="36" prefWidth="256" promptText="Пароль" style="-fx-background-radius:8;-fx-border-radius:8;                                           -fx-border-color:#cbd5e1;-fx-font-size:13px;" visible="false" />
+                        <PasswordField fx:id="password" prefHeight="36" prefWidth="256" promptText="Введите пароль" style="-fx-background-radius:8;-fx-border-radius:8;                                               -fx-border-color:#cbd5e1;-fx-font-size:13px;" />
                     </children>
                 </StackPane>
-                <Button fx:id="PassInTexts" focusTraversable="false" layoutX="340.0" layoutY="225.0" onAction="#PassInText" prefHeight="30" prefWidth="31.0" style="-fx-background-color: transparent; -fx-text-fill: #555; -fx-cursor: hand;" text="👀">
-                    <font>
-                        <Font size="13.0" />
-                    </font>
-
+                <Button fx:id="PassInTexts" focusTraversable="false" layoutX="316" layoutY="172" onAction="#PassInText" prefHeight="26" prefWidth="28" style="-fx-background-color:transparent;-fx-cursor:hand;" text="👀">
+                    <font><Font size="12" /></font>
                 </Button>
 
-                <Hyperlink layoutX="60" layoutY="270" onAction="#showForgetPass" style="-fx-text-fill: Black; -fx-font-size: 13px;" text="Забыли пароль?" />
-                <Hyperlink layoutX="260" layoutY="270" onAction="#showRegs" style="-fx-text-fill: Black; -fx-font-size: 13px;" text="Регистрация" />
+                
+                <Hyperlink layoutX="52" layoutY="214" onAction="#showForgetPass" style="-fx-font-size:12px;-fx-text-fill:#374151;" text="Забыли пароль?" />
+                <Hyperlink layoutX="240" layoutY="214" onAction="#showRegs" style="-fx-font-size:12px;-fx-text-fill:#374151;" text="Регистрация" />
 
-                <Button layoutX="100" layoutY="320" onAction="#Connect" prefHeight="45" prefWidth="200" style="-fx-background-color: #1e3a8a; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 15px; -fx-background-radius: 10; -fx-cursor: hand;" text="Войти" />
+                
+                <Button layoutX="85" layoutY="252" onAction="#Connect" prefHeight="40" prefWidth="200" style="-fx-background-color:#1e3a8a;-fx-text-fill:white;                                -fx-font-weight:bold;-fx-font-size:14px;                                -fx-background-radius:10;-fx-cursor:hand;" text="Войти" />
 
-                <Hyperlink layoutX="150" layoutY="380" onAction="#goGuestPanel" style="-fx-text-fill: Black; -fx-font-size: 13px;" text="Зайти как гость" />
+                
+                <Hyperlink layoutX="132" layoutY="304" onAction="#goGuestPanel" style="-fx-font-size:12px;-fx-text-fill:#374151;" text="Зайти как гость" />
 
-                <TextFlow fx:id="statusFlow" layoutX="13.0" layoutY="406.0" maxHeight="87.0" minHeight="32.0" prefHeight="73.0" prefWidth="375.0" textAlignment="CENTER">
+                
+                <TextFlow fx:id="statusFlow" layoutX="10" layoutY="334" prefHeight="130" prefWidth="350" textAlignment="CENTER">
                     <children>
-                        <Label fx:id="statusLabel" alignment="CENTER" contentDisplay="CENTER" style="-fx-font-size: 14px; -fx-text-fill: red; -fx-font-weight: bold;" textAlignment="CENTER" wrapText="true" />
+                        <Label fx:id="statusLabel" alignment="CENTER" style="-fx-font-size:12px;-fx-text-fill:red;-fx-font-weight:bold;" textAlignment="CENTER" wrapText="true" />
                     </children>
                 </TextFlow>
             </children>

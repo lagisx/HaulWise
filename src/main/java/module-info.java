@@ -20,15 +20,19 @@ module com.example.postgresql {
     requires com.google.gson;
     requires okhttp3;
     requires java.net.http;
-    requires telegram.bot.api;
 
     opens com.example.postgresql to javafx.fxml;
     exports com.example.postgresql;
+    exports com.example.postgresql.API;
+    opens com.example.postgresql.API to javafx.fxml;
     exports com.example.postgresql.UserF;
     opens com.example.postgresql.UserF to javafx.fxml;
     exports com.example.postgresql.Controllers;
     opens com.example.postgresql.Controllers to javafx.fxml;
-    opens com.example.postgresql.support to javafx.fxml;
     exports com.example.postgresql.Controllers.CardControllers;
     opens com.example.postgresql.Controllers.CardControllers to javafx.fxml;
+    exports com.example.postgresql.support;
+    opens com.example.postgresql.support to javafx.fxml;
+    exports com.example.postgresql.utils;
+    opens com.example.postgresql.utils to javafx.fxml;
 }

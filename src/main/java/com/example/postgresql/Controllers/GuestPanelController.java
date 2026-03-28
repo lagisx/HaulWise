@@ -2,6 +2,7 @@ package com.example.postgresql.Controllers;
 
 import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.Controllers.CardControllers.GuestCargoCardController;
+import com.example.postgresql.utils.CargoImageLoader;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.UserF.Cargo;
 import com.example.postgresql.utils.MapManager;
@@ -14,7 +15,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -23,7 +23,6 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GuestPanelController {
 
@@ -36,7 +35,6 @@ public class GuestPanelController {
     @FXML private Button applyFilterButton;
 
     private final SupabaseClient supabase = new SupabaseClient();
-    private final Random random = new Random();
 
     private JsonArray allCargos;
 
@@ -52,7 +50,7 @@ public class GuestPanelController {
         cargoContainer.getChildren().clear();
         cargoContainer.getChildren().add(loadingLabel());
 
-        supabase.select("gruz", "*", null)
+        supabase.select("cargo", "*", null)
                 .thenAccept(json -> Platform.runLater(() -> {
                     allCargos = json;
                     showCargos(json);
@@ -95,8 +93,8 @@ public class GuestPanelController {
         for (Cargo c : parse(allCargos)) {
             boolean matches = true;
 
-            if (!from.isEmpty() && !c.getFrom().toLowerCase().contains(from)) matches = false;
-            if (!to.isEmpty() && !c.getTo().toLowerCase().contains(to)) matches = false;
+            if (!from.isEmpty() && !c.getFromCity().toLowerCase().contains(from)) matches = false;
+            if (!to.isEmpty() && !c.getToCity().toLowerCase().contains(to)) matches = false;
             if (c.getWeight() < minWeight || c.getWeight() > maxWeight) matches = false;
 
             if (matches) filtered.add(c);
@@ -131,16 +129,16 @@ public class GuestPanelController {
             AnchorPane card = loader.load();
             GuestCargoCardController ctrl = loader.getController();
 
-            ctrl.typeLabel.setText("RUS • " + nullToEmpty(c.getTypeTC()));
+            ctrl.typeLabel.setText("RUS • " + nullToEmpty(c.getVehicleType()));
             ctrl.vesObemLabel.setText(String.format("%.0f т / %.0f м³", c.getWeight(), c.getVolume()));
             ctrl.tovarLabel.setText(nullToEmpty(c.getProduct()));
             ctrl.zagruzValue.setText(nullToEmpty(c.getLoadType()));
             ctrl.dateValue.setText(nullToEmpty(c.getDate()));
             ctrl.cargoTypeLabel.setText(nullToEmpty(c.getLoadDetails()));
-            ctrl.randomImageOnCard.setImage(randomImage());
+            CargoImageLoader.loadRandom(ctrl.randomImageOnCard);
 
-            String from = nullToEmpty(c.getFrom()).trim();
-            String to = nullToEmpty(c.getTo()).trim();
+            String from = nullToEmpty(c.getFromCity()).trim();
+            String to = nullToEmpty(c.getToCity()).trim();
             ctrl.routeLabel.setText(from + " → " + to);
             ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
 
@@ -168,9 +166,10 @@ public class GuestPanelController {
                         s(o, "Товар"), s(o, "Откуда"), s(o, "Куда"),
                         s(o, "ТипПогрузки"), s(o, "ДеталиПогрузки"),
                         s(o, "Даты"), d(o, "ЦенаПоКарте"), d(o, "ЦенаНДС"),
-                        s(o, "Торг_без_торга"), s(o, "КонтактныйТелефон"), s(o, "owner_login")
-                ));
-            } catch (Exception ignored) {}
+                        s(o, "Торг_без_торга"), s(o, "КонтактныйТелефон"),
+                        o.has("заказчик_id") && !o.get("заказчик_id").isJsonNull()
+                                ? o.get("заказчик_id").getAsInt() : 0));
+            } catch (Exception ex) { System.err.println("Ошибка парсинга груза: " + ex.getMessage()); }
         }
         return list;
     }
@@ -201,13 +200,6 @@ public class GuestPanelController {
         cargoContainer.getChildren().add(l);
     }
 
-    private Image randomImage() {
-        String[] imgs = {"/images/BoxImage.png", "/images/CarTwo.png", "/images/CarThreeBox.png",
-                "/images/CarFour.png", "/images/Kran.png", "/images/CargoImage.png",
-                "/images/ThreeCargo.png", "/images/Pallet.png"};
-        return new Image(getClass().getResourceAsStream(imgs[random.nextInt(imgs.length)]));
-    }
-
     @FXML private void goBack() throws IOException { switchTo("main.fxml", "Авторизация"); }
     @FXML private void goAutoriz() throws IOException { switchTo("main.fxml", "Авторизация"); }
     @FXML private void goReg() throws IOException { switchTo("reg.fxml", "Регистрация"); }
@@ -225,9 +217,8 @@ public class GuestPanelController {
         stage.setScene(new Scene(l.load()));
         stage.setTitle("Гость • Поиск грузов");
         stage.centerOnScreen();
-        stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
+        stage.setResizable(true);
         stage.setMaximized(true);
-        stage.setFullScreenExitHint("");
         stage.show();
     }
 }

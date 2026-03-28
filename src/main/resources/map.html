@@ -3,83 +3,140 @@
 <head>
     <meta charset="utf-8">
     <title>Маршрут</title>
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=8425e739-546d-42ca-aa84-772542533179" type="text/javascript"></script>
     <style>
-        html, body, #map { width: 100%; height: 100%; margin: 0; padding: 0; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body, #map { width: 100%; height: 100%; background: #f1f5f9; }
+        #loading {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: sans-serif; font-size: 18px; color: #64748b; z-index: 10;
+        }
+        #info-bar {
+            position: absolute; bottom: 16px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.97);
+            border-radius: 12px; padding: 10px 24px;
+            font-family: sans-serif; font-size: 14px; color: #1e293b;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            display: none; z-index: 100; white-space: nowrap;
+        }
     </style>
 </head>
 <body>
+<div id="loading">Загружаем карту…</div>
 <div id="map"></div>
+<div id="info-bar"></div>
 
 <script>
-    let myMap;
-    let multiRoute = null;
-    let placemarks = [];
+    var myMap    = null;
+    var geoObjs  = [];
+    var infoBar  = document.getElementById('info-bar');
+    var mapReady = false;
 
-    ymaps.ready(() => {
-        myMap = new ymaps.Map("map", {
+    ymaps.ready(function () {
+        document.getElementById('loading').style.display = 'none';
+
+        myMap = new ymaps.Map('map', {
             center: [55.76, 37.64],
-            zoom: 4,
-            controls: ['zoomControl', 'fullscreenControl']
-        });
+            zoom: 5,
+            controls: ['zoomControl', 'fullscreenControl', 'typeSelector']
+        }, { suppressMapOpenBlock: true });
 
-        myMap.behaviors.disable('drag');
-        setTimeout(() => myMap.behaviors.enable('drag'), 300);
+        mapReady = true;
+
+        if (window._pendingRoute) {
+            var p = window._pendingRoute;
+            window._pendingRoute = null;
+            buildRoute(p.from, p.to);
+        }
     });
 
     function clearMap() {
-        if (multiRoute) {
-            myMap.geoObjects.remove(multiRoute);
-            multiRoute = null;
-        }
-        placemarks.forEach(p => myMap.geoObjects.remove(p));
-        placemarks = [];
+        geoObjs.forEach(function (o) { myMap.geoObjects.remove(o); });
+        geoObjs = [];
+        infoBar.style.display = 'none';
     }
 
-    window.showRoute = function(coords, fromCity, toCity) {
-        if (!myMap || !coords || coords.length < 2) return;
+    window.showRoute = function (from, to) {
+        if (!mapReady) {
+            window._pendingRoute = { from: from, to: to };
+            return;
+        }
+        buildRoute(from, to);
+    };
 
+    function buildRoute(from, to) {
         clearMap();
 
-        const start = [coords[0][1], coords[0][0]];  // [lat, lon]
-        const end   = [coords[coords.length-1][1], coords[coords.length-1][0]];
+        // Флаги: false = ещё ждём, null = не найдено, array = координаты
+        var coords = { from: false, to: false };
 
-        multiRoute = new ymaps.multiRouter.MultiRoute({
-            referencePoints: [start, end],
-            params: { routingMode: 'auto' }
-        }, {
-            routeActiveStrokeWidth: 10,
-            routeActiveStrokeColor: "#0066FF",
-            routeStrokeWidth: 6,
-            routeStrokeColor: "#3388FF",
-            boundsAutoApply: false  // ВЫКЛЮЧАЕМ авто-зум здесь
-        });
+        function onBothReady() {
+            if (coords.from === false || coords.to === false) return;
 
-        myMap.geoObjects.add(multiRoute);
-
-        const startPm = new ymaps.Placemark(start, {
-            balloonContent: `<strong style="color:#0066FF">Откуда:</strong><br><big>${fromCity}</big>`
-        }, { preset: 'islands#blueStretchyIcon' });
-
-        const endPm = new ymaps.Placemark(end, {
-            balloonContent: `<strong style="color:#FF3300">Куда:</strong><br><big>${toCity}</big>`
-        }, { preset: 'islands#redStretchyIcon' });
-
-        myMap.geoObjects.add(startPm);
-        myMap.geoObjects.add(endPm);
-        placemarks = [startPm, endPm];
-
-        multiRoute.getRoutes().events.add('ready', () => {
-            const bounds = multiRoute.getBounds();
-            if (bounds) {
-                myMap.setBounds(bounds, {
-                    checkZoomRange: true,
-                    zoomMargin: 50,
-                    duration: 800
+            if (coords.from) {
+                var pmFrom = new ymaps.Placemark(coords.from, {
+                    balloonContent: '<b>' + from + '</b>'
+                }, {
+                    preset: 'islands#blueCircleDotIconWithCaption',
+                    iconCaptionMaxWidth: '200',
+                    iconCaption: from
                 });
+                myMap.geoObjects.add(pmFrom);
+                geoObjs.push(pmFrom);
             }
-        });
-    };
+
+            if (coords.to) {
+                var pmTo = new ymaps.Placemark(coords.to, {
+                    balloonContent: '<b>' + to + '</b>'
+                }, {
+                    preset: 'islands#redCircleDotIconWithCaption',
+                    iconCaptionMaxWidth: '200',
+                    iconCaption: to
+                });
+                myMap.geoObjects.add(pmTo);
+                geoObjs.push(pmTo);
+            }
+
+            if (coords.from && coords.to) {
+                var line = new ymaps.Polyline(
+                    [coords.from, coords.to], {},
+                    { strokeColor: '#2563eb', strokeWidth: 4, strokeOpacity: 0.8, strokeStyle: 'dash' }
+                );
+                myMap.geoObjects.add(line);
+                geoObjs.push(line);
+
+                myMap.setBounds(myMap.geoObjects.getBounds(), {
+                    checkZoomRange: true, zoomMargin: 100
+                });
+
+                var dist = Math.round(ymaps.coordSystem.geo.getDistance(coords.from, coords.to) / 1000);
+                infoBar.innerHTML = 'from + '</b> → <b>' + to + '</b> &nbsp;|&nbsp; ~' + dist + ' км (по прямой)';
+                infoBar.style.display = 'block';
+
+            } else if (coords.from || coords.to) {
+                myMap.setCenter(coords.from || coords.to, 8);
+                infoBar.innerHTML = 'Найдена только одна точка: <b>' + (coords.from ? from : to) + '</b>';
+                infoBar.style.display = 'block';
+            } else {
+                infoBar.innerHTML = 'Не удалось найти: <b>' + from + '</b> и <b>' + to + '</b>';
+                infoBar.style.display = 'block';
+            }
+        }
+
+        ymaps.geocode(from, { results: 1 }).then(function (res) {
+            var obj = res.geoObjects.get(0);
+            coords.from = obj ? obj.geometry.getCoordinates() : null;
+            onBothReady();
+        }, function () { coords.from = null; onBothReady(); });
+
+        ymaps.geocode(to, { results: 1 }).then(function (res) {
+            var obj = res.geoObjects.get(0);
+            coords.to = obj ? obj.geometry.getCoordinates() : null;
+            onBothReady();
+        }, function () { coords.to = null; onBothReady(); });
+    }
 </script>
 </body>
 </html>

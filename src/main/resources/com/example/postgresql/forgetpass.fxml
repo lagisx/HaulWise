@@ -1,72 +1,131 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<AnchorPane prefHeight="700" prefWidth="1100" style="-fx-background-color: #f8fafc;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.ForgetPasswordController">
+<AnchorPane prefHeight="700" prefWidth="1100"
+            style="-fx-background-color: #f8fafc;"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.postgresql.Controllers.ForgetPasswordController">
 
-    <children>
+    
+    <VBox alignment="TOP_CENTER" prefHeight="700" prefWidth="500" spacing="40"
+          style="-fx-background-color: #eef2ff; -fx-padding: 80 40 40 40;">
+        <children>
+            <Label style="-fx-font-size: 30px; -fx-font-weight: 800; -fx-text-fill: #1e40af;"
+                   text="Восстановление пароля" wrapText="true"/>
 
-        <VBox alignment="TOP_CENTER" prefHeight="700" prefWidth="500" spacing="40" style="-fx-background-color: #eef2ff; -fx-padding: 60 40 40 40;">
-            <children>
+            <Label style="-fx-font-size: 56px;" text="🔐"/>
 
-                <Label style="-fx-font-size: 32px; -fx-font-weight: 800; -fx-text-fill: #1e40af;" text="Привяжите Telegram" />
-
-                <ImageView fitHeight="284.0" fitWidth="289.0" preserveRatio="true">
-                    <image>
-                        <Image url="@images/BotQR-CODE.png" />
-                    </image>
-                </ImageView>
-
-                <VBox alignment="CENTER" prefWidth="400" spacing="16">
-                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;" text="Как привязать аккаунт:" />
-
-                    <VBox alignment="CENTER_LEFT" spacing="12">
-                        <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;" text="1. Отсканируйте QR-код камерой Telegram" wrapText="true" />
-                        <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;" text="Или" />
-                        <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;" text="Откройте Telegram и найдите бота:" />
-                        <Label style="-fx-font-size: 17px; -fx-font-weight: bold; -fx-text-fill: #1e40af;" text="\@HaulwiseBot" />
-                        <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;" text="2. Отправьте ему команду:" />
-                        <Label fx:id="commandLabel" style="-fx-font-size: 18px; -fx-font-weight: bold;                                       -fx-background-color: #e0e7ff; -fx-background-radius: 16;                                       -fx-padding: 14 24; -fx-text-fill: #1e40af;" text="/start ваш_логин_или_email" />
-                    </VBox>
-
-                    <Button fx:id="openTelegramButton" onAction="#openTelegramBot" style="-fx-background-color: #3b82f6; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-font-size: 16px;                                    -fx-background-radius: 16; -fx-padding: 16 50; -fx-cursor: hand;" text="Открыть бота в Telegram" />
+            <VBox alignment="CENTER" prefWidth="400" spacing="16">
+                <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1e293b;"
+                       text="Как это работает:"/>
+                <VBox alignment="CENTER_LEFT" spacing="14">
+                    <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;"
+                           text="1. Введите ваш логин или email" wrapText="true"/>
+                    <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;"
+                           text="2. Получите 6-значный код на почту" wrapText="true"/>
+                    <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;"
+                           text="3. Введите код из письма" wrapText="true"/>
+                    <Label style="-fx-font-size: 15px; -fx-text-fill: #475569;"
+                           text="4. Установите новый пароль" wrapText="true"/>
                 </VBox>
+                <Label style="-fx-font-size: 13px; -fx-text-fill: #94a3b8; -fx-padding: 16 0 0 0;"
+                       text="Код действителен 10 минут. Проверьте папку «Спам»." wrapText="true"/>
+            </VBox>
+        </children>
+    </VBox>
 
-            </children>
-        </VBox>
+    
+    <AnchorPane layoutX="500.0" prefHeight="700" prefWidth="600">
+        <children>
+            <ScrollPane fitToWidth="true" hbarPolicy="NEVER"
+                        style="-fx-background-color: transparent; -fx-border-color: transparent;"
+                        AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
+                        AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
+                <content>
+                    <VBox alignment="CENTER" prefWidth="460" spacing="20"
+                          style="-fx-padding: 60 70 40 70;">
 
-        <!-- ПРАВАЯ ФОРМА: ввод и кнопки -->
-        <AnchorPane layoutX="500.0" prefHeight="700" prefWidth="600">
-            <children>
-                <VBox alignment="CENTER" layoutX="70.0" layoutY="152.0" prefWidth="460" spacing="32">
+                        <Label style="-fx-font-size: 32px; -fx-font-weight: 800; -fx-text-fill: #1e293b;"
+                               text="Восстановление пароля"/>
 
-                    <!-- Заголовок формы -->
-                    <Label style="-fx-font-size: 32px; -fx-font-weight: 800; -fx-text-fill: #1e293b;" text="Восстановление доступа" />
+                        
+                        <VBox prefWidth="460" spacing="8">
+                            <Label style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #374151;"
+                                   text="Логин или Email"/>
+                            <TextField fx:id="loginField" prefHeight="52" prefWidth="460"
+                                       promptText="Введите логин или email"
+                                       style="-fx-background-radius: 14; -fx-border-radius: 14;
+                                              -fx-border-color: #cbd5e1; -fx-font-size: 15px; -fx-padding: 0 20;"/>
+                        </VBox>
 
-                    <!-- Поле ввода -->
-                    <VBox prefWidth="460" spacing="10">
-                        <Label style="-fx-font-size: 16px; -fx-font-weight: 600; -fx-text-fill: #374151;" text="Логин или Email" />
-                        <TextField fx:id="login" prefHeight="56" prefWidth="460" promptText="Введите логин или email" style="-fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #cbd5e1; -fx-font-size: 16px; -fx-padding: 0 24;" />
+                        <Button fx:id="sendEmailButton" onAction="#ForgetPass"
+                                prefHeight="56" prefWidth="400"
+                                text="📧  Отправить код на почту"
+                                style="-fx-background-color: #1e3a8a; -fx-text-fill: white;
+                                       -fx-font-weight: bold; -fx-font-size: 16px;
+                                       -fx-background-radius: 18; -fx-cursor: hand;"/>
+
+                        
+                        <VBox fx:id="otpBox" spacing="10" visible="false" managed="false" prefWidth="460">
+                            <Label style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #374151;"
+                                   text="Код из письма"/>
+                            <TextField fx:id="otpField" prefHeight="60" prefWidth="460"
+                                       promptText="_ _ _ _ _ _"
+                                       style="-fx-background-radius: 14; -fx-border-radius: 14;
+                                              -fx-border-color: #6366f1; -fx-border-width: 2;
+                                              -fx-font-size: 32px; -fx-padding: 0 20;
+                                              -fx-alignment: center; -fx-font-weight: bold;"/>
+                            <Button fx:id="verifyOtpButton" onAction="#verifyOtp"
+                                    prefHeight="52" prefWidth="400"
+                                    text="✅  Подтвердить код"
+                                    style="-fx-background-color: #059669; -fx-text-fill: white;
+                                           -fx-font-weight: bold; -fx-font-size: 15px;
+                                           -fx-background-radius: 16; -fx-cursor: hand;"/>
+                        </VBox>
+
+                        
+                        <VBox fx:id="newPasswordBox" spacing="10" visible="false" managed="false" prefWidth="460">
+                            <Label style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #374151;"
+                                   text="Новый пароль"/>
+                            <PasswordField fx:id="newPasswordField" prefHeight="52" prefWidth="460"
+                                           promptText="Минимум 6 символов"
+                                           style="-fx-background-radius: 14; -fx-border-radius: 14;
+                                                  -fx-border-color: #cbd5e1; -fx-font-size: 15px; -fx-padding: 0 20;"/>
+                            <Label style="-fx-font-size: 15px; -fx-font-weight: 600; -fx-text-fill: #374151;"
+                                   text="Подтвердите пароль"/>
+                            <PasswordField fx:id="confirmPasswordField" prefHeight="52" prefWidth="460"
+                                           promptText="Повторите новый пароль"
+                                           style="-fx-background-radius: 14; -fx-border-radius: 14;
+                                                  -fx-border-color: #cbd5e1; -fx-font-size: 15px; -fx-padding: 0 20;"/>
+                            <Button fx:id="changePasswordButton" onAction="#changePassword"
+                                    prefHeight="56" prefWidth="400"
+                                    text="🔑  Сохранить новый пароль"
+                                    style="-fx-background-color: #1e3a8a; -fx-text-fill: white;
+                                           -fx-font-weight: bold; -fx-font-size: 16px;
+                                           -fx-background-radius: 18; -fx-cursor: hand;"/>
+                        </VBox>
+
+                        
+                        <Button onAction="#goBack" prefHeight="46" prefWidth="300"
+                                text="← Назад"
+                                style="-fx-background-color: transparent; -fx-text-fill: #1e40af;
+                                       -fx-font-weight: bold; -fx-font-size: 15px;
+                                       -fx-border-color: #1e40af; -fx-border-width: 2;
+                                       -fx-border-radius: 18; -fx-cursor: hand;"/>
+
+                        
+                        <Label fx:id="statusLabel" alignment="CENTER" prefWidth="460"
+                               style="-fx-font-size: 14px; -fx-font-weight: 600;"
+                               wrapText="true"/>
+
                     </VBox>
+                </content>
+            </ScrollPane>
+        </children>
+    </AnchorPane>
 
-                    <!-- Успешная отправка -->
-                    <Label fx:id="telegramLinkedLabel" alignment="CENTER" managed="false" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #16a34a;                                   -fx-background-color: #f0fdf4; -fx-background-radius: 20;                                   -fx-padding: 20 40;" text="✅ Код отправлен в Telegram" visible="false" />
-
-                    <!-- Кнопка отправки -->
-                    <Button onAction="#ForgetPass" prefHeight="60" prefWidth="400" style="-fx-background-color: #1e3a8a; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-font-size: 18px;                                    -fx-background-radius: 20; -fx-cursor: hand;" text="Отправить код" />
-
-                    <!-- Назад -->
-                    <Button onAction="#goBack" prefHeight="48" prefWidth="300" style="-fx-background-color: transparent; -fx-text-fill: #1e40af;                                    -fx-font-weight: bold; -fx-font-size: 16px;                                    -fx-border-color: #1e40af; -fx-border-width: 2;                                    -fx-border-radius: 20; -fx-cursor: hand;" text="← Назад" />
-
-                    <!-- Статус -->
-                    <Label fx:id="statusLabel" alignment="CENTER" prefWidth="460" style="-fx-font-size: 15px; -fx-text-fill: #dc2626; -fx-font-weight: 600;" wrapText="true" />
-
-                </VBox>
-            </children>
-        </AnchorPane>
-
-
-    </children>
 </AnchorPane>

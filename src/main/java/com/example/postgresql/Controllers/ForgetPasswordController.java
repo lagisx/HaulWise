@@ -1,188 +1,201 @@
 package com.example.postgresql.Controllers;
 
-import com.example.postgresql.API.TelegramAPI;
-import com.example.postgresql.HelloApplication;
+import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.OtpStore;
+import com.example.postgresql.API.ResendEmailService;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-import java.sql.*;
+import java.security.SecureRandom;
 
 public class ForgetPasswordController {
 
-    @FXML private TextField login;
+    
+    @FXML private TextField  loginField;
+    @FXML private Button     sendEmailButton;
+
+    
+    @FXML private VBox       otpBox;
+    @FXML private TextField  otpField;
+    @FXML private Button     verifyOtpButton;
+
+    
+    @FXML private VBox        newPasswordBox;
+    @FXML private PasswordField newPasswordField;
+    @FXML private PasswordField confirmPasswordField;
+    @FXML private Button      changePasswordButton;
+
     @FXML private Label statusLabel;
 
-    @FXML private Label telegramLinkedLabel;
-    @FXML private Button openTelegramButton;
-    @FXML private Label commandLabel;
+    private final AuthService        auth   = new AuthService();
+    private final ResendEmailService email  = ResendEmailService.getInstance();
+    private final SecureRandom       rng    = new SecureRandom();
 
-    private String Code;
-    private Stage codeStage;
-    private String currentUser;
-    private Long currentChatId;
-    private String currentIdentifier;
-
-    private static final String BOT_USERNAME = "HaulwiseBot";
-
-    private static String generate(int length) {
-        java.util.Random random = new java.util.Random();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < length; i++) {
-            sb.append(random.nextInt(10));
-        }
-        return sb.toString();
-    }
+    private String resolvedEmail = null;
+    private String accessToken   = null;
 
     @FXML
-    public void ForgetPass(ActionEvent event) {
-        currentIdentifier = login.getText().trim();
-        if (currentIdentifier.isEmpty()) {
-            showStatus("Введите логин или email", "#dc2626");
-            hideAllHints();
-            return;
-        }
+    private void initialize() {
+        hide(otpBox);
+        hide(newPasswordBox);
+    }
 
-        String normalized = currentIdentifier.toLowerCase();
+    
 
-        try (Connection conn = DriverManager.getConnection(HelloController.DB_URL, HelloController.DB_USER, HelloController.DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement(
-                     "SELECT login, email, telegram_chat_id FROM users WHERE LOWER(login) = ? OR LOWER(email) = ?")) {
+    @FXML
+    private void ForgetPass(ActionEvent event) {
+        String identifier = loginField.getText().trim();
+        if (identifier.isEmpty()) { showStatus("Введите логин или email", "#dc2626"); return; }
 
-            stmt.setString(1, normalized);
-            stmt.setString(2, normalized);
-            ResultSet rs = stmt.executeQuery();
+        sendEmailButton.setDisable(true);
+        showStatus("Ищем аккаунт...", "#2563eb");
 
-            if (!rs.next()) {
-                showStatus("Аккаунт не найден", "#dc2626");
-                hideAllHints();
-                return;
-            }
-
-            currentUser = rs.getString("login");
-            currentChatId = rs.getLong("telegram_chat_id");
-            if (rs.wasNull()) currentChatId = null;
-
-            Code = generate(6);
-
-            if (currentChatId != null) {
-                if (TelegramAPI.sendCode(currentChatId, Code)) {
-                    hideAllHints();
-                    telegramLinkedLabel.setVisible(true);
-                    telegramLinkedLabel.setManaged(true);
-                    showStatus("", "");
-                    FormCode();
-                } else {
-                    showStatus("Ошибка отправки в Telegram", "#dc2626");
+        auth.findUserForPasswordReset(identifier.toLowerCase())
+            .thenAccept(info -> Platform.runLater(() -> {
+                if (info == null || info.email == null || info.email.isEmpty()) {
+                    sendEmailButton.setDisable(false);
+                    showStatus("❌ Аккаунт не найден", "#dc2626");
+                    return;
                 }
-            } else {
-                showTelegramInstruction(currentIdentifier);
-                showStatus("Привяжите Telegram для получения кода", "#f59e0b");
-            }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-            showStatus("Ошибка базы данных", "#dc2626");
-        }
+                resolvedEmail = info.email;
+                String code = generateCode();
+                OtpStore.save(resolvedEmail, code);
+
+                showStatus("Отправляем код...", "#2563eb");
+
+                email.sendOtpCode(resolvedEmail, code)
+                     .thenAccept(sent -> Platform.runLater(() -> {
+                         sendEmailButton.setDisable(false);
+                         if (sent) {
+                             showStatus("✅ Код отправлен на " + maskEmail(resolvedEmail), "#16a34a");
+                             loginField.setDisable(true);
+                             sendEmailButton.setText("🔄 Отправить повторно");
+                             show(otpBox);
+                             otpField.requestFocus();
+                         } else {
+                             OtpStore.remove(resolvedEmail);
+                             showStatus("❌ Ошибка отправки. Проверьте API ключ Resend.", "#dc2626");
+                         }
+                     }));
+            }))
+            .exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    sendEmailButton.setDisable(false);
+                    showStatus("❌ Ошибка сети: " + ex.getMessage(), "#dc2626");
+                });
+                return null;
+            });
     }
 
-    private void showTelegramInstruction(String identifier) {
-        if (commandLabel != null) {
-            commandLabel.setText("/start " + identifier);
-        }
-    }
-
-    private void hideAllHints() {
-        telegramLinkedLabel.setVisible(false);
-        telegramLinkedLabel.setManaged(false);
-    }
+    
 
     @FXML
-    private void openTelegramBot() {
-        if (currentIdentifier == null || currentIdentifier.isEmpty()) {
-            showStatus("Введите логин или email", "#f59e0b");
+    private void verifyOtp(ActionEvent event) {
+        String code = otpField.getText().trim();
+        if (code.isEmpty()) { showStatus("Введите код из письма", "#dc2626"); return; }
+        if (resolvedEmail == null) { showStatus("Сначала отправьте код", "#dc2626"); return; }
+
+        verifyOtpButton.setDisable(true);
+
+        if (!OtpStore.verify(resolvedEmail, code)) {
+            verifyOtpButton.setDisable(false);
+            showStatus("❌ Неверный или истёкший код", "#dc2626");
+            otpField.clear();
             return;
         }
 
-        String url = "https://t.me/" + BOT_USERNAME + "?start=" + currentIdentifier;
-        HelloApplication.getAppHostServices().showDocument(url);
+        
+        showStatus("Код верный! Получаем доступ...", "#2563eb");
 
-        showStatus("Открываем Telegram...", "#2563eb");
+        
+        auth.getServiceTokenForEmail(resolvedEmail)
+            .thenAccept(token -> Platform.runLater(() -> {
+                verifyOtpButton.setDisable(false);
+                if (token != null) {
+                    accessToken = token;
+                    showStatus("✅ Введите новый пароль", "#16a34a");
+                    hide(otpBox);
+                    sendEmailButton.setVisible(false);
+                    sendEmailButton.setManaged(false);
+                    show(newPasswordBox);
+                    newPasswordField.requestFocus();
+                } else {
+                    showStatus("❌ Ошибка получения доступа. Попробуйте ещё раз.", "#dc2626");
+                }
+            }))
+            .exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    verifyOtpButton.setDisable(false);
+                    showStatus("❌ Ошибка: " + ex.getMessage(), "#dc2626");
+                });
+                return null;
+            });
     }
 
-    private void FormCode() {
-        codeStage = new Stage();
-        codeStage.setTitle("Ввод кода");
-        codeStage.setResizable(false);
+    
 
-        VBox root = new VBox(20);
-        root.setAlignment(Pos.CENTER);
-        root.setStyle("-fx-padding: 40; -fx-background-color: white; -fx-background-radius: 24;");
+    @FXML
+    private void changePassword(ActionEvent event) {
+        String newPass     = newPasswordField.getText().trim();
+        String confirmPass = confirmPasswordField.getText().trim();
 
-        Label title = new Label("Введите код из Telegram");
-        title.setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #1e293b;");
+        if (newPass.isEmpty())             { showStatus("Введите новый пароль", "#dc2626"); return; }
+        if (newPass.length() < 6)          { showStatus("Минимум 6 символов", "#dc2626"); return; }
+        if (!newPass.equals(confirmPass))  { showStatus("Пароли не совпадают", "#dc2626"); return; }
+        if (accessToken == null)           { showStatus("Сначала подтвердите код", "#dc2626"); return; }
 
-        TextField codeField = new TextField();
-        codeField.setPromptText("6 цифр");
-        codeField.setMaxWidth(250);
-        codeField.setStyle("-fx-font-size: 18px; -fx-padding: 14; -fx-background-radius: 16; -fx-border-radius: 16; -fx-border-color: #94a3b8;");
+        changePasswordButton.setDisable(true);
+        showStatus("Сохраняем пароль...", "#2563eb");
 
-        Label errorLabel = new Label();
-        errorLabel.setStyle("-fx-text-fill: #dc2626; -fx-font-size: 14px;");
-
-        Button confirm = new Button("Подтвердить");
-        confirm.setStyle("-fx-background-color: #3b82f6; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 14 40; -fx-background-radius: 16; -fx-font-size: 16px;");
-        confirm.setOnAction(e -> {
-            if (codeField.getText().trim().equals(Code)) {
-                codeStage.close();
-                openPasswordRecover();
-            } else {
-                errorLabel.setText("Неверный код");
-            }
-        });
-
-        Button cancel = new Button("Отмена");
-        cancel.setStyle("-fx-background-color: #f1f5f9; -fx-text-fill: #475569; -fx-border-color: #cbd5e1; -fx-border-width: 2; -fx-background-radius: 16; -fx-padding: 12 30;");
-        cancel.setOnAction(e -> codeStage.close());
-
-        root.getChildren().addAll(title, codeField, confirm, cancel, errorLabel);
-
-        codeStage.setScene(new Scene(root, 450, 350));
-        codeStage.show();
+        auth.updatePasswordWithToken(accessToken, newPass)
+            .thenAccept(ok -> Platform.runLater(() -> {
+                if (ok) {
+                    showStatus("✅ Пароль успешно изменён! Войдите с новым паролем.", "#16a34a");
+                    changePasswordButton.setText("✅ Готово");
+                    changePasswordButton.setDisable(true);
+                    newPasswordField.setDisable(true);
+                    confirmPasswordField.setDisable(true);
+                } else {
+                    changePasswordButton.setDisable(false);
+                    showStatus("❌ Ошибка смены пароля. Попробуйте позже.", "#dc2626");
+                }
+            }))
+            .exceptionally(ex -> {
+                Platform.runLater(() -> {
+                    changePasswordButton.setDisable(false);
+                    showStatus("❌ Ошибка: " + ex.getMessage(), "#dc2626");
+                });
+                return null;
+            });
     }
 
-    private void openPasswordRecover() {
-        try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("passwordRecover.fxml"));
-            Scene scene = new Scene(loader.load());
+    
 
-            PasswordRecoverController controller = loader.getController();
-            controller.setUserEmail(currentUser);
+    private String generateCode() {
+        return String.format("%06d", rng.nextInt(1_000_000));
+    }
 
-            Stage stage = (Stage) login.getScene().getWindow();
-            stage.setScene(scene);
-            stage.setTitle("Смена пароля");
-            stage.setResizable(false);
-            stage.centerOnScreen();
-        } catch (IOException e) {
-            showStatus("Ошибка перехода", "#dc2626");
-        }
+    private String maskEmail(String e) {
+        int at = e.indexOf('@');
+        if (at <= 1) return e;
+        return e.charAt(0) + "***" + e.substring(at);
     }
 
     private void showStatus(String text, String color) {
         statusLabel.setText(text);
-        statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold; -fx-font-size: 14px;");
+        statusLabel.setStyle("-fx-text-fill:" + color + ";-fx-font-weight:bold;-fx-font-size:14px;");
     }
+
+    private void show(VBox box) { if (box != null) { box.setVisible(true); box.setManaged(true); } }
+    private void hide(VBox box) { if (box != null) { box.setVisible(false); box.setManaged(false); } }
 
     @FXML
     private void goBack(ActionEvent event) {
-        Stage stage = (Stage) login.getScene().getWindow();
-        new HelloController().goBack(stage);
+        new HelloController().goBack((Stage) loginField.getScene().getWindow());
     }
 }

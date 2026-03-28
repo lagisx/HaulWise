@@ -12,30 +12,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.scene.text.TextFlow;
+import javafx.scene.text.*;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.sql.*;
 import java.util.concurrent.CompletableFuture;
 
 public class HelloController {
-    public static final String DB_URL = "jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres?sslmode=require";
-    public static final String DB_USER = "postgres.mkdwltdoayuhuikzycod";
-    public static final String DB_PASSWORD = "lagisx";
-    public static final String DataBase_Name = "postgres";
 
-    @FXML public TextField username;
+    @FXML public  TextField     username;
     @FXML private PasswordField password;
+    @FXML public  TextField     passVisible;
+    @FXML private Label         statusLabel;
+    @FXML private TextFlow      statusFlow;
 
-    @FXML private Label statusLabel;
-    @FXML private TextFlow statusFlow;
-
-    @FXML TextField passVisible;
     private boolean visiblePass = false;
+
+    
 
     @FXML
     private void Connect(ActionEvent event) {
@@ -43,42 +37,36 @@ public class HelloController {
         String pass = visiblePass ? passVisible.getText().trim() : password.getText().trim();
 
         if (user.isEmpty() || pass.isEmpty()) {
-            Platform.runLater(() -> showStatus("Введите логин и пароль"));
+            showStatus("Введите логин и пароль");
             return;
         }
 
-        AuthService authService = new AuthService();
+        AuthService auth = new AuthService();
 
-        authService.checkBlacklist(user)
-                .thenCompose(blockStatus -> {
-                    if (blockStatus.isBlocked) {
-                        Platform.runLater(() -> showBlockedStatus(blockStatus.reason));
+        auth.checkBlacklist(user)
+                .thenCompose(block -> {
+                    if (block.isBlocked) {
+                        Platform.runLater(() -> showBlockedStatus(block.reason));
                         return CompletableFuture.completedFuture(null);
                     }
-                    return authService.authenticate(user, pass);
+                    return auth.authenticate(user, pass);
                 })
-                .thenAccept(authResult -> {
-                    if (authResult == null) return;
-
+                .thenAccept(result -> {
+                    if (result == null) return;
                     Platform.runLater(() -> {
-                        if (authResult.success) {
+                        if (result.success) {
                             Stage stage = (Stage) ((Button) event.getSource()).getScene().getWindow();
                             try {
-                                if ("admin".equalsIgnoreCase(authResult.role)) {
-                                    AdminPanelController.AdminPanel(stage, user, pass);
-                                } else {
-                                    UserPanelController.UserPanel(stage, user, pass);
-                                }
+                                if ("admin".equalsIgnoreCase(result.role))
+                                    AdminPanelController.AdminPanel(stage, user, "");
+                                else
+                                    UserPanelController.UserPanel(stage, user, "");
                             } catch (Exception e) {
                                 showStatus("Ошибка открытия панели: " + e.getMessage());
-                                e.printStackTrace();
                             }
                         } else {
-                            if (authResult.blockReason != null) {
-                                showBlockedStatus(authResult.blockReason);
-                            } else {
-                                showStatus(authResult.message);
-                            }
+                            if (result.blockReason != null) showBlockedStatus(result.blockReason);
+                            else showStatus(result.message);
                         }
                     });
                 })
@@ -88,119 +76,94 @@ public class HelloController {
                     return null;
                 });
     }
+
+    
+
     private void showStatus(String message) {
         statusFlow.getChildren().clear();
-        Text text = new Text(message);
-        text.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-fill: red;");
-        statusFlow.getChildren().add(text);
+        Text t = new Text(message);
+        t.setStyle("-fx-font-size:14px;-fx-font-weight:bold;-fx-fill:red;");
+        statusFlow.getChildren().add(t);
         statusFlow.setTextAlignment(TextAlignment.CENTER);
-        Timeline hideTimer = new Timeline(new KeyFrame(Duration.seconds(3), e -> statusFlow.getChildren().clear()));
-        hideTimer.setCycleCount(1);
-        hideTimer.play();
+        new Timeline(new KeyFrame(Duration.seconds(3), e -> statusFlow.getChildren().clear())).play();
     }
 
     private void showBlockedStatus(String reason) {
         statusFlow.getChildren().clear();
         statusFlow.setTextAlignment(TextAlignment.CENTER);
         Text t1 = new Text("Данный пользователь заблокирован:\n" + reason + "\nЧтобы узнать подробнее обратитесь в");
-        t1.setStyle("-fx-fill: red; -fx-font-size: 14; -fx-font-weight: bold");
-
-        Hyperlink supportLink = new Hyperlink("тех.поддержку");
-        supportLink.setStyle("-fx-font-size: 14; -fx-font-weight: bold");
-        supportLink.setOnAction(e -> openSupportWithAutoFill(reason));
-
-        statusFlow.getChildren().addAll(t1, supportLink);
+        t1.setStyle("-fx-fill:red;-fx-font-size:14;-fx-font-weight:bold");
+        Hyperlink link = new Hyperlink("тех.поддержку");
+        link.setStyle("-fx-font-size:14;-fx-font-weight:bold");
+        link.setOnAction(e -> openSupportWithAutoFill(reason));
+        statusFlow.getChildren().addAll(t1, link);
     }
-    private void openSupportWithAutoFill(String blockReason) {
-        String currentLogin = username.getText().trim();
 
-        SupportTechController sup = new SupportTechController();
-        sup.SupportTechPanelWithPrefill(
-                currentLogin,
-                "Прошу разблокировать аккаунт",
-                "Здравствуйте!\n\nМой логин: " + currentLogin +
-                        "\nАккаунт заблокирован по причине: " + blockReason +
-                        "\n\nПрошу рассмотреть возможность разблокировки.\nГотов предоставить пояснения.\n\nСпасибо."
-        );
+    private void openSupportWithAutoFill(String reason) {
+        String login = username.getText().trim();
+        new SupportTechController().SupportTechPanelWithPrefill(
+                login, "Прошу разблокировать аккаунт",
+                "Здравствуйте!\n\nМой логин: " + login +
+                "\nАккаунт заблокирован по причине: " + reason +
+                "\n\nПрошу рассмотреть возможность разблокировки.\nГотов предоставить пояснения.\n\nСпасибо.");
     }
+
+    
 
     @FXML private void showRegs(ActionEvent event) {
         try {
-            FXMLLoader regfxml = new FXMLLoader(HelloApplication.class.getResource("reg.fxml"));
-            Scene scene1 = new Scene(regfxml.load());
-
-            Stage currentStage = (Stage) username.getScene().getWindow();
-            currentStage.centerOnScreen();
-            currentStage.setTitle("Регистрация");
-            currentStage.setResizable(false);
-            currentStage.setScene(scene1);
-
-        } catch (IOException e) {
-            statusLabel.setText("Ошибка: " + e.getMessage());
-            e.printStackTrace();
-        }
+            Stage stage = (Stage) username.getScene().getWindow();
+            Scene regScene = new Scene(new FXMLLoader(HelloApplication.class.getResource("reg.fxml")).load());
+            stage.setScene(regScene);
+            stage.setTitle("Регистрация");
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.sizeToScene();
+            stage.centerOnScreen();
+        } catch (IOException e) { statusLabel.setText("Ошибка: " + e.getMessage()); }
     }
 
     @FXML private void showForgetPass(ActionEvent event) {
         try {
-            FXMLLoader forgetpassFXML = new FXMLLoader(HelloApplication.class.getResource("forgetpass.fxml"));
-            Scene scene1 = new Scene(forgetpassFXML.load());
-
-            Stage currentStage = (Stage) username.getScene().getWindow();
-            currentStage.setTitle("Восстановление пароля");
-            currentStage.setResizable(false);
-            currentStage.centerOnScreen();
-            currentStage.setScene(scene1);
-        } catch (IOException e) {
-            statusLabel.setText("Ошибка: " + e.getMessage());
-            statusLabel.setAlignment(Pos.CENTER);
-        }
+            Stage stage = (Stage) username.getScene().getWindow();
+            stage.setScene(new Scene(new FXMLLoader(HelloApplication.class.getResource("forgetpass.fxml")).load()));
+            stage.setTitle("Восстановление пароля");
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.sizeToScene();
+            stage.centerOnScreen();
+        } catch (IOException e) { statusLabel.setText("Ошибка: " + e.getMessage()); statusLabel.setAlignment(Pos.CENTER); }
     }
 
     @FXML public void goBack(Stage stage) {
         try {
-            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("main.fxml"));
-            Scene scene = new Scene(loader.load());
-
-            stage.setScene(scene);
-            stage.show();
-            stage.centerOnScreen();
-            stage.setResizable(false);
+            stage.setScene(new Scene(new FXMLLoader(HelloApplication.class.getResource("main.fxml")).load()));
             stage.setTitle("Авторизация");
-
-        } catch (IOException e) {
-            statusLabel.setText("Ошибка: " + e.getMessage());
-        }
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.sizeToScene();
+            stage.centerOnScreen();
+            stage.show();
+        } catch (IOException e) { if (statusLabel != null) statusLabel.setText("Ошибка: " + e.getMessage()); }
     }
 
     @FXML public void goGuestPanel() throws IOException {
-        Stage currentStage = (Stage) username.getScene().getWindow();
-        GuestPanelController.GuestPanel(currentStage);
+        GuestPanelController.GuestPanel((Stage) username.getScene().getWindow());
     }
 
     @FXML
-    public void PassInText(ActionEvent event){
+    public void PassInText(ActionEvent event) {
         visiblePass = !visiblePass;
-
         if (visiblePass) {
             passVisible.setText(password.getText());
-            passVisible.setVisible(true);
-            passVisible.setManaged(true);
-            password.setVisible(false);
-            password.setManaged(false);
-
-            passVisible.requestFocus();
-            passVisible.positionCaret(passVisible.getText().length());
+            passVisible.setVisible(true);  passVisible.setManaged(true);
+            password.setVisible(false);    password.setManaged(false);
+            passVisible.requestFocus();    passVisible.positionCaret(passVisible.getLength());
         } else {
             password.setText(passVisible.getText());
-            password.setVisible(true);
-            password.setManaged(true);
-
-            passVisible.setVisible(false);
-            passVisible.setManaged(false);
-
-            password.requestFocus();
-            password.positionCaret(password.getText().length());
+            password.setVisible(true);     password.setManaged(true);
+            passVisible.setVisible(false); passVisible.setManaged(false);
+            password.requestFocus();       password.positionCaret(password.getLength());
         }
     }
 }

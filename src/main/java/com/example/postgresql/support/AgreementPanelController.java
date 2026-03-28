@@ -19,12 +19,16 @@ public class AgreementPanelController {
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.setTitle("Пользовательское соглашение");
             stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.sizeToScene();
             stage.centerOnScreen();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
     @FXML
     private void goBack(ActionEvent event) {
         try {
@@ -34,6 +38,9 @@ public class AgreementPanelController {
             Stage stage = (Stage) ((javafx.scene.Node) event.getSource()).getScene().getWindow();
             stage.setTitle("Регистрация");
             stage.setScene(new Scene(root));
+            stage.setResizable(false);
+            stage.setMaximized(false);
+            stage.sizeToScene();
             stage.centerOnScreen();
 
         } catch (IOException e) {

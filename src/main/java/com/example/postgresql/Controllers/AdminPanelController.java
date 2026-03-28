@@ -81,7 +81,7 @@ public class AdminPanelController {
     }
     private void setupCargoColumns() {
         colCargoId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
-        colCargoOwner.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "owner_login")));
+        colCargoOwner.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "owner_display")));
         colCargoType.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "ТипТС")));
         colCargoWeight.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "Вес")));
         colCargoVolume.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "Объем")));
@@ -144,7 +144,6 @@ public class AdminPanelController {
 
             for (JsonElement el : array) {
                 JsonObject cargo = el.getAsJsonObject();
-                cargo.addProperty("owner_login", "Загрузка...");
                 cargos.add(cargo);
             }
 
@@ -152,18 +151,23 @@ public class AdminPanelController {
                 JsonObject cargo = cargos.get(i);
                 final int index = i;
 
-                if (cargo.has("заказчик_id")) {
-                    int userId = cargo.get("заказчик_id").getAsInt();
-                    authService.supabase.select("users", "login", "id=eq." + userId)
-                            .thenAccept(userArray -> Platform.runLater(() -> {
-                                String login = userArray.size() > 0
-                                        ? userArray.get(0).getAsJsonObject().get("login").getAsString()
-                                        : "Удалён";
-                                cargos.get(index).addProperty("owner_login", login);
-                                cargoTable.refresh();
-                            }));
+                if (cargo.has("заказчик_id") && !cargo.get("заказчик_id").isJsonNull()) {
+                    try {
+                        int userId = cargo.get("заказчик_id").getAsInt();
+                        cargo.addProperty("owner_display", "Загрузка...");
+                        authService.supabase.select("users", "login", "id=eq." + userId)
+                                .thenAccept(userArray -> Platform.runLater(() -> {
+                                    String login = (userArray != null && userArray.size() > 0)
+                                            ? userArray.get(0).getAsJsonObject().get("login").getAsString()
+                                            : "Удалён";
+                                    cargos.get(index).addProperty("owner_display", login);
+                                    cargoTable.refresh();
+                                }));
+                    } catch (Exception e) {
+                        cargo.addProperty("owner_display", "—");
+                    }
                 } else {
-                    cargo.addProperty("owner_login", "Гость");
+                    cargo.addProperty("owner_display", "Гость");
                 }
             }
 
@@ -329,7 +333,6 @@ public class AdminPanelController {
         }
     }
 
-
     @FXML
     private void editUser() {
         JsonObject selectedUser = userTable.getSelectionModel().getSelectedItem();
@@ -494,8 +497,11 @@ public class AdminPanelController {
         FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("main.fxml"));
         Parent root = loader.load();
         Stage stage = (Stage) cargoTable.getScene().getWindow();
+        stage.setResizable(false);
+        stage.setMaximized(false);
         stage.setScene(new Scene(root));
         stage.setTitle("Авторизация");
+        stage.sizeToScene();
         stage.centerOnScreen();
     }
 
@@ -507,9 +513,8 @@ public class AdminPanelController {
         ctrl.LabelUser.setText(user);
         stage.setScene(scene);
         stage.setTitle("Админ-панель");
-        stage.setFullScreenExitKeyCombination(KeyCombination.NO_MATCH);
-        stage.setFullScreen(true);
-        stage.setFullScreenExitHint("");
+        stage.setResizable(true);
+        stage.setMaximized(true);
         stage.centerOnScreen();
         stage.show();
     }

@@ -32,9 +32,8 @@ public class AddCargoDialogController {
             "Москва", "Санкт-Петербург", "Екатеринбург", "Новосибирск", "Казань",
             "Нижний Новгород", "Челябинск", "Красноярск", "Самара", "Уфа", "Ростов-на-Дону",
             "Омск", "Краснодар", "Воронеж", "Пермь", "Волгоград", "Саратов", "Тюмень",
-            "Тольятти", "Ижевск", "Барнаул",
-            "Ульяновск", "Иркутск", "Хабаровск", "Ярославль", "Махачкала",
-            "Владивосток", "Оренбург", "Томск", "Кемерово"
+            "Тольятти", "Ижевск", "Барнаул", "Ульяновск", "Иркутск", "Хабаровск",
+            "Ярославль", "Махачкала", "Владивосток", "Оренбург", "Томск", "Кемерово"
     );
 
     @FXML
@@ -47,26 +46,18 @@ public class AddCargoDialogController {
         setupAutoComplete(from);
         setupAutoComplete(to);
 
-        from.valueProperty().addListener((obs, oldVal, newVal) -> preventSameCities(true));
-        to.valueProperty().addListener((obs, oldVal, newVal) -> preventSameCities(false));
-
-        from.getEditor().textProperty().addListener((obs, oldText, newText) -> preventSameCities(true));
-        to.getEditor().textProperty().addListener((obs, oldText, newText) -> preventSameCities(false));
+        from.valueProperty().addListener((obs, o, n) -> preventSameCities(true));
+        to.valueProperty().addListener((obs, o, n)   -> preventSameCities(false));
+        from.getEditor().textProperty().addListener((obs, o, n) -> preventSameCities(true));
+        to.getEditor().textProperty().addListener((obs, o, n)   -> preventSameCities(false));
 
         priceCard.textProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) {
-                priceNDS.setText("");
-                return;
-            }
+            if (newValue == null || newValue.isEmpty()) { priceNDS.setText(""); return; }
             String digits = newValue.replaceAll("[^0-9]", "");
-            if (digits.isEmpty()) {
-                priceNDS.setText("");
-                return;
-            }
+            if (digits.isEmpty()) { priceNDS.setText(""); return; }
             try {
                 double price = Double.parseDouble(digits);
-                double withNds = price * 1.2;
-                priceNDS.setText(String.format("%,.0f", withNds));
+                priceNDS.setText(String.format("%,.0f", price * 1.2));
             } catch (Exception e) {
                 priceNDS.setText("Ошибка");
             }
@@ -78,63 +69,32 @@ public class AddCargoDialogController {
 
     private void setupAutoComplete(ComboBox<String> comboBox) {
         TextField editor = comboBox.getEditor();
-
         editor.textProperty().addListener((obs, oldText, newText) -> {
-            if (newText == null || newText.trim().isEmpty()) {
-                comboBox.hide();
+            if (newText == null || newText.isEmpty()) {
                 comboBox.setItems(cities);
                 return;
             }
-
-            String lower = newText.toLowerCase();
-            ObservableList<String> filtered = cities.filtered(city ->
-                    city.toLowerCase().contains(lower));
-
-            if (!filtered.isEmpty()) {
-                comboBox.setItems(filtered);
-                comboBox.show();
-            } else {
-                comboBox.hide();
+            ObservableList<String> filtered = FXCollections.observableArrayList();
+            for (String city : cities) {
+                if (city.toLowerCase().contains(newText.toLowerCase())) filtered.add(city);
             }
-        });
-
-        comboBox.setOnAction(e -> {
-            if (comboBox.getValue() != null) {
-                editor.setText(comboBox.getValue());
-            }
-            comboBox.hide();
-        });
-
-        editor.focusedProperty().addListener((obs, wasFocused, isNowFocused) -> {
-            if (!isNowFocused) {
-                comboBox.hide();
-            }
+            comboBox.setItems(filtered);
+            if (!filtered.isEmpty() && !comboBox.isShowing()) comboBox.show();
         });
     }
 
     private void preventSameCities(boolean changedFrom) {
-        String fromCity = from.getEditor().getText().trim();
-        String toCity   = to.getEditor().getText().trim();
-
-        if (!fromCity.isEmpty() && !toCity.isEmpty()
-                && fromCity.equalsIgnoreCase(toCity)) {
-
-            if (changedFrom) {
-                from.getEditor().clear();
-                from.setValue(null);
-                showStatus("Города 'Откуда' и 'Куда' не могут совпадать", "#ef4444");
-            } else {
-                to.getEditor().clear();
-                to.setValue(null);
-                showStatus("Города 'Откуда' и 'Куда' не могут совпадать", "#ef4444");
-            }
+        String fromVal = from.getEditor().getText();
+        String toVal   = to.getEditor().getText();
+        if (fromVal != null && toVal != null && !fromVal.isEmpty() && fromVal.equals(toVal)) {
+            showStatus("Откуда и Куда не могут совпадать", "#ef4444");
         }
     }
 
-    public void setUser(String username, String phone, Runnable callback) {
-        this.currentUser = username;
-        this.userPhone = phone.isEmpty() ? "Не указан" : phone;
-        this.onSuccess = callback;
+    public void setUser(String login, String phone, Runnable onSuccess) {
+        this.currentUser = login;
+        this.userPhone   = phone == null || phone.isEmpty() ? "Не указан" : phone;
+        this.onSuccess   = onSuccess;
     }
 
     @FXML
@@ -146,18 +106,14 @@ public class AddCargoDialogController {
         }
 
         JsonObject cargo = buildCargoObject();
-
         showStatus("Публикация груза...", "#6366f1");
 
-        authService.supabase.select("users", "id",
-                        "login=eq." + URLEncoder.encode(currentUser, StandardCharsets.UTF_8))
+        authService.supabase.select("users", "id", "login=eq." + currentUser)
                 .thenCompose(result -> {
-                    if (result.isEmpty()) {
-                        throw new RuntimeException("Пользователь не найден в системе");
-                    }
+                    if (result.isEmpty()) throw new RuntimeException("Пользователь не найден");
                     int userId = result.get(0).getAsJsonObject().get("id").getAsInt();
                     cargo.addProperty("заказчик_id", userId);
-                    return authService.supabase.insert("gruz", cargo);
+                    return authService.supabase.insert("cargo", cargo);
                 })
                 .thenAccept(v -> Platform.runLater(() -> {
                     showStatus("Груз успешно опубликован!", "#16a34a");
@@ -170,107 +126,82 @@ public class AddCargoDialogController {
                     Platform.runLater(() -> {
                         Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
                         String message = cause.getMessage() != null ? cause.getMessage() : "Неизвестная ошибка";
-
                         if (message.contains("409") ||
                                 message.toLowerCase().contains("conflict") ||
                                 message.contains("duplicate key value violates unique constraint")) {
-
                             Alert alert = new Alert(Alert.AlertType.WARNING);
                             alert.setTitle("Груз уже существует");
                             alert.setHeaderText("Нельзя добавить дублирующий груз");
-                            alert.setContentText(
-                                    "Вы уже опубликовали груз с такими же параметрами:\n" +
-                                            "• Маршрут: " + cargo.get("Откуда").getAsString() + " → " + cargo.get("Куда").getAsString() + "\n" +
-                                            "• Даты: " + cargo.get("Даты").getAsString() + "\n\n" +
-                                            "Если нужно изменить — удалите существующий в разделе «Мои грузы»."
-                            );
-                            alert.getDialogPane().setPrefSize(520, 320);
+                            alert.setContentText("Груз с такими параметрами уже существует.");
                             alert.showAndWait();
-
-                            showStatus("Дубликат не добавлен", "#f59e0b");
-                        }
-                        else {
-                            showStatus("Ошибка публикации: " + message, "#ef4444");
+                        } else {
+                            showStatus("Ошибка: " + message, "#ef4444");
                         }
                     });
                     return null;
                 });
     }
-    private String validateFields() {
-        StringBuilder error = new StringBuilder();
-
-        if (typeTS.getText().trim().isEmpty()) error.append("• Тип ТС\n");
-        if (loadingType.getText().trim().isEmpty()) error.append("• Тип погрузки\n");
-        if (weight.getText().trim().isEmpty()) error.append("• Вес\n");
-        if (volume.getText().trim().isEmpty()) error.append("• Объём\n");
-        if (product.getText().trim().isEmpty()) error.append("• Товар\n");
-        if (from.getEditor().getText().trim().isEmpty()) error.append("• Откуда\n");
-        if (to.getEditor().getText().trim().isEmpty()) error.append("• Куда\n");
-        if (dateFrom.getValue() == null) error.append("• Дата погрузки (с)\n");
-        if (priceCard.getText().trim().isEmpty()) error.append("• Цена без НДС\n");
-        if (trade.getValue() == null) error.append("• Торг\n");
-
-        String fromCity = from.getEditor().getText().trim();
-        String toCity = to.getEditor().getText().trim();
-        if (!fromCity.isEmpty() && !toCity.isEmpty() && fromCity.equalsIgnoreCase(toCity)) {
-            error.append("• Города отправления и назначения не могут совпадать\n");
-        }
-
-        return error.toString();
-    }
 
     private JsonObject buildCargoObject() {
         String fromCity = from.getEditor().getText().trim();
-        String toCity = to.getEditor().getText().trim();
+        String toCity   = to.getEditor().getText().trim();
+
+        String dateFromStr = dateFrom.getValue() != null
+                ? dateFrom.getValue().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "";
+        String dateToStr   = dateTo.getValue() != null
+                ? dateTo.getValue().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "";
+        String datesText   = dateFromStr.isEmpty() ? dateToStr
+                : (dateToStr.isEmpty() ? dateFromStr : dateFromStr + " – " + dateToStr);
 
         JsonObject cargo = new JsonObject();
         cargo.addProperty("ТипТС", typeTS.getText().trim());
-        cargo.addProperty("Вес", getNumber(weight.getText()));
-        cargo.addProperty("Объем", getNumber(volume.getText()));
-        cargo.addProperty("Товар", product.getText().trim());
-        cargo.addProperty("Откуда", fromCity);
-        cargo.addProperty("Куда", toCity);
-        cargo.addProperty("ТипПогрузки", loadingType.getText().trim());
-
-        String datesText = dateFrom.getValue().format(DateTimeFormatter.ofPattern("dd.MM"));
-        if (dateTo.getValue() != null && !dateTo.getValue().equals(dateFrom.getValue())) {
-            datesText += " – " + dateTo.getValue().format(DateTimeFormatter.ofPattern("dd.MM"));
-        }
-        cargo.addProperty("Даты", datesText);
-
+        cargo.addProperty("Вес",       getNumber(weight.getText()));
+        cargo.addProperty("Объем",       getNumber(volume.getText()));
+        cargo.addProperty("Товар",      product.getText().trim());
+        cargo.addProperty("Откуда",    fromCity);
+        cargo.addProperty("Куда",      toCity);
+        cargo.addProperty("ТипПогрузки",    loadingType.getText().trim());
+        cargo.addProperty("Даты",        datesText);
         cargo.addProperty("ДеталиПогрузки", details.getText().trim().isEmpty() ? "—" : details.getText().trim());
-        cargo.addProperty("ЦенаПоКарте", getNumber(priceCard.getText()));
-        cargo.addProperty("ЦенаНДС", getNumber(priceNDS.getText()));
-        cargo.addProperty("Торг_без_торга", trade.getValue());
+        cargo.addProperty("ЦенаПоКарте",   getNumber(priceCard.getText()));
+        cargo.addProperty("ЦенаНДС",    getNumber(priceNDS.getText()));
+        cargo.addProperty("Торг_без_торга",      trade.getValue());
         cargo.addProperty("КонтактныйТелефон", userPhone);
-
         return cargo;
     }
 
-    @FXML
-    private void onCancel() {
-        closeWindow();
-    }
-
-    private void closeWindow() {
-        Stage stage = (Stage) typeTS.getScene().getWindow();
-        if (stage != null) stage.close();
-    }
-
-    private void showStatus(String text, String color) {
-        statusLabel.setText(text);
-        statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold; -fx-font-size: 15px;");
-        new Timeline(new KeyFrame(javafx.util.Duration.seconds(8),
-                e -> statusLabel.setText(""))).play();
+    private String validateFields() {
+        StringBuilder sb = new StringBuilder();
+        if (typeTS.getText().trim().isEmpty())               sb.append("• Тип ТС\n");
+        if (from.getEditor().getText().trim().isEmpty())     sb.append("• Откуда\n");
+        if (to.getEditor().getText().trim().isEmpty())       sb.append("• Куда\n");
+        String fromVal = from.getEditor().getText().trim();
+        String toVal   = to.getEditor().getText().trim();
+        if (!fromVal.isEmpty() && fromVal.equals(toVal))    sb.append("• Откуда и Куда совпадают\n");
+        if (weight.getText().trim().isEmpty())               sb.append("• Вес\n");
+        if (volume.getText().trim().isEmpty())               sb.append("• Объём\n");
+        if (product.getText().trim().isEmpty())              sb.append("• Товар\n");
+        return sb.toString();
     }
 
     private double getNumber(String text) {
-        if (text == null || text.isEmpty()) return 0;
-        String numbers = text.replaceAll("[^0-9]", "");
-        try {
-            return numbers.isEmpty() ? 0 : Double.parseDouble(numbers);
-        } catch (Exception e) {
-            return 0;
-        }
+        if (text == null || text.trim().isEmpty()) return 0;
+        try { return Double.parseDouble(text.trim().replaceAll("[^0-9.]", "")); }
+        catch (NumberFormatException e) { return 0; }
+    }
+
+    private void showStatus(String msg, String color) {
+        statusLabel.setText(msg);
+        statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 13;");
+        statusLabel.setVisible(true);
+        statusLabel.setManaged(true);
+    }
+
+    @FXML
+    private void onCancel() { closeWindow(); }
+
+    private void closeWindow() {
+        Stage stage = (Stage) statusLabel.getScene().getWindow();
+        stage.close();
     }
 }
