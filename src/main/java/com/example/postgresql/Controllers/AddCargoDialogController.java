@@ -104,10 +104,8 @@ public class AddCargoDialogController {
             showStatus("Исправьте ошибки:\n" + error, "#ef4444");
             return;
         }
-
         JsonObject cargo = buildCargoObject();
         showStatus("Публикация груза...", "#6366f1");
-
         authService.supabase.select("users", "id", "login=eq." + currentUser)
                 .thenCompose(result -> {
                     if (result.isEmpty()) throw new RuntimeException("Пользователь не найден");

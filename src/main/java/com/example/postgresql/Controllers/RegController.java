@@ -36,8 +36,6 @@ public class RegController {
         String pass  = visiblePass ? passVisible.getText().trim() : password.getText().trim();
         String mail  = email.getText().trim();
         String tel   = phone.getText().trim();
-
-        
         if (user.isEmpty() || pass.isEmpty() || tel.isEmpty() || mail.isEmpty()) {
             setStatus("Заполните все обязательные поля (включая email)");
             return;
@@ -56,11 +54,9 @@ public class RegController {
         }
 
         setStatus("Регистрация...");
-
         auth.registerUser(user, pass, mail, tel)
                 .thenAccept(error -> Platform.runLater(() -> {
                     if (error == null) {
-                        
                         setStatus("Регистрация успешна! Войдите в аккаунт.");
                         new Timeline(new KeyFrame(Duration.millis(1800), ev -> back())).play();
                     } else {
@@ -68,7 +64,7 @@ public class RegController {
                     }
                 }))
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> setStatus("Ошибка сети: " + ex.getMessage()));
+                    Platform.runLater(() -> setStatus("Не удалось подключиться к серверу. Проверьте интернет-соединение."));
                     return null;
                 });
     }

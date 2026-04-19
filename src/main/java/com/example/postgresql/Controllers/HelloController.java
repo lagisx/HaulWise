@@ -17,32 +17,41 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+
+import javafx.geometry.Insets;
+
 import java.util.concurrent.CompletableFuture;
 
 public class HelloController {
 
-    @FXML public  TextField     username;
-    @FXML private PasswordField password;
-    @FXML public  TextField     passVisible;
-    @FXML private Label         statusLabel;
-    @FXML private TextFlow      statusFlow;
+    @FXML
+    public TextField username;
+    @FXML
+    private PasswordField password;
+    @FXML
+    public TextField passVisible;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private TextFlow statusFlow;
 
     private boolean visiblePass = false;
 
-    
 
     @FXML
     private void Connect(ActionEvent event) {
         String user = username.getText().trim();
         String pass = visiblePass ? passVisible.getText().trim() : password.getText().trim();
-
+        if (user.equals("__reset__")) {
+            showAdminResetDialog();
+            username.clear();
+            return;
+        }
         if (user.isEmpty() || pass.isEmpty()) {
             showStatus("Введите логин и пароль");
             return;
         }
-
         AuthService auth = new AuthService();
-
         auth.checkBlacklist(user)
                 .thenCompose(block -> {
                     if (block.isBlocked) {
@@ -72,12 +81,46 @@ public class HelloController {
                 })
                 .exceptionally(ex -> {
                     ex.printStackTrace();
-                    Platform.runLater(() -> showStatus("Ошибка соединения с сервером"));
+                    Platform.runLater(() -> showStatus("Не удалось подключиться к серверу. Проверьте интернет-соединение."));
                     return null;
                 });
     }
 
-    
+    private void showAdminResetDialog() {
+        javafx.scene.control.Dialog<String[]> dialog = new javafx.scene.control.Dialog<>();
+        dialog.setTitle("Сброс пароля (Admin)");
+        dialog.setHeaderText("Введите логин и новый пароль");
+
+        javafx.scene.control.TextField loginF = new javafx.scene.control.TextField();
+        loginF.setPromptText("Логин пользователя");
+        javafx.scene.control.PasswordField passF = new javafx.scene.control.PasswordField();
+        passF.setPromptText("Новый пароль");
+
+        javafx.scene.layout.VBox box = new javafx.scene.layout.VBox(8, new Label("Логин:"), loginF, new Label("Новый пароль:"), passF);
+        box.setPadding(new javafx.geometry.Insets(10));
+        dialog.getDialogPane().setContent(box);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.setResultConverter(bt -> bt == ButtonType.OK ? new String[]{loginF.getText().trim(), passF.getText().trim()} : null);
+
+        dialog.showAndWait().ifPresent(arr -> {
+            String login = arr[0], newPass = arr[1];
+            if (login.isEmpty() || newPass.isEmpty()) {
+                showStatus("Заполните все поля");
+                return;
+            }
+            if (newPass.length() < 6) {
+                showStatus("Пароль минимум 6 символов");
+                return;
+            }
+
+            showStatus("Сбрасываем пароль...");
+            new AuthService().adminChangePassword_byLogin(login, newPass)
+                    .thenAccept(ok -> Platform.runLater(() -> {
+                        if (ok) showStatus("✅ Пароль для " + login + " успешно сброшен!");
+                        else showStatus("❌ Ошибка сброса. Проверьте логин.");
+                    }));
+        });
+    }
 
     private void showStatus(String message) {
         statusFlow.getChildren().clear();
@@ -104,13 +147,13 @@ public class HelloController {
         new SupportTechController().SupportTechPanelWithPrefill(
                 login, "Прошу разблокировать аккаунт",
                 "Здравствуйте!\n\nМой логин: " + login +
-                "\nАккаунт заблокирован по причине: " + reason +
-                "\n\nПрошу рассмотреть возможность разблокировки.\nГотов предоставить пояснения.\n\nСпасибо.");
+                        "\nАккаунт заблокирован по причине: " + reason +
+                        "\n\nПрошу рассмотреть возможность разблокировки.\nГотов предоставить пояснения.\n\nСпасибо.");
     }
 
-    
 
-    @FXML private void showRegs(ActionEvent event) {
+    @FXML
+    private void showRegs(ActionEvent event) {
         try {
             Stage stage = (Stage) username.getScene().getWindow();
             Scene regScene = new Scene(new FXMLLoader(HelloApplication.class.getResource("reg.fxml")).load());
@@ -120,10 +163,13 @@ public class HelloController {
             stage.setMaximized(false);
             stage.sizeToScene();
             stage.centerOnScreen();
-        } catch (IOException e) { statusLabel.setText("Ошибка: " + e.getMessage()); }
+        } catch (IOException e) {
+            statusLabel.setText("Ошибка: " + e.getMessage());
+        }
     }
 
-    @FXML private void showForgetPass(ActionEvent event) {
+    @FXML
+    private void showForgetPass(ActionEvent event) {
         try {
             Stage stage = (Stage) username.getScene().getWindow();
             stage.setScene(new Scene(new FXMLLoader(HelloApplication.class.getResource("forgetpass.fxml")).load()));
@@ -132,10 +178,14 @@ public class HelloController {
             stage.setMaximized(false);
             stage.sizeToScene();
             stage.centerOnScreen();
-        } catch (IOException e) { statusLabel.setText("Ошибка: " + e.getMessage()); statusLabel.setAlignment(Pos.CENTER); }
+        } catch (IOException e) {
+            statusLabel.setText("Ошибка: " + e.getMessage());
+            statusLabel.setAlignment(Pos.CENTER);
+        }
     }
 
-    @FXML public void goBack(Stage stage) {
+    @FXML
+    public void goBack(Stage stage) {
         try {
             stage.setScene(new Scene(new FXMLLoader(HelloApplication.class.getResource("main.fxml")).load()));
             stage.setTitle("Авторизация");
@@ -144,10 +194,13 @@ public class HelloController {
             stage.sizeToScene();
             stage.centerOnScreen();
             stage.show();
-        } catch (IOException e) { if (statusLabel != null) statusLabel.setText("Ошибка: " + e.getMessage()); }
+        } catch (IOException e) {
+            if (statusLabel != null) statusLabel.setText("Ошибка: " + e.getMessage());
+        }
     }
 
-    @FXML public void goGuestPanel() throws IOException {
+    @FXML
+    public void goGuestPanel() throws IOException {
         GuestPanelController.GuestPanel((Stage) username.getScene().getWindow());
     }
 
@@ -156,14 +209,20 @@ public class HelloController {
         visiblePass = !visiblePass;
         if (visiblePass) {
             passVisible.setText(password.getText());
-            passVisible.setVisible(true);  passVisible.setManaged(true);
-            password.setVisible(false);    password.setManaged(false);
-            passVisible.requestFocus();    passVisible.positionCaret(passVisible.getLength());
+            passVisible.setVisible(true);
+            passVisible.setManaged(true);
+            password.setVisible(false);
+            password.setManaged(false);
+            passVisible.requestFocus();
+            passVisible.positionCaret(passVisible.getLength());
         } else {
             password.setText(passVisible.getText());
-            password.setVisible(true);     password.setManaged(true);
-            passVisible.setVisible(false); passVisible.setManaged(false);
-            password.requestFocus();       password.positionCaret(password.getLength());
+            password.setVisible(true);
+            password.setManaged(true);
+            passVisible.setVisible(false);
+            passVisible.setManaged(false);
+            password.requestFocus();
+            password.positionCaret(password.getLength());
         }
     }
 }

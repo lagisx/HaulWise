@@ -23,54 +23,76 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.LinkedHashSet;
 import java.util.List;
+
 import com.example.postgresql.utils.CargoImageLoader;
 
 public class UserPanelController {
 
-    
-    @FXML private VBox cargoContainer;
-    @FXML private VBox userCargoContainer;
-    @FXML private VBox favoritesContainer;
-    @FXML private TabPane tabPane;
-    @FXML private Button btnAddCargo;
-    @FXML private Label  LabelUser;
 
-    
-    @FXML private TextField fromFilter, toFilter;
-    @FXML private TextField minWeightFilter, maxWeightFilter;
-    @FXML private TextField minPriceFilter, maxPriceFilter;
-    @FXML private Button applyFilterButton;
+    @FXML
+    private VBox cargoContainer;
+    @FXML
+    private VBox userCargoContainer;
+    @FXML
+    private VBox favoritesContainer;
+    @FXML
+    private TabPane tabPane;
+    @FXML
+    private Button btnAddCargo;
+    @FXML
+    private Label LabelUser;
 
-    
-    @FXML private VBox chatListContainer;   
-    @FXML private VBox chatContentPane;     
-    @FXML private VBox chatPlaceholder;     
 
-    
+    @FXML
+    private TextField fromFilter, toFilter;
+    @FXML
+    private TextField minWeightFilter, maxWeightFilter;
+    @FXML
+    private TextField minPriceFilter, maxPriceFilter;
+    @FXML
+    private Button applyFilterButton;
+
+
+    @FXML
+    private VBox chatListContainer;
+    @FXML
+    private VBox chatContentPane;
+    @FXML
+    private VBox chatPlaceholder;
+
+
     private JsonArray allCargos;
     private static String currentUser;
     private final AuthService authService = new AuthService();
 
-    
+
     private String activeChatPartner = null;
-    
+
     private ChatController activeChatController = null;
 
-    
+
     private final LinkedHashSet<String> openedChats = new LinkedHashSet<>();
 
-    public static void setCurrentUser(String u) { currentUser = u; }
-    public static String getCurrentUser()        { return currentUser; }
+    public static void setCurrentUser(String u) {
+        currentUser = u;
+    }
 
-    
-    
-    
+    public static String getCurrentUser() {
+        return currentUser;
+    }
+
 
     @FXML
     private void initialize() {
         tabPane.getTabs().forEach(t -> t.setClosable(false));
         if (applyFilterButton != null)
             applyFilterButton.setOnAction(e -> applyFilters());
+
+        tabPane.getSelectionModel().selectedIndexProperty().addListener((obs, oldIdx, newIdx) -> {
+            if (newIdx.intValue() == 2 && currentUser != null) {
+                loadFavorites();
+            }
+        });
     }
 
     public void setUser(String login) {
@@ -82,9 +104,6 @@ public class UserPanelController {
         loadChatList();
     }
 
-    
-    
-    
 
     @FXML
     private void profileClick() {
@@ -97,7 +116,7 @@ public class UserPanelController {
             }
             final String e = email, p = phone;
             Platform.runLater(() ->
-                ProfileUser.profilePanel((Stage) LabelUser.getScene().getWindow(), currentUser, e, p)
+                    ProfileUser.profilePanel((Stage) LabelUser.getScene().getWindow(), currentUser, e, p)
             );
         }).exceptionally(ex -> {
             Platform.runLater(() -> showError("Ошибка профиля: " + ex.getMessage()));
@@ -105,27 +124,24 @@ public class UserPanelController {
         });
     }
 
-    
-    
-    
 
     private void loadChatList() {
         if (chatListContainer == null) return;
         renderChatList();
 
         authService.getMyConversations(currentUser)
-            .thenAccept(array -> Platform.runLater(() -> {
-                if (array != null) {
-                    for (JsonElement el : array) {
-                        JsonObject msg = el.getAsJsonObject();
-                        String sender   = str(msg, "sender_login");
-                        String receiver = str(msg, "receiver_login");
-                        if (!sender.isEmpty()   && !sender.equals(currentUser))   openedChats.add(sender);
-                        if (!receiver.isEmpty() && !receiver.equals(currentUser)) openedChats.add(receiver);
+                .thenAccept(array -> Platform.runLater(() -> {
+                    if (array != null) {
+                        for (JsonElement el : array) {
+                            JsonObject msg = el.getAsJsonObject();
+                            String sender = str(msg, "sender_login");
+                            String receiver = str(msg, "receiver_login");
+                            if (!sender.isEmpty() && !sender.equals(currentUser)) openedChats.add(sender);
+                            if (!receiver.isEmpty() && !receiver.equals(currentUser)) openedChats.add(receiver);
+                        }
                     }
-                }
-                renderChatList();
-            }));
+                    renderChatList();
+                }));
     }
 
     private void renderChatList() {
@@ -146,64 +162,64 @@ public class UserPanelController {
     }
 
     private HBox buildChatRow(String partner) {
-        
+
         Label avatar = new Label(partner.substring(0, 1).toUpperCase());
         avatar.setMinSize(40, 40);
         avatar.setMaxSize(40, 40);
         avatar.setAlignment(Pos.CENTER);
         boolean isActive = partner.equals(activeChatPartner);
         avatar.setStyle("-fx-background-color: " + (isActive ? "#1e40af" : "#dbeafe") + ";" +
-                        "-fx-text-fill: " + (isActive ? "white" : "#1e40af") + ";" +
-                        "-fx-font-weight: bold; -fx-font-size: 17; -fx-background-radius: 20;");
+                "-fx-text-fill: " + (isActive ? "white" : "#1e40af") + ";" +
+                "-fx-font-weight: bold; -fx-font-size: 17; -fx-background-radius: 20;");
 
         Label name = new Label(partner);
         name.setStyle("-fx-font-weight: bold; -fx-font-size: 14; -fx-text-fill: " + (isActive ? "#1e40af" : "#0f172a") + ";");
         HBox.setHgrow(name, Priority.ALWAYS);
 
-        
+
         Button delBtn = new Button("✕");
         delBtn.setStyle("-fx-background-color: transparent; -fx-text-fill: #94a3b8;" +
-                        "-fx-font-size: 13; -fx-padding: 2 6; -fx-cursor: hand;");
+                "-fx-font-size: 13; -fx-padding: 2 6; -fx-cursor: hand;");
         delBtn.setOnAction(e -> {
             openedChats.remove(partner);
             if (partner.equals(activeChatPartner)) clearChatView();
             renderChatList();
         });
-        
+
         delBtn.setVisible(false);
 
         HBox row = new HBox(10, avatar, name, delBtn);
         row.setAlignment(Pos.CENTER_LEFT);
         row.setPadding(new Insets(10, 14, 10, 14));
         row.setStyle("-fx-background-color: " + (isActive ? "#eff6ff" : "transparent") + ";" +
-                     "-fx-cursor: hand; -fx-border-color: transparent transparent #f1f5f9 transparent;");
+                "-fx-cursor: hand; -fx-border-color: transparent transparent #f1f5f9 transparent;");
 
         row.setOnMouseEntered(e -> {
             delBtn.setVisible(true);
             if (!partner.equals(activeChatPartner))
                 row.setStyle("-fx-background-color: #f8fafc; -fx-cursor: hand;" +
-                             "-fx-border-color: transparent transparent #f1f5f9 transparent;");
+                        "-fx-border-color: transparent transparent #f1f5f9 transparent;");
         });
         row.setOnMouseExited(e -> {
             delBtn.setVisible(false);
             if (!partner.equals(activeChatPartner))
                 row.setStyle("-fx-background-color: transparent; -fx-cursor: hand;" +
-                             "-fx-border-color: transparent transparent #f1f5f9 transparent;");
+                        "-fx-border-color: transparent transparent #f1f5f9 transparent;");
         });
         row.setOnMouseClicked(e -> openChatInline(partner));
 
         return row;
     }
 
-    
+
     public void openChatInline(String partnerLogin) {
         boolean isNew = openedChats.add(partnerLogin);
         activeChatPartner = partnerLogin;
 
-        
+
         Platform.runLater(this::renderChatList);
 
-        
+
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("Chat.fxml"));
             Parent chatRoot = loader.load();
@@ -212,7 +228,7 @@ public class UserPanelController {
 
             chatContentPane.getChildren().clear();
             VBox.setVgrow(chatRoot, Priority.ALWAYS);
-            
+
             if (chatRoot instanceof Region region) {
                 region.setMaxWidth(Double.MAX_VALUE);
                 region.setMaxHeight(Double.MAX_VALUE);
@@ -221,14 +237,14 @@ public class UserPanelController {
             }
             chatContentPane.getChildren().add(chatRoot);
 
-            
+
             tabPane.getSelectionModel().select(3);
         } catch (Exception e) {
             showError("Не удалось открыть чат: " + e.getMessage());
         }
     }
 
-    
+
     public void openChatWith(String partnerLogin) {
         openChatInline(partnerLogin);
     }
@@ -241,9 +257,6 @@ public class UserPanelController {
             chatContentPane.getChildren().add(chatPlaceholder);
     }
 
-    
-    
-    
 
     private void loadFavorites() {
         if (favoritesContainer == null) return;
@@ -251,30 +264,40 @@ public class UserPanelController {
         showLoading(favoritesContainer);
 
         authService.getFavoriteCargos(currentUser)
-            .thenAccept(array -> Platform.runLater(() -> {
-                favoritesContainer.getChildren().clear();
-                if (array == null || array.isEmpty()) {
-                    favoritesContainer.getChildren().add(createInfoLabel("У вас нет избранных грузов"));
-                    return;
-                }
-                Label cnt = new Label("★  Избранное: " + array.size());
-                cnt.setStyle("-fx-font-weight: bold; -fx-font-size: 16; -fx-padding: 14 0 8 14; -fx-text-fill: #0f172a;");
-                favoritesContainer.getChildren().add(cnt);
-                for (JsonElement el : array) addCargoCard(el.getAsJsonObject(), favoritesContainer, false);
-            }))
-            .exceptionally(ex -> handleError(favoritesContainer, ex));
+                .thenAccept(array -> Platform.runLater(() -> {
+                    favoritesContainer.getChildren().clear();
+                    if (array == null || array.isEmpty()) {
+                        favoritesContainer.getChildren().add(createInfoLabel("У вас нет избранных грузов"));
+                        return;
+                    }
+                    HBox header = new HBox(12);
+                    header.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                    header.setStyle("-fx-padding: 14 14 8 14;");
+                    Label cnt = new Label("★  Избранное: " + array.size());
+                    cnt.setStyle("-fx-font-weight: bold; -fx-font-size: 16; -fx-text-fill: #0f172a;");
+                    Button refreshBtn = new Button("🔄 Обновить");
+                    refreshBtn.setStyle("-fx-background-color: #eff6ff; -fx-text-fill: #1e40af;" +
+                            "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                            "-fx-padding: 5 14; -fx-background-radius: 8;" +
+                            "-fx-border-color: #bfdbfe; -fx-border-radius: 8; -fx-cursor: hand;");
+                    refreshBtn.setOnAction(ev -> loadFavorites());
+                    header.getChildren().addAll(cnt, refreshBtn);
+                    favoritesContainer.getChildren().add(header);
+                    for (JsonElement el : array) addCargoCard(el.getAsJsonObject(), favoritesContainer, false, true);
+                }))
+                .exceptionally(ex -> handleError(favoritesContainer, ex));
     }
 
-    
-    
-    
 
     private void loadAllCargos() {
         cargoContainer.getChildren().clear();
         showLoading(cargoContainer);
         authService.getAllCargos()
-            .thenAccept(array -> Platform.runLater(() -> { allCargos = array; displayAllCargos(array); }))
-            .exceptionally(ex -> handleError(cargoContainer, ex));
+                .thenAccept(array -> Platform.runLater(() -> {
+                    allCargos = array;
+                    displayAllCargos(array);
+                }))
+                .exceptionally(ex -> handleError(cargoContainer, ex));
     }
 
     private void displayAllCargos(JsonArray cargos) {
@@ -286,13 +309,13 @@ public class UserPanelController {
         Label cnt = new Label("Найдено грузов: " + cargos.size());
         cnt.setStyle("-fx-font-weight: bold; -fx-font-size: 16; -fx-padding: 14 0 8 14; -fx-text-fill: #0f172a;");
         cargoContainer.getChildren().add(cnt);
-        for (JsonElement el : cargos) addCargoCard(el.getAsJsonObject(), cargoContainer, false);
+        for (JsonElement el : cargos) addCargoCard(el.getAsJsonObject(), cargoContainer, false, false);
     }
 
     private void applyFilters() {
         if (allCargos == null || allCargos.isEmpty()) return;
         String from = fromFilter.getText().trim().toLowerCase();
-        String to   = toFilter.getText().trim().toLowerCase();
+        String to = toFilter.getText().trim().toLowerCase();
         double minW = parseDouble(minWeightFilter.getText(), 0);
         double maxW = parseDouble(maxWeightFilter.getText(), Double.MAX_VALUE);
         double minP = parseDouble(minPriceFilter.getText(), 0);
@@ -303,7 +326,7 @@ public class UserPanelController {
             JsonObject c = el.getAsJsonObject();
             boolean ok = true;
             if (!from.isEmpty() && !getStr(c, "Откуда").toLowerCase().contains(from)) ok = false;
-            if (!to.isEmpty()   && !getStr(c, "Куда").toLowerCase().contains(to))     ok = false;
+            if (!to.isEmpty() && !getStr(c, "Куда").toLowerCase().contains(to)) ok = false;
             double w = getDbl(c, "Вес"), p = getDbl(c, "ЦенаПоКарте");
             if (w < minW || w > maxW || p < minP || p > maxP) ok = false;
             if (ok) filtered.add(c);
@@ -311,17 +334,14 @@ public class UserPanelController {
         displayAllCargos(filtered);
     }
 
-    
-    
-    
 
     private void loadUserCargos() {
         userCargoContainer.getChildren().clear();
         userCargoContainer.getChildren().add(btnAddCargo);
         showLoading(userCargoContainer);
         authService.getUserCargos(currentUser)
-            .thenAccept(array -> Platform.runLater(() -> displayUserCargos(array)))
-            .exceptionally(ex -> handleError(userCargoContainer, ex));
+                .thenAccept(array -> Platform.runLater(() -> displayUserCargos(array)))
+                .exceptionally(ex -> handleError(userCargoContainer, ex));
     }
 
     private void displayUserCargos(JsonArray cargos) {
@@ -334,14 +354,11 @@ public class UserPanelController {
             userCargoContainer.getChildren().add(1, createInfoLabel("У вас пока нет добавленных грузов"));
             return;
         }
-        for (JsonElement el : cargos) addCargoCard(el.getAsJsonObject(), userCargoContainer, true);
+        for (JsonElement el : cargos) addCargoCard(el.getAsJsonObject(), userCargoContainer, true, false);
     }
 
-    
-    
-    
 
-    private void addCargoCard(JsonObject cargo, VBox container, boolean isOwner) {
+    private void addCargoCard(JsonObject cargo, VBox container, boolean isOwner, boolean isFavoriteTab) {
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CargoCard/UserCargoCard.fxml"));
             AnchorPane card = loader.load();
@@ -350,7 +367,7 @@ public class UserPanelController {
             ctrl.typeLabel.setText("RUS • " + getStr(cargo, "ТипТС"));
 
             String fromCity = getStr(cargo, "Откуда").trim();
-            String toCity   = getStr(cargo, "Куда").trim();
+            String toCity = getStr(cargo, "Куда").trim();
             ctrl.routeLabel.setText(fromCity + " → " + toCity);
             ctrl.routeLabel.setStyle("-fx-font-weight: bold; -fx-text-fill: #0f172a; -fx-cursor: hand;");
             MapManager.getInstance().showOnClick(ctrl.routeLabel, fromCity, toCity);
@@ -386,41 +403,138 @@ public class UserPanelController {
                 ctrl.deleteLabel.setVisible(false);
                 ctrl.deleteLabel.setManaged(false);
 
-                
+                int cargoId = cargo.get("id").getAsInt();
+
                 if (cargo.has("заказчик_id") && !cargo.get("заказчик_id").isJsonNull()) {
                     int ownerId = cargo.get("заказчик_id").getAsInt();
                     authService.supabase.select("users", "login", "id=eq." + ownerId)
-                        .thenAccept(ur -> Platform.runLater(() -> {
-                            String ownerLogin = (ur != null && !ur.isEmpty())
-                                    ? ur.get(0).getAsJsonObject().get("login").getAsString() : "";
-                            if (!ownerLogin.isEmpty() && !ownerLogin.equals(currentUser)) {
-                                ctrl.chatButton.setVisible(true);
-                                ctrl.chatButton.setManaged(true);
-                                ctrl.chatButton.setOnAction(e -> openChatInline(ownerLogin));
-                            }
-                        }));
+                            .thenAccept(ur -> Platform.runLater(() -> {
+                                String ownerLogin = (ur != null && !ur.isEmpty())
+                                        ? ur.get(0).getAsJsonObject().get("login").getAsString() : "";
+                                if (!ownerLogin.isEmpty() && !ownerLogin.equals(currentUser)) {
+                                    ctrl.chatButton.setVisible(true);
+                                    ctrl.chatButton.setManaged(true);
+                                    ctrl.chatButton.setOnAction(e -> openChatInline(ownerLogin));
+                                }
+                            }));
                 } else {
                     ctrl.chatButton.setVisible(false);
                     ctrl.chatButton.setManaged(false);
                 }
 
-                
-                int cargoId = cargo.get("id").getAsInt();
-                ctrl.favButton.setVisible(true);
-                ctrl.favButton.setManaged(true);
-                ctrl.favButton.setOnAction(e ->
-                    authService.addFavorite(currentUser, cargoId).thenAccept(ok ->
-                        Platform.runLater(() -> {
-                            if (ok) {
-                                ctrl.favButton.setText("✅ В избранном");
-                                ctrl.favButton.setStyle(
-                                    "-fx-background-color: #d1fae5; -fx-text-fill: #065f46;" +
-                                    "-fx-font-weight: bold; -fx-font-size: 11px;" +
-                                    "-fx-padding: 5 12; -fx-background-radius: 8;");
-                            }
-                        })
-                    )
-                );
+
+                if (isFavoriteTab) {
+                    ctrl.removeFromFavButton.setVisible(true);
+                    ctrl.removeFromFavButton.setManaged(true);
+                    ctrl.favButton.setVisible(false);
+                    ctrl.favButton.setManaged(false);
+                    if (cargo.has("заказчик_id") && !cargo.get("заказчик_id").isJsonNull()) {
+                        int ownerId = cargo.get("заказчик_id").getAsInt();
+                        authService.supabase.select("users", "login", "id=eq." + ownerId)
+                                .thenAccept(ur -> Platform.runLater(() -> {
+                                    String ownerLogin = (ur != null && !ur.isEmpty())
+                                            ? ur.get(0).getAsJsonObject().get("login").getAsString() : "";
+                                    if (!ownerLogin.isEmpty() && !ownerLogin.equals(currentUser)) {
+                                        ctrl.chatButton.setVisible(true);
+                                        ctrl.chatButton.setManaged(true);
+                                        ctrl.chatButton.setOnAction(e -> openChatInline(ownerLogin));
+                                    }
+                                }));
+                    }
+                    ctrl.removeFromFavButton.setOnAction(e -> {
+                        authService.removeFavorite(currentUser, cargoId).thenAccept(ok ->
+                                Platform.runLater(() -> {
+                                    if (ok) {
+                                        container.getChildren().remove(card);
+                                        container.getChildren().stream()
+                                                .filter(n -> n instanceof HBox)
+                                                .map(n -> (HBox) n)
+                                                .flatMap(h -> h.getChildren().stream())
+                                                .filter(n -> n instanceof Label && ((Label) n).getText().startsWith("★"))
+                                                .findFirst()
+                                                .ifPresent(n -> {
+                                                    long cnt = container.getChildren().stream()
+                                                            .filter(c -> c instanceof javafx.scene.layout.AnchorPane).count();
+                                                    ((Label) n).setText("★  Избранное: " + cnt);
+                                                });
+                                    } else {
+                                        showError("Не удалось убрать из избранного");
+                                    }
+                                })
+                        );
+                    });
+                } else {
+                    ctrl.favButton.setVisible(true);
+                    ctrl.favButton.setManaged(true);
+
+                    authService.isFavorite(currentUser, cargoId).thenAccept(alreadyFav ->
+                            Platform.runLater(() -> {
+                                if (alreadyFav) {
+                                    ctrl.favButton.setText("✅ В избранном");
+                                    ctrl.favButton.setStyle(
+                                            "-fx-background-color: #d1fae5; -fx-text-fill: #065f46;" +
+                                                    "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                                                    "-fx-padding: 5 12; -fx-background-radius: 8;");
+                                    ctrl.favButton.setOnAction(e ->
+                                            authService.removeFavorite(currentUser, cargoId).thenAccept(ok ->
+                                                    Platform.runLater(() -> {
+                                                        if (ok) {
+                                                            ctrl.favButton.setText("★ В избранное");
+                                                            ctrl.favButton.setStyle(
+                                                                    "-fx-background-color: #fffbeb; -fx-text-fill: #92400e;" +
+                                                                            "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                                                                            "-fx-padding: 5 14; -fx-background-radius: 8;" +
+                                                                            "-fx-border-color: #fde68a; -fx-border-radius: 8; -fx-cursor: hand;");
+                                                            ctrl.favButton.setOnAction(ev ->
+                                                                    authService.addFavorite(currentUser, cargoId).thenAccept(ok2 ->
+                                                                            Platform.runLater(() -> {
+                                                                                if (ok2) {
+                                                                                    ctrl.favButton.setText("✅ В избранном");
+                                                                                    ctrl.favButton.setStyle(
+                                                                                            "-fx-background-color: #d1fae5; -fx-text-fill: #065f46;" +
+                                                                                                    "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                                                                                                    "-fx-padding: 5 12; -fx-background-radius: 8;");
+                                                                                }
+                                                                            })
+                                                                    )
+                                                            );
+                                                        }
+                                                    })
+                                            )
+                                    );
+                                } else {
+                                    ctrl.favButton.setText("★ В избранное");
+                                    ctrl.favButton.setOnAction(e ->
+                                            authService.addFavorite(currentUser, cargoId).thenAccept(ok ->
+                                                    Platform.runLater(() -> {
+                                                        if (ok) {
+                                                            ctrl.favButton.setText("✅ В избранном");
+                                                            ctrl.favButton.setStyle(
+                                                                    "-fx-background-color: #d1fae5; -fx-text-fill: #065f46;" +
+                                                                            "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                                                                            "-fx-padding: 5 12; -fx-background-radius: 8;");
+                                                            ctrl.favButton.setOnAction(ev ->
+                                                                    authService.removeFavorite(currentUser, cargoId).thenAccept(ok2 ->
+                                                                            Platform.runLater(() -> {
+                                                                                if (ok2) {
+                                                                                    ctrl.favButton.setText("★ В избранное");
+                                                                                    ctrl.favButton.setStyle(
+                                                                                            "-fx-background-color: #fffbeb; -fx-text-fill: #92400e;" +
+                                                                                                    "-fx-font-weight: bold; -fx-font-size: 11px;" +
+                                                                                                    "-fx-padding: 5 14; -fx-background-radius: 8;" +
+                                                                                                    "-fx-border-color: #fde68a; -fx-border-radius: 8; -fx-cursor: hand;");
+                                                                                }
+                                                                            })
+                                                                    )
+                                                            );
+                                                        }
+                                                    })
+                                            )
+                                    );
+                                }
+                            })
+                    );
+                }
             }
 
             container.getChildren().add(card);
@@ -431,16 +545,19 @@ public class UserPanelController {
 
     private void deleteCargo(int cargoId, AnchorPane card) {
         authService.deleteCargo(cargoId)
-            .thenAccept(ok -> Platform.runLater(() -> {
-                if (ok) { userCargoContainer.getChildren().remove(card); showSuccess("Груз удалён"); refreshAllCargos(); }
-                else showError("Не удалось удалить груз");
-            }))
-            .exceptionally(ex -> { Platform.runLater(() -> showError("Ошибка: " + ex.getMessage())); return null; });
+                .thenAccept(ok -> Platform.runLater(() -> {
+                    if (ok) {
+                        userCargoContainer.getChildren().remove(card);
+                        showSuccess("Груз удалён");
+                        refreshAllCargos();
+                    } else showError("Не удалось удалить груз");
+                }))
+                .exceptionally(ex -> {
+                    Platform.runLater(() -> showError("Ошибка: " + ex.getMessage()));
+                    return null;
+                });
     }
 
-    
-    
-    
 
     @FXML
     private void AddUsersCargo() {
@@ -452,7 +569,10 @@ public class UserPanelController {
             }
             final String p = phone;
             Platform.runLater(() -> openAddCargoDialog(currentUser, p));
-        }).exceptionally(ex -> { Platform.runLater(() -> showError("Ошибка профиля: " + ex.getMessage())); return null; });
+        }).exceptionally(ex -> {
+            Platform.runLater(() -> showError("Ошибка профиля: " + ex.getMessage()));
+            return null;
+        });
     }
 
     private void openAddCargoDialog(String user, String phone) {
@@ -471,7 +591,10 @@ public class UserPanelController {
         }
     }
 
-    private void refreshAllCargos() { loadAllCargos(); loadUserCargos(); }
+    private void refreshAllCargos() {
+        loadAllCargos();
+        loadUserCargos();
+    }
 
     @FXML
     private void goBack() throws IOException {
@@ -498,44 +621,73 @@ public class UserPanelController {
         stage.show();
     }
 
-    
-    
-    
 
     private String getStr(JsonObject o, String k) {
         return o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "—";
     }
+
     private String str(JsonObject o, String k) {
         return o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "";
     }
+
     private double getDbl(JsonObject o, String k) {
         if (!o.has(k) || o.get(k).isJsonNull()) return 0;
-        try { return o.get(k).getAsDouble(); } catch (Exception e) { return 0; }
+        try {
+            return o.get(k).getAsDouble();
+        } catch (Exception e) {
+            return 0;
+        }
     }
-    private String fmt(JsonObject o, String k)    { return String.format("%.0f", getDbl(o, k)); }
-    private String fmtRub(JsonObject o, String k) { return fmt(o, k) + " ₽"; }
+
+    private String fmt(JsonObject o, String k) {
+        return String.format("%.0f", getDbl(o, k));
+    }
+
+    private String fmtRub(JsonObject o, String k) {
+        return fmt(o, k) + " ₽";
+    }
+
     private double parseDouble(String s, double def) {
         if (s == null || s.trim().isEmpty()) return def;
-        try { return Double.parseDouble(s.trim()); } catch (NumberFormatException e) { return def; }
+        try {
+            return Double.parseDouble(s.trim());
+        } catch (NumberFormatException e) {
+            return def;
+        }
     }
+
     private void showLoading(VBox b) {
         Label l = new Label("Загрузка...");
         l.setStyle("-fx-padding: 20; -fx-font-size: 15; -fx-text-fill: #64748b;");
         b.getChildren().add(l);
     }
+
     private Label createInfoLabel(String t) {
         Label l = new Label(t);
         l.setStyle("-fx-padding: 20; -fx-font-size: 14; -fx-text-fill: #94a3b8;");
         return l;
     }
+
     private void showError(String m) {
-        Alert a = new Alert(Alert.AlertType.ERROR); a.setTitle("Ошибка"); a.setContentText(m); a.show();
+        Alert a = new Alert(Alert.AlertType.ERROR);
+        a.setTitle("Ошибка");
+        a.setContentText(m);
+        a.show();
     }
+
     private void showSuccess(String m) {
-        Alert a = new Alert(Alert.AlertType.INFORMATION); a.setTitle("Успех"); a.setHeaderText(null); a.setContentText(m); a.show();
+        Alert a = new Alert(Alert.AlertType.INFORMATION);
+        a.setTitle("Успех");
+        a.setHeaderText(null);
+        a.setContentText(m);
+        a.show();
     }
+
     private Void handleError(VBox b, Throwable ex) {
-        Platform.runLater(() -> { b.getChildren().clear(); b.getChildren().add(createInfoLabel("Ошибка: " + ex.getMessage())); });
+        Platform.runLater(() -> {
+            b.getChildren().clear();
+            b.getChildren().add(createInfoLabel("Ошибка: " + ex.getMessage()));
+        });
         return null;
     }
 }

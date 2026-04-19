@@ -54,7 +54,6 @@ public class ProfileUser {
     private String initialEmail = "";
     private String initialPhone = "";
     private boolean emailConfirmed = false;
-    private String passwordAccessToken = null;
 
     private final com.example.postgresql.API.AuthService authService = new com.example.postgresql.API.AuthService();
 
@@ -105,7 +104,7 @@ public class ProfileUser {
                     updateEmailStatusCard(dbEmail);
                 }))
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showStatus("Ошибка связи с сервером", "red"));
+                    Platform.runLater(() -> showStatus("Нет подключения к серверу. Проверьте интернет.", "red"));
                     return null;
                 });
     }
@@ -197,7 +196,7 @@ public class ProfileUser {
                     } else {
                         OtpStore.remove(initialEmail);
                         resendConfirmBtn.setText("📧 Отправить код");
-                        showStatus("Ошибка отправки. Попробуйте позже.", "red");
+                        showStatus("Не удалось отправить письмо. Попробуйте позже.", "red");
                     }
                 }))
                 .exceptionally(ex -> {
@@ -205,7 +204,7 @@ public class ProfileUser {
                         OtpStore.remove(initialEmail);
                         resendConfirmBtn.setDisable(false);
                         resendConfirmBtn.setText("📧 Отправить код");
-                        showStatus("Ошибка: " + ex.getMessage(), "red");
+                        showStatus("Нет подключения к серверу. Попробуйте позже.", "red");
                     });
                     return null;
                 });
@@ -257,6 +256,11 @@ public class ProfileUser {
             return;
         }
 
+        if (!emailConfirmed) {
+            showPasswordStatus("❌ Сначала подтвердите email — без этого смена пароля недоступна", "#dc2626");
+            return;
+        }
+
         sendPasswordCodeBtn.setDisable(true);
         sendPasswordCodeBtn.setText("⏳ Отправка...");
         showPasswordStatus("", "");
@@ -279,7 +283,7 @@ public class ProfileUser {
                     } else {
                         OtpStore.remove(initialEmail);
                         sendPasswordCodeBtn.setText("📧 Отправить код");
-                        showPasswordStatus("Ошибка отправки. Проверьте API ключ Resend.", "#dc2626");
+                        showPasswordStatus("Не удалось отправить письмо. Попробуйте позже.", "#dc2626");
                     }
                 }))
                 .exceptionally(ex -> {
@@ -287,7 +291,7 @@ public class ProfileUser {
                         OtpStore.remove(initialEmail);
                         sendPasswordCodeBtn.setDisable(false);
                         sendPasswordCodeBtn.setText("Отправить код");
-                        showPasswordStatus("Ошибка: " + ex.getMessage(), "#dc2626");
+                        showPasswordStatus("Нет подключения к серверу. Попробуйте позже.", "#dc2626");
                     });
                     return null;
                 });
@@ -309,19 +313,10 @@ public class ProfileUser {
         boolean verified = OtpStore.verify(initialEmail, code);
         verifyPasswordCodeBtn.setDisable(false);
         if (verified) {
-            
-            authService.getServiceTokenForEmail(initialEmail)
-                    .thenAccept(token -> Platform.runLater(() -> {
-                        if (token != null) {
-                            passwordAccessToken = token;
-                            showPasswordStatus("Код подтверждён! Введите новый пароль.", "#16a34a");
-                            if (passwordStep1Box != null) { passwordStep1Box.setVisible(false); passwordStep1Box.setManaged(false); }
-                            if (passwordStep2Box != null) { passwordStep2Box.setVisible(false); passwordStep2Box.setManaged(false); }
-                            if (passwordStep3Box != null) { passwordStep3Box.setVisible(true); passwordStep3Box.setManaged(true); }
-                        } else {
-                            showPasswordStatus("Ошибка получения доступа. Попробуйте снова.", "#dc2626");
-                        }
-                    }));
+            showPasswordStatus("Код подтверждён! Введите новый пароль.", "#16a34a");
+            if (passwordStep1Box != null) { passwordStep1Box.setVisible(false); passwordStep1Box.setManaged(false); }
+            if (passwordStep2Box != null) { passwordStep2Box.setVisible(false); passwordStep2Box.setManaged(false); }
+            if (passwordStep3Box != null) { passwordStep3Box.setVisible(true); passwordStep3Box.setManaged(true); }
             return;
         } else {
             showPasswordStatus("Неверный или истёкший код.", "#dc2626");
@@ -346,15 +341,10 @@ public class ProfileUser {
             showPasswordStatus("Пароли не совпадают", "#dc2626");
             return;
         }
-        if (passwordAccessToken == null) {
-            showPasswordStatus("Сначала подтвердите код", "#dc2626");
-            return;
-        }
-
         saveNewPasswordBtn.setDisable(true);
         showPasswordStatus("Сохраняем...", "#2563eb");
 
-        authService.updatePasswordWithToken(passwordAccessToken, newPass)
+        authService.adminChangePassword(initialEmail, newPass)
                 .thenAccept(ok -> Platform.runLater(() -> {
                     saveNewPasswordBtn.setDisable(false);
                     if (ok) {
@@ -363,15 +353,14 @@ public class ProfileUser {
                         saveNewPasswordBtn.setDisable(true);
                         profileNewPassword.setDisable(true);
                         profileConfirmPassword.setDisable(true);
-                        passwordAccessToken = null;
                     } else {
-                        showPasswordStatus("Ошибка смены пароля", "#dc2626");
+                        showPasswordStatus("Не удалось сменить пароль. Попробуйте позже.", "#dc2626");
                     }
                 }))
                 .exceptionally(ex -> {
                     Platform.runLater(() -> {
                         saveNewPasswordBtn.setDisable(false);
-                        showPasswordStatus("Ошибка: " + ex.getMessage(), "#dc2626");
+                        showPasswordStatus("Нет подключения к серверу. Попробуйте позже.", "#dc2626");
                     });
                     return null;
                 });
@@ -445,7 +434,7 @@ public class ProfileUser {
                     }
                 }))
                 .exceptionally(ex -> {
-                    Platform.runLater(() -> showStatus("Ошибка сохранения", "red"));
+                    Platform.runLater(() -> showStatus("Не удалось сохранить данные. Попробуйте позже.", "red"));
                     return null;
                 });
     }
@@ -459,13 +448,33 @@ public class ProfileUser {
             if (btn == ButtonType.YES) {
                 SupabaseClient supabase = new SupabaseClient();
                 String encodedLogin = URLEncoder.encode(currentUser, StandardCharsets.UTF_8);
-                supabase.delete("users", "login=eq." + encodedLogin)
+
+                supabase.selectWithRaw("users", "auth_uuid", "login=eq." + encodedLogin)
+                        .thenCompose(rows -> {
+                            String authUuid = null;
+                            if (!rows.isEmpty()) {
+                                com.google.gson.JsonObject u = rows.get(0).getAsJsonObject();
+                                if (u.has("auth_uuid") && !u.get("auth_uuid").isJsonNull()) {
+                                    authUuid = u.get("auth_uuid").getAsString();
+                                }
+                            }
+
+                            final String finalAuthUuid = authUuid;
+
+                            return supabase.delete("users", "login=eq." + encodedLogin)
+                                    .thenCompose(res -> {
+                                        if (finalAuthUuid != null) {
+                                            return supabase.adminDeleteAuthUser(finalAuthUuid);
+                                        }
+                                        return java.util.concurrent.CompletableFuture.completedFuture(true);
+                                    });
+                        })
                         .thenAccept(res -> Platform.runLater(() -> {
                             showStatus("Аккаунт удалён", "red");
                             ((Stage) LabelUser.getScene().getWindow()).close();
                         }))
                         .exceptionally(ex -> {
-                            Platform.runLater(() -> showStatus("Ошибка удаления", "red"));
+                            Platform.runLater(() -> showStatus("Не удалось удалить аккаунт. Попробуйте позже.", "red"));
                             return null;
                         });
             }
@@ -499,7 +508,7 @@ public class ProfileUser {
             controller.setUserData(username, email, phone);
 
             stage.setScene(scene);
-            stage.setTitle("Профиль • " + username);
+            stage.setTitle("Профиль " + username);
             stage.setMaximized(true);
             stage.centerOnScreen();
             stage.show();

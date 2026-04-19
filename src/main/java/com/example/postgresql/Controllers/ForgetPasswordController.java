@@ -3,12 +3,15 @@ package com.example.postgresql.Controllers;
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.API.OtpStore;
 import com.example.postgresql.API.ResendEmailService;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.security.SecureRandom;
 
@@ -36,7 +39,6 @@ public class ForgetPasswordController {
     private final SecureRandom       rng    = new SecureRandom();
 
     private String resolvedEmail = null;
-    private String accessToken   = null;
 
     @FXML
     private void initialize() {
@@ -58,7 +60,13 @@ public class ForgetPasswordController {
             .thenAccept(info -> Platform.runLater(() -> {
                 if (info == null || info.email == null || info.email.isEmpty()) {
                     sendEmailButton.setDisable(false);
-                    showStatus("❌ Аккаунт не найден", "#dc2626");
+                    showStatus("❌ Аккаунт с таким логином или email не найден", "#dc2626");
+                    return;
+                }
+
+                if (!info.emailConfirmed) {
+                    sendEmailButton.setDisable(false);
+                    showStatus("❌ Email не подтверждён. Войдите в профиль и подтвердите почту, чтобы восстанавливать пароль", "#dc2626");
                     return;
                 }
 
@@ -86,7 +94,7 @@ public class ForgetPasswordController {
             .exceptionally(ex -> {
                 Platform.runLater(() -> {
                     sendEmailButton.setDisable(false);
-                    showStatus("❌ Ошибка сети: " + ex.getMessage(), "#dc2626");
+                    showStatus("❌ Не удалось подключиться к серверу. Проверьте интернет-соединение", "#dc2626");
                 });
                 return null;
             });
@@ -109,32 +117,13 @@ public class ForgetPasswordController {
             return;
         }
 
-        
-        showStatus("Код верный! Получаем доступ...", "#2563eb");
-
-        
-        auth.getServiceTokenForEmail(resolvedEmail)
-            .thenAccept(token -> Platform.runLater(() -> {
-                verifyOtpButton.setDisable(false);
-                if (token != null) {
-                    accessToken = token;
-                    showStatus("✅ Введите новый пароль", "#16a34a");
-                    hide(otpBox);
-                    sendEmailButton.setVisible(false);
-                    sendEmailButton.setManaged(false);
-                    show(newPasswordBox);
-                    newPasswordField.requestFocus();
-                } else {
-                    showStatus("❌ Ошибка получения доступа. Попробуйте ещё раз.", "#dc2626");
-                }
-            }))
-            .exceptionally(ex -> {
-                Platform.runLater(() -> {
-                    verifyOtpButton.setDisable(false);
-                    showStatus("❌ Ошибка: " + ex.getMessage(), "#dc2626");
-                });
-                return null;
-            });
+        verifyOtpButton.setDisable(false);
+        showStatus("✅ Введите новый пароль", "#16a34a");
+        hide(otpBox);
+        sendEmailButton.setVisible(false);
+        sendEmailButton.setManaged(false);
+        show(newPasswordBox);
+        newPasswordField.requestFocus();
     }
 
     
@@ -147,12 +136,10 @@ public class ForgetPasswordController {
         if (newPass.isEmpty())             { showStatus("Введите новый пароль", "#dc2626"); return; }
         if (newPass.length() < 6)          { showStatus("Минимум 6 символов", "#dc2626"); return; }
         if (!newPass.equals(confirmPass))  { showStatus("Пароли не совпадают", "#dc2626"); return; }
-        if (accessToken == null)           { showStatus("Сначала подтвердите код", "#dc2626"); return; }
-
         changePasswordButton.setDisable(true);
         showStatus("Сохраняем пароль...", "#2563eb");
 
-        auth.updatePasswordWithToken(accessToken, newPass)
+        auth.adminChangePassword(resolvedEmail, newPass)
             .thenAccept(ok -> Platform.runLater(() -> {
                 if (ok) {
                     showStatus("✅ Пароль успешно изменён! Войдите с новым паролем.", "#16a34a");
@@ -168,7 +155,7 @@ public class ForgetPasswordController {
             .exceptionally(ex -> {
                 Platform.runLater(() -> {
                     changePasswordButton.setDisable(false);
-                    showStatus("❌ Ошибка: " + ex.getMessage(), "#dc2626");
+                    showStatus("❌ Не удалось подключиться к серверу. Попробуйте позже.", "#dc2626");
                 });
                 return null;
             });
@@ -188,7 +175,11 @@ public class ForgetPasswordController {
 
     private void showStatus(String text, String color) {
         statusLabel.setText(text);
-        statusLabel.setStyle("-fx-text-fill:" + color + ";-fx-font-weight:bold;-fx-font-size:14px;");
+        statusLabel.setStyle("-fx-text-fill:" + color +
+                ";-fx-font-weight:bold;-fx-font-size:14px;");
+        new Timeline(new KeyFrame(
+                Duration.seconds(10),
+                e -> statusLabel.setText(""))).play();
     }
 
     private void show(VBox box) { if (box != null) { box.setVisible(true); box.setManaged(true); } }

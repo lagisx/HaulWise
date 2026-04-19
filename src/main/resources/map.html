@@ -69,7 +69,6 @@
     function buildRoute(from, to) {
         clearMap();
 
-        // Флаги: false = ещё ждём, null = не найдено, array = координаты
         var coords = { from: false, to: false };
 
         function onBothReady() {
@@ -112,15 +111,15 @@
                 });
 
                 var dist = Math.round(ymaps.coordSystem.geo.getDistance(coords.from, coords.to) / 1000);
-                infoBar.innerHTML = 'from + '</b> → <b>' + to + '</b> &nbsp;|&nbsp; ~' + dist + ' км (по прямой)';
+                infoBar.innerHTML = '<b>' + from + '</b> \u2192 <b>' + to + '</b> &nbsp;|&nbsp; ~' + dist + ' \u043a\u043c (\u043f\u043e \u043f\u0440\u044f\u043c\u043e\u0439)';
                 infoBar.style.display = 'block';
 
             } else if (coords.from || coords.to) {
                 myMap.setCenter(coords.from || coords.to, 8);
-                infoBar.innerHTML = 'Найдена только одна точка: <b>' + (coords.from ? from : to) + '</b>';
+                infoBar.innerHTML = '\u041d\u0430\u0439\u0434\u0435\u043d\u0430 \u0442\u043e\u043b\u044c\u043a\u043e \u043e\u0434\u043d\u0430 \u0442\u043e\u0447\u043a\u0430: <b>' + (coords.from ? from : to) + '</b>';
                 infoBar.style.display = 'block';
             } else {
-                infoBar.innerHTML = 'Не удалось найти: <b>' + from + '</b> и <b>' + to + '</b>';
+                infoBar.innerHTML = '\u041d\u0435 \u0443\u0434\u0430\u043b\u043e\u0441\u044c \u043d\u0430\u0439\u0442\u0438: <b>' + from + '</b> \u0438 <b>' + to + '</b>';
                 infoBar.style.display = 'block';
             }
         }

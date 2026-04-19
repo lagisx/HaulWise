@@ -11,11 +11,11 @@ public class BlockUsers {
 
     public BlockUsers(int id, String login, String email, String phone,
                       String reason, String blockedBy, String createdAt) {
-        this.id        = id;
-        this.login     = login;
-        this.email     = email;
-        this.phone     = phone;
-        this.reason    = reason;
+        this.id = id;
+        this.login = login;
+        this.email = email;
+        this.phone = phone;
+        this.reason = reason;
         this.blockedBy = blockedBy;
         this.createdAt = createdAt;
     }
