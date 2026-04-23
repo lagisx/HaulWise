@@ -74,7 +74,6 @@ public class MapManager {
         engine.getLoadWorker().stateProperty().addListener((obs, old, state) -> {
             if (state == javafx.concurrent.Worker.State.SUCCEEDED) {
                 mapReady = true;
-                System.out.println("[MapManager] Карта готова");
             }
         });
     }
@@ -125,10 +124,13 @@ public class MapManager {
         String to   = toCity.replace("\\", "\\\\").replace("'", "\\'");
         String js   = "showRoute('" + from + "', '" + to + "');";
 
+        System.out.println("Запрос маршрута: " + fromCity + " - " + toCity);
+
         try {
             engine.executeScript(js);
+            System.out.println("маршрут передан в WebView успешно");
         } catch (Exception e) {
-            System.err.println("[MapManager] JS error: " + e.getMessage());
+            System.err.println("JS error: " + e.getMessage());
         }
     }
 

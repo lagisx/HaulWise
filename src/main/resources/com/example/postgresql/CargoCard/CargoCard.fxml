@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.web.*?>
+<?import javafx.geometry.*?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.example.postgresql.Controllers.CargoCardController"
+      prefWidth="1000" prefHeight="620"
+      style="-fx-background-color: #f8fafc;">
+
+    <!-- ══ Шапка ══════════════════════════════════════════════════════════ -->
+    <HBox alignment="CENTER_LEFT" spacing="12"
+          style="-fx-background-color: #ffffff;
+                 -fx-border-color: #e2e8f0;
+                 -fx-border-width: 0 0 1 0;
+                 -fx-padding: 14 24 14 24;">
+
+        <Label text="📦" style="-fx-font-size: 22px;"/>
+        <Label fx:id="labelRoute"
+               style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button text="✕  Закрыть" onAction="#onClose"
+                style="-fx-background-color: #f1f5f9;
+                       -fx-text-fill: #475569;
+                       -fx-font-size: 13px;
+                       -fx-font-weight: bold;
+                       -fx-padding: 7 18;
+                       -fx-background-radius: 8;
+                       -fx-cursor: hand;"/>
+    </HBox>
+
+    <!-- ══ Основной контент: карта + инфо ════════════════════════════════ -->
+    <HBox spacing="0" VBox.vgrow="ALWAYS">
+
+        <!-- Левая панель — карта -->
+        <VBox prefWidth="540" style="-fx-background-color: #e8f0fe;
+                                      -fx-border-color: #e2e8f0;
+                                      -fx-border-width: 0 1 0 0;">
+            <WebView fx:id="mapWebView" VBox.vgrow="ALWAYS"/>
+        </VBox>
+
+        <!-- Правая панель — информация о грузе -->
+        <ScrollPane fitToWidth="true" HBox.hgrow="ALWAYS"
+                    style="-fx-background-color: transparent;
+                           -fx-background: transparent;
+                           -fx-border-color: transparent;">
+            <VBox spacing="0" style="-fx-padding: 24 28 24 28; -fx-background-color: #ffffff;">
+
+                <!-- Секция: Груз -->
+                <Label text="О грузе"
+                       style="-fx-font-size: 11px; -fx-font-weight: bold;
+                              -fx-text-fill: #94a3b8; -fx-padding: 0 0 8 0;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Товар:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelProduct"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Тип транспорта:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelVehicleType"
+                           style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Вес:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelWeight" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Объём:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelVolume" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Тип погрузки:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelLoadType" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Дата:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelDate" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <!-- Секция: Цена -->
+                <VBox style="-fx-padding: 18 0 0 0;">
+                    <Label text="Стоимость"
+                           style="-fx-font-size: 11px; -fx-font-weight: bold;
+                                  -fx-text-fill: #94a3b8; -fx-padding: 0 0 8 0;"/>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Цена по карте:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelPriceCard"
+                           style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #16a34a;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Цена с НДС:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelPriceNds" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Торг:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelBargain" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+                <!-- Секция: Контакты -->
+                <VBox style="-fx-padding: 18 0 0 0;">
+                    <Label text="Контакты"
+                           style="-fx-font-size: 11px; -fx-font-weight: bold;
+                                  -fx-text-fill: #94a3b8; -fx-padding: 0 0 8 0;"/>
+                </VBox>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Телефон:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelContact"
+                           style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: #2563eb;"/>
+                </HBox>
+
+                <Separator style="-fx-opacity: 0.3;"/>
+
+                <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10 0;">
+                    <Label text="Владелец:" style="-fx-font-size: 13px; -fx-text-fill: #64748b; -fx-min-width: 140;"/>
+                    <Label fx:id="labelOwner" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
+                </HBox>
+
+            </VBox>
+        </ScrollPane>
+    </HBox>
+</VBox>

@@ -11,7 +11,6 @@ module com.example.postgresql {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
-    requires com.almasb.fxgl.all;
     requires javafx.graphics;
     requires java.desktop;
     requires java.compiler;

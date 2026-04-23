@@ -1,4 +1,4 @@
-package com.example.postgresql.API;
+package com.example.postgresql.api;
 
 import okhttp3.*;
 import java.io.IOException;

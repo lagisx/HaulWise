@@ -67,6 +67,7 @@
     };
 
     function buildRoute(from, to) {
+    console.log("Запрос маршрута: " + from + " → " + to);
         clearMap();
 
         var coords = { from: false, to: false };
@@ -113,6 +114,7 @@
                 var dist = Math.round(ymaps.coordSystem.geo.getDistance(coords.from, coords.to) / 1000);
                 infoBar.innerHTML = '<b>' + from + '</b> \u2192 <b>' + to + '</b> &nbsp;|&nbsp; ~' + dist + ' \u043a\u043c (\u043f\u043e \u043f\u0440\u044f\u043c\u043e\u0439)';
                 infoBar.style.display = 'block';
+                console.log("Ответ Яндекс Геокодер: маршрут построен, расстояние ~" + dist + " км");
 
             } else if (coords.from || coords.to) {
                 myMap.setCenter(coords.from || coords.to, 8);
