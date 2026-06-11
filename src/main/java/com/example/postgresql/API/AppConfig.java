@@ -11,12 +11,6 @@ public class AppConfig {
 
     private AppConfig() {
         try (InputStream is = getClass().getResourceAsStream("/config.properties")) {
-            if (is == null) {
-                throw new RuntimeException(
-                    "Файл config.properties не найден!\n" +
-                    "Создайте src/main/resources/config.properties"
-                );
-            }
             props.load(is);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка чтения config.properties: " + e.getMessage(), e);

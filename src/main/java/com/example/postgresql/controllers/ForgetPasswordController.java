@@ -1,8 +1,8 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.AuthService;
-import com.example.postgresql.api.OtpStore;
-import com.example.postgresql.api.ResendEmailService;
+import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.OtpStore;
+import com.example.postgresql.API.ResendEmailService;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;

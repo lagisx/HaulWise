@@ -1,4 +1,4 @@
-package com.example.postgresql.api;
+package com.example.postgresql.API;
 
 import java.time.Instant;
 import java.util.Map;

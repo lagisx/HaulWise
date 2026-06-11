@@ -1,4 +1,4 @@
-package com.example.postgresql.api;
+package com.example.postgresql.API;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

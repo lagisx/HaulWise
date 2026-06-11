@@ -6,7 +6,7 @@
 
 <VBox xmlns="http://javafx.com/javafx/17.0.12"
       xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="com.example.postgresql.Controllers.ChatController"
+      fx:controller="com.example.postgresql.controllers.ChatController"
       prefWidth="600" prefHeight="580"
       style="-fx-background-color: #f8fafc;">
 

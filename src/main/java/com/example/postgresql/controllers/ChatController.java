@@ -1,7 +1,7 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.AuthService;
-import com.example.postgresql.api.RealtimeClient;
+import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.RealtimeClient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;

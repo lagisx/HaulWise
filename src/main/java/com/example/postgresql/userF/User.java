@@ -1,4 +1,4 @@
-package com.example.postgresql.userF;
+package com.example.postgresql.UserF;
 
 public class User {
     private int    id;

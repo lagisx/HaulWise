@@ -1,10 +1,10 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.SupabaseClient;
+import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.CardControllers.GuestCargoCardController;
 import com.example.postgresql.utils.CargoImageLoader;
 import com.example.postgresql.HelloApplication;
-import com.example.postgresql.userF.Cargo;
+import com.example.postgresql.UserF.Cargo;
 import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

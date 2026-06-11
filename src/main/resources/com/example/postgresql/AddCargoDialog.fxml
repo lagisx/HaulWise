@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="TOP_CENTER" maxWidth="900" minWidth="728.0" prefHeight="698.0" prefWidth="728.0" spacing="18" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.AddCargoDialogController">
+<VBox alignment="TOP_CENTER" maxWidth="900" minWidth="728.0" prefHeight="698.0" prefWidth="728.0" spacing="18" style="-fx-background-color: white; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.controllers.AddCargoDialogController">
 
     <padding>
         <Insets bottom="32" left="32" right="32" top="32" />

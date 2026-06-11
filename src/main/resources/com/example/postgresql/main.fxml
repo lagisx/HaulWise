@@ -5,7 +5,7 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="620" prefWidth="880" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.postgresql.Controllers.HelloController">
+<AnchorPane prefHeight="620" prefWidth="880" style="-fx-background-color: #f6f7f9;" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/17.0.12" fx:controller="com.example.postgresql.controllers.HelloController">
     <children>
 
         
@@ -41,7 +41,7 @@
                         <PasswordField fx:id="password" prefHeight="36" prefWidth="256" promptText="Введите пароль" style="-fx-background-radius:8;-fx-border-radius:8;                                               -fx-border-color:#cbd5e1;-fx-font-size:13px;" />
                     </children>
                 </StackPane>
-                <Button fx:id="PassInTexts" focusTraversable="false" layoutX="316" layoutY="172" onAction="#PassInText" prefHeight="26" prefWidth="28" style="-fx-background-color:transparent;-fx-cursor:hand;" text="👀">
+                <Button fx:id="PassInTexts" focusTraversable="false" layoutX="316" layoutY="172" onAction="#passInText" prefHeight="26" prefWidth="28" style="-fx-background-color:transparent;-fx-cursor:hand;" text="👀">
                     <font><Font size="12" /></font>
                 </Button>
 
@@ -50,7 +50,7 @@
                 <Hyperlink layoutX="240" layoutY="214" onAction="#showRegs" style="-fx-font-size:12px;-fx-text-fill:#374151;" text="Регистрация" />
 
                 
-                <Button layoutX="85" layoutY="252" onAction="#Connect" prefHeight="40" prefWidth="200" style="-fx-background-color:#1e3a8a;-fx-text-fill:white;                                -fx-font-weight:bold;-fx-font-size:14px;                                -fx-background-radius:10;-fx-cursor:hand;" text="Войти" />
+                <Button layoutX="85" layoutY="252" onAction="#connect" prefHeight="40" prefWidth="200" style="-fx-background-color:#1e3a8a;-fx-text-fill:white;                                -fx-font-weight:bold;-fx-font-size:14px;                                -fx-background-radius:10;-fx-cursor:hand;" text="Войти" />
 
                 
                 <Hyperlink layoutX="132" layoutY="304" onAction="#goGuestPanel" style="-fx-font-size:12px;-fx-text-fill:#374151;" text="Зайти как гость" />

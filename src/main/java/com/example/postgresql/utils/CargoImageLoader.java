@@ -30,7 +30,7 @@ public class CargoImageLoader {
                 String url = storageClient.getRandomPublicImageUrl();
                 loadByUrl(imageView, url);
             } catch (Exception e) {
-                System.err.println("loadRandom error: " + e.getMessage());
+                System.err.println("[CargoImageLoader] loadRandom error: " + e.getMessage());
             }
         });
     }
@@ -44,29 +44,40 @@ public class CargoImageLoader {
 
     private static void loadByUrl(ImageView imageView, String url) {
         try {
-            System.out.println("[LOG] Начало загрузки изображения: " + url);
-            Image img = new Image(url, true);
+            System.out.println("Загрузка изображения: " + url);
 
-            img.progressProperty().addListener((obs, oldVal, newVal) -> {
-                System.out.println("[LOG] Прогресс загрузки: " + newVal);
-                if (newVal.doubleValue() >= 1.0 && !img.isError()) {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .build();
+
+            try (Response response = http.newCall(request).execute()) {
+                if (!response.isSuccessful() || response.body() == null) {
+                    System.err.println("HTTP " + response.code() + " для " + url);
+                    return;
+                }
+
+                byte[] bytes = response.body().bytes();
+                InputStream stream = new ByteArrayInputStream(bytes);
+
+                Image img = new Image(stream);
+                img.progressProperty().addListener((obs, oldVal, newVal) -> {
+                    System.out.println("Прогресс загрузки: " + newVal.doubleValue());
+                });
+
+                if (!img.isError()) {
                     Platform.runLater(() -> {
                         imageView.setImage(img);
                         imageView.setVisible(true);
                         imageView.setManaged(true);
-                        System.out.println("[LOG] Изображение успешно загружено");
+                        System.out.println("Изображение успешно загружено и отображено");
                     });
+                } else {
+                    System.err.println("Ошибка загрузки изображения: " + url);
                 }
-            });
-
-            img.errorProperty().addListener((obs, oldVal, isError) -> {
-                if (isError) {
-                    System.err.println("[LOG] ОШИБКА: изображение не загружено: " + url);
-                }
-            });
+            }
 
         } catch (Exception e) {
-            System.err.println("[LOG] ИСКЛЮЧЕНИЕ: " + e.getMessage());
+            System.err.println("Ошибка загрузки " + url + " : " + e.getMessage());
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.postgresql.userF;
+package com.example.postgresql.UserF;
 
 public class ChatMessage {
     private final int id;

@@ -1,7 +1,8 @@
-package com.example.postgresql.userF;
+package com.example.postgresql.UserF;
 
-import com.example.postgresql.api.OtpStore;
-import com.example.postgresql.api.SupabaseClient;
+import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.OtpStore;
+import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.UserPanelController;
 import com.example.postgresql.HelloApplication;
 import com.google.gson.JsonObject;
@@ -12,7 +13,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import com.example.postgresql.api.ResendEmailService;
+import com.example.postgresql.API.ResendEmailService;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -54,7 +55,7 @@ public class ProfileUser {
     private String initialPhone = "";
     private boolean emailConfirmed = false;
 
-    private final com.example.postgresql.api.AuthService authService = new com.example.postgresql.api.AuthService();
+    private final AuthService authService = new AuthService();
 
     @FXML
     private void initialize() {

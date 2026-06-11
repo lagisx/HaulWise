@@ -1,8 +1,8 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.AuthService;
+import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
-import com.example.postgresql.api.AuthService.UserAuthResult;
+import com.example.postgresql.API.AuthService.UserAuthResult;
 import com.example.postgresql.support.SupportTechController;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -91,8 +91,17 @@ public class HelloController {
             } else {
                 UserPanelController.userPanel(stage, user, null);
             }
-        } catch (Exception _) {
-            showStatus("Ошибка открытия панели");
+        } catch (Exception e) {
+            e.printStackTrace();
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            String msg = cause.getMessage() != null ? cause.getMessage() : e.getClass().getSimpleName();
+            showStatus("Ошибка открытия панели: " + msg);
+
+            Throwable t = e;
+            while (t != null) {
+                System.err.println("[openPanel] причина: " + t.getClass().getName() + ": " + t.getMessage());
+                t = t.getCause();
+            }
         }
     }
 

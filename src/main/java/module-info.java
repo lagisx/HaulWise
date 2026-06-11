@@ -26,10 +26,10 @@ module com.example.postgresql {
     opens com.example.postgresql.API to javafx.fxml;
     exports com.example.postgresql.UserF;
     opens com.example.postgresql.UserF to javafx.fxml;
-    exports com.example.postgresql.Controllers;
-    opens com.example.postgresql.Controllers to javafx.fxml;
-    exports com.example.postgresql.Controllers.CardControllers;
-    opens com.example.postgresql.Controllers.CardControllers to javafx.fxml;
+    exports com.example.postgresql.controllers;
+    opens com.example.postgresql.controllers to javafx.fxml;
+    exports com.example.postgresql.controllers.CardControllers;
+    opens com.example.postgresql.controllers.CardControllers to javafx.fxml;
     exports com.example.postgresql.support;
     opens com.example.postgresql.support to javafx.fxml;
     exports com.example.postgresql.utils;

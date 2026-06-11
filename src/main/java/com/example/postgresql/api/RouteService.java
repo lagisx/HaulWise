@@ -1,4 +1,4 @@
-package com.example.postgresql.api;
+package com.example.postgresql.API;
 
 import java.util.List;
 import java.util.function.Consumer;

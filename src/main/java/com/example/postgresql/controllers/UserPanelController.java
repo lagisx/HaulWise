@@ -21,9 +21,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import com.example.postgresql.HelloApplication;
-import com.example.postgresql.api.AuthService;
+import com.example.postgresql.API.AuthService;
 import com.example.postgresql.controllers.CardControllers.UserCargoCardController;
-import com.example.postgresql.userF.ProfileUser;
+import com.example.postgresql.UserF.ProfileUser;
 import com.example.postgresql.utils.CargoImageLoader;
 import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;

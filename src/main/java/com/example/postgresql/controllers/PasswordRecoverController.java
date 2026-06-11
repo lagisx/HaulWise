@@ -1,6 +1,6 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.AuthService;
+import com.example.postgresql.API.AuthService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;

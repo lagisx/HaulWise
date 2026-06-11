@@ -15,7 +15,7 @@
                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 8, 0.08, 0, 3);"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.postgresql.Controllers.CardControllers.UserCargoCardController">
+            fx:controller="com.example.postgresql.controllers.CardControllers.UserCargoCardController">
 
 
     <HBox spacing="0"
