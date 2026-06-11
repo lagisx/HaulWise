@@ -18,10 +18,27 @@ public class ChatMessage {
         this.createdAt = createdAt;
     }
 
-    public int getId()               { return id; }
-    public String getSenderLogin()   { return senderLogin; }
-    public String getReceiverLogin() { return receiverLogin; }
-    public String getContent()       { return content; }
-    public boolean isRead()          { return isRead; }
-    public String getCreatedAt()     { return createdAt; }
+    public int getId() {
+        return id;
+    }
+
+    public String getSenderLogin() {
+        return senderLogin;
+    }
+
+    public String getReceiverLogin() {
+        return receiverLogin;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public boolean isRead() {
+        return isRead;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
 }

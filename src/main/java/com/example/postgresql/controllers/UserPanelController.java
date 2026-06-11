@@ -23,9 +23,12 @@ import javafx.stage.Stage;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.API.Bitrix24Client;
+import com.example.postgresql.API.CompanyService;
 import com.example.postgresql.UserF.Cargo;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+
 import com.example.postgresql.controllers.CardControllers.UserCargoCardController;
 import com.example.postgresql.UserF.ProfileUser;
 import com.example.postgresql.utils.CargoImageLoader;
@@ -36,7 +39,8 @@ import com.google.gson.JsonObject;
 
 public class UserPanelController {
 
-@FXML private VBox cargoContainer;
+    @FXML
+    private VBox cargoContainer;
     @FXML
     private VBox userCargoContainer;
     @FXML
@@ -45,13 +49,18 @@ public class UserPanelController {
     private TabPane tabPane;
     @FXML
     private Button btnAddCargo;
-    @FXML private Label LabelUser;
-    @FXML private TextField fromFilter, toFilter;
+    @FXML
+    private Label LabelUser;
+    @FXML
+    private TextField fromFilter, toFilter;
     @FXML
     private TextField minWeightFilter, maxWeightFilter;
-    @FXML private TextField minPriceFilter, maxPriceFilter;
-    @FXML private Button applyFilterButton;
-    @FXML private VBox chatListContainer;
+    @FXML
+    private TextField minPriceFilter, maxPriceFilter;
+    @FXML
+    private Button applyFilterButton;
+    @FXML
+    private VBox chatListContainer;
     @FXML
     private VBox chatContentPane;
     @FXML
@@ -60,6 +69,7 @@ public class UserPanelController {
     private JsonArray allCargos;
     private static String currentUser;
     private final AuthService authService = new AuthService();
+    private final CompanyService companyService = new CompanyService();
 
     private ChatPanelManager chatManager;
 
@@ -157,7 +167,6 @@ public class UserPanelController {
                 }))
                 .exceptionally(ex -> handleError(favoritesContainer, ex));
     }
-
 
 
     private void loadAllCargos() {
@@ -280,7 +289,23 @@ public class UserPanelController {
 
         ctrl.deleteLabel.setVisible(true);
         ctrl.deleteLabel.setManaged(true);
-        ctrl.deleteLabel.setOnMouseClicked(e -> deleteCargo(cargoId, card));
+        ctrl.deleteLabel.setOnMouseClicked(e -> {
+            int bitrixDealId = safeInt(cargo, "bitrix_deal_id");
+            if (bitrixDealId > 0) {
+                companyService.getWebhookForUser(currentUser).thenAccept(webhook -> {
+                    if (!webhook.isEmpty()) {
+                        Bitrix24Client.getInstance()
+                                .deleteDeal(webhook, bitrixDealId)
+                                .thenAccept(ok -> System.out.println("[Bitrix24] Сделка удалена: " + ok))
+                                .exceptionally(ex -> {
+                                    System.err.println("[Bitrix24] " + ex.getMessage());
+                                    return null;
+                                });
+                    }
+                });
+            }
+            deleteCargo(cargoId, card);
+        });
 
         ctrl.chatButton.setVisible(false);
         ctrl.chatButton.setManaged(false);
@@ -332,33 +357,55 @@ public class UserPanelController {
             ctrl.chatButton.setVisible(true);
             ctrl.chatButton.setManaged(true);
             ctrl.chatButton.setOnAction(e -> {
-                try {
-                    Cargo cargoObj = new Cargo(
-                        safeInt(cargo, "id"),
-                        safeStr(cargo, "ТипТС"),
-                        safeDbl(cargo, "Вес"),
-                        safeDbl(cargo, "Объем"),
-                        safeStr(cargo, "Товар"),
-                        safeStr(cargo, "Откуда"),
-                        safeStr(cargo, "Куда"),
-                        safeStr(cargo, "ТипПогрузки"),
-                        safeStr(cargo, "ДеталиПогрузки"),
-                        safeStr(cargo, "Даты"),
-                        safeDbl(cargo, "ЦенаПоКарте"),
-                        safeDbl(cargo, "ЦенаНДС"),
-                        safeStr(cargo, "Торг_без_торга"),
-                        safeStr(cargo, "КонтактныйТелефон"),
-                        0
-                    );
-                    String deadline = LocalDate.now().plusDays(7)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T23:59:59+03:00";
-                    Bitrix24Client.getInstance()
-                        .createTaskForCarrier(cargoObj, currentUser, deadline)
-                        .thenAccept(taskId -> System.out.println("[Bitrix24] Задача создана, ID=" + taskId))
-                        .exceptionally(ex -> { System.err.println("[Bitrix24] Ошибка задачи: " + ex.getMessage()); return null; });
-                } catch (Exception ex) {
-                    System.err.println("[Bitrix24] Ошибка при создании задачи: " + ex.getMessage());
-                }
+                companyService.getWebhookForUser(currentUser).thenAccept(myWebhook -> {
+                    if (!myWebhook.isEmpty()) {
+                        Cargo cargoObj = new Cargo(
+                                safeInt(cargo, "id"), safeStr(cargo, "ТипТС"),
+                                safeDbl(cargo, "Вес"), safeDbl(cargo, "Объем"),
+                                safeStr(cargo, "Товар"), safeStr(cargo, "Откуда"),
+                                safeStr(cargo, "Куда"), safeStr(cargo, "ТипПогрузки"),
+                                safeStr(cargo, "ДеталиПогрузки"), safeStr(cargo, "Даты"),
+                                safeDbl(cargo, "ЦенаПоКарте"), safeDbl(cargo, "ЦенаНДС"),
+                                safeStr(cargo, "Торг_без_торга"), safeStr(cargo, "КонтактныйТелефон"), 0);
+                        String deadline = LocalDate.now().plusDays(7)
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T23:59:59+03:00";
+                        Bitrix24Client.getInstance()
+                                .createTaskForCarrier(myWebhook, cargoObj, currentUser, deadline)
+                                .thenAccept(taskId -> {
+                                    System.out.println("[Bitrix24] Задача создана, ID=" + taskId);
+                                    if (taskId > 0) {
+                                        javafx.application.Platform.runLater(() -> {
+                                            ctrl.cancelDealBtn.setUserData(new int[]{taskId});
+                                            ctrl.cancelDealBtn.setVisible(true);
+                                            ctrl.cancelDealBtn.setManaged(true);
+                                            ctrl.cancelDealBtn.setOnAction(ev ->
+                                                    cancelCarrierDeal(ctrl, myWebhook, taskId));
+                                        });
+                                    }
+                                })
+                                .exceptionally(ex -> {
+                                    System.err.println("[Bitrix24] task: " + ex.getMessage());
+                                    return null;
+                                });
+                    }
+                    int bitrixDealId = safeInt(cargo, "bitrix_deal_id");
+                    if (bitrixDealId > 0) {
+                        companyService.getWebhookForUser(ownerLogin).thenAccept(ownerWebhook -> {
+                            if (!ownerWebhook.isEmpty()) {
+                                Bitrix24Client.getInstance()
+                                        .updateDealStageInProgress(ownerWebhook, bitrixDealId)
+                                        .thenAccept(ok -> System.out.println("[Bitrix24] Сделка переведена в 'В работе': " + ok))
+                                        .exceptionally(ex -> {
+                                            System.err.println("[Bitrix24] update: " + ex.getMessage());
+                                            return null;
+                                        });
+                            }
+                        });
+                    }
+                }).exceptionally(ex -> {
+                    System.err.println("[Bitrix24] webhook: " + ex.getMessage());
+                    return null;
+                });
                 openChatInline(ownerLogin);
             });
         }
@@ -623,16 +670,39 @@ public class UserPanelController {
         return null;
     }
 
+    private void cancelCarrierDeal(UserCargoCardController ctrl, String webhook, int taskId) {
+        Bitrix24Client.getInstance().completeTask(webhook, taskId)
+                .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                    System.out.println("[Bitrix24] Задача завершена: " + ok);
+                    ctrl.cancelDealBtn.setVisible(false);
+                    ctrl.cancelDealBtn.setManaged(false);
+                }))
+                .exceptionally(ex -> {
+                    System.err.println("[Bitrix24] completeTask error: " + ex.getMessage());
+                    return null;
+                });
+    }
+
     private static String safeStr(JsonObject obj, String key) {
         if (!obj.has(key) || obj.get(key).isJsonNull()) return "";
         return obj.get(key).getAsString();
     }
+
     private static double safeDbl(JsonObject obj, String key) {
         if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
-        try { return obj.get(key).getAsDouble(); } catch (Exception e) { return 0; }
+        try {
+            return obj.get(key).getAsDouble();
+        } catch (Exception e) {
+            return 0;
+        }
     }
+
     private static int safeInt(JsonObject obj, String key) {
         if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
-        try { return obj.get(key).getAsInt(); } catch (Exception e) { return 0; }
+        try {
+            return obj.get(key).getAsInt();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

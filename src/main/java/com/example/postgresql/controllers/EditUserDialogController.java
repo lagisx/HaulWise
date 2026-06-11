@@ -12,15 +12,17 @@ import javafx.util.Duration;
 
 public class EditUserDialogController {
 
-    @FXML private TextField loginField, phoneField, emailField;
-    @FXML private Label     statusLabel;
+    @FXML
+    private TextField loginField, phoneField, emailField;
+    @FXML
+    private Label statusLabel;
 
     private final AuthService auth = new AuthService();
     private JsonObject user;
-    private Runnable   onSuccess;
+    private Runnable onSuccess;
 
     public void setUser(JsonObject user, Runnable onSuccess) {
-        this.user      = user;
+        this.user = user;
         this.onSuccess = onSuccess;
 
         loginField.setText(user.get("login").getAsString());
@@ -30,7 +32,8 @@ public class EditUserDialogController {
                 ? user.get("email").getAsString() : "");
     }
 
-    @FXML private void onSave() {
+    @FXML
+    private void onSave() {
         String phone = phoneField.getText().trim();
         String email = emailField.getText().trim();
 
@@ -59,7 +62,10 @@ public class EditUserDialogController {
                 }));
     }
 
-    @FXML public void onCancel() { closeDialog(); }
+    @FXML
+    public void onCancel() {
+        closeDialog();
+    }
 
     private void showError(String msg) {
         statusLabel.setText(msg);

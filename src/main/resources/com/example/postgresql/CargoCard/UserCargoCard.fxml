@@ -17,15 +17,12 @@
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.example.postgresql.controllers.CardControllers.UserCargoCardController">
 
-
     <HBox spacing="0"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"
           AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0">
 
-
         <VBox spacing="6" HBox.hgrow="ALWAYS"
               style="-fx-padding: 12 16 10 16;">
-
 
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label fx:id="typeLabel"
@@ -37,7 +34,6 @@
                        style="-fx-font-size: 15px; -fx-font-weight: 800; -fx-text-fill: #0f172a; -fx-cursor: hand;"
                        text="Москва → Санкт-Петербург"/>
             </HBox>
-
 
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Label fx:id="vesObemLabel"
@@ -59,7 +55,6 @@
                               -fx-padding: 3 8; -fx-background-radius: 6;"
                        text="Боковая"/>
             </HBox>
-
 
             <HBox alignment="CENTER_LEFT" spacing="10">
                 <VBox spacing="1">
@@ -86,7 +81,6 @@
                        text="Торг возможен"/>
             </HBox>
 
-
             <HBox alignment="CENTER_LEFT" spacing="8">
                 <Button fx:id="chatButton" text="💬 Написать"
                         managed="false" visible="false"
@@ -105,6 +99,12 @@
                                -fx-font-weight: bold; -fx-font-size: 11px;
                                -fx-padding: 5 14; -fx-background-radius: 8;
                                -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-cursor: hand;"/>
+                <Button fx:id="cancelDealBtn" text="⚡ Отменить сделку"
+                        managed="false" visible="false"
+                        style="-fx-background-color: #fef3c7; -fx-text-fill: #92400e;
+                               -fx-font-weight: bold; -fx-font-size: 11px;
+                               -fx-padding: 5 14; -fx-background-radius: 8;
+                               -fx-border-color: #fde68a; -fx-border-radius: 8; -fx-cursor: hand;"/>
                 <Label fx:id="deleteLabel" managed="false" visible="false"
                        style="-fx-font-size: 12px; -fx-text-fill: #ef4444;
                               -fx-font-weight: bold; -fx-cursor: hand;
@@ -113,7 +113,6 @@
                        text="✕ Удалить"/>
             </HBox>
         </VBox>
-
 
         <ImageView fx:id="randomImageOnCard"
                    fitHeight="120.0" fitWidth="150.0"

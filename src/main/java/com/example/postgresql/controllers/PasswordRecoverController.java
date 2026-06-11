@@ -9,7 +9,8 @@ import javafx.stage.Stage;
 
 public class PasswordRecoverController {
 
-    @FXML private Label statusLabel;
+    @FXML
+    private Label statusLabel;
 
     private final AuthService auth = new AuthService();
 

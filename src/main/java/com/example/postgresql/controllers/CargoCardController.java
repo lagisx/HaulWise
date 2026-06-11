@@ -10,24 +10,37 @@ import javafx.stage.Stage;
 
 public class CargoCardController {
 
-    @FXML private WebView mapWebView;
+    @FXML
+    private WebView mapWebView;
 
-    @FXML private Label labelRoute;
-    @FXML private Label labelProduct;
-    @FXML private Label labelVehicleType;
-    @FXML private Label labelWeight;
-    @FXML private Label labelVolume;
-    @FXML private Label labelLoadType;
-    @FXML private Label labelDate;
-    @FXML private Label labelPriceCard;
-    @FXML private Label labelPriceNds;
-    @FXML private Label labelBargain;
-    @FXML private Label labelContact;
-    @FXML private Label labelOwner;
+    @FXML
+    private Label labelRoute;
+    @FXML
+    private Label labelProduct;
+    @FXML
+    private Label labelVehicleType;
+    @FXML
+    private Label labelWeight;
+    @FXML
+    private Label labelVolume;
+    @FXML
+    private Label labelLoadType;
+    @FXML
+    private Label labelDate;
+    @FXML
+    private Label labelPriceCard;
+    @FXML
+    private Label labelPriceNds;
+    @FXML
+    private Label labelBargain;
+    @FXML
+    private Label labelContact;
+    @FXML
+    private Label labelOwner;
 
     public void setCargo(JsonObject cargo, String ownerLogin) {
         String fromCity = getStr(cargo, "Откуда");
-        String toCity   = getStr(cargo, "Куда");
+        String toCity = getStr(cargo, "Куда");
         labelRoute.setText(fromCity + "  →  " + toCity);
         labelProduct.setText(getStr(cargo, "Товар"));
         labelVehicleType.setText(getStr(cargo, "ТипТС"));
@@ -57,7 +70,7 @@ public class CargoCardController {
         engine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
             if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
                 String from = fromCity.replace("'", "\\'");
-                String to   = toCity.replace("'", "\\'");
+                String to = toCity.replace("'", "\\'");
                 Platform.runLater(() ->
                         engine.executeScript("showRoute('" + from + "', '" + to + "');")
                 );
@@ -77,7 +90,9 @@ public class CargoCardController {
         try {
             double v = o.get(key).getAsDouble();
             return v == Math.floor(v) ? String.valueOf((int) v) : String.valueOf(v);
-        } catch (Exception e) { return "—"; }
+        } catch (Exception e) {
+            return "—";
+        }
     }
 
     private String fmtRub(JsonObject o, String key) {
@@ -85,7 +100,9 @@ public class CargoCardController {
         try {
             long v = Math.round(o.get(key).getAsDouble());
             return String.format("%,d ₽", v).replace(',', ' ');
-        } catch (Exception e) { return "—"; }
+        } catch (Exception e) {
+            return "—";
+        }
     }
 
     @FXML

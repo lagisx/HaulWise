@@ -4,6 +4,7 @@ import com.example.postgresql.API.AuthService;
 import com.example.postgresql.API.OtpStore;
 import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.UserPanelController;
+import com.example.postgresql.controllers.CompanyPanelController;
 import com.example.postgresql.HelloApplication;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -21,36 +22,60 @@ import java.security.SecureRandom;
 
 public class ProfileUser {
 
-    @FXML private Label    LabelUser;
-    @FXML private TextField login;
-    @FXML private TextField email;
-    @FXML private TextField phone;
-    @FXML private Label    statusLabel;
+    @FXML
+    private Label LabelUser;
+    @FXML
+    private TextField login;
+    @FXML
+    private TextField email;
+    @FXML
+    private TextField phone;
+    @FXML
+    private Label statusLabel;
 
-    
-    @FXML private VBox  emailStatusCard;        
-    @FXML private Label emailStatusIcon;        
-    @FXML private Label emailStatusTitle;       
-    @FXML private Label emailStatusDesc;        
-    @FXML private Button resendConfirmBtn;      
-    @FXML private Label  emailStatusBadge;
-    @FXML private VBox   emailOtpBox;
-    @FXML private TextField emailOtpField;
-    @FXML private Button verifyEmailBtn;
 
-    
-    @FXML private VBox          passwordStep1Box;
-    @FXML private Button        sendPasswordCodeBtn;
-    @FXML private VBox          passwordStep2Box;
-    @FXML private TextField     passwordOtpField;
-    @FXML private Button        verifyPasswordCodeBtn;
-    @FXML private VBox          passwordStep3Box;
-    @FXML private PasswordField profileNewPassword;
-    @FXML private PasswordField profileConfirmPassword;
-    @FXML private Button        saveNewPasswordBtn;
-    @FXML private Label         passwordStatusLabel;
+    @FXML
+    private VBox emailStatusCard;
+    @FXML
+    private Label emailStatusIcon;
+    @FXML
+    private Label emailStatusTitle;
+    @FXML
+    private Label emailStatusDesc;
+    @FXML
+    private Button resendConfirmBtn;
+    @FXML
+    private Label emailStatusBadge;
+    @FXML
+    private VBox emailOtpBox;
+    @FXML
+    private TextField emailOtpField;
+    @FXML
+    private Button verifyEmailBtn;
 
-    private String currentUser  = "";
+
+    @FXML
+    private VBox passwordStep1Box;
+    @FXML
+    private Button sendPasswordCodeBtn;
+    @FXML
+    private VBox passwordStep2Box;
+    @FXML
+    private TextField passwordOtpField;
+    @FXML
+    private Button verifyPasswordCodeBtn;
+    @FXML
+    private VBox passwordStep3Box;
+    @FXML
+    private PasswordField profileNewPassword;
+    @FXML
+    private PasswordField profileConfirmPassword;
+    @FXML
+    private Button saveNewPasswordBtn;
+    @FXML
+    private Label passwordStatusLabel;
+
+    private String currentUser = "";
     private String initialEmail = "";
     private String initialPhone = "";
     private boolean emailConfirmed = false;
@@ -66,7 +91,7 @@ public class ProfileUser {
     }
 
     public void setUserData(String username, String currentEmail, String currentPhone) {
-        this.currentUser  = username != null ? username : "";
+        this.currentUser = username != null ? username : "";
         this.initialEmail = currentEmail != null ? currentEmail : "";
         this.initialPhone = currentPhone != null ? currentPhone : "";
 
@@ -85,7 +110,10 @@ public class ProfileUser {
 
         supabase.select("users", "email,phone,email_confirmed", "login=eq." + encodedLogin)
                 .thenAccept(result -> Platform.runLater(() -> {
-                    if (result.isEmpty()) { showStatus("Пользователь не найден", "red"); return; }
+                    if (result.isEmpty()) {
+                        showStatus("Пользователь не найден", "red");
+                        return;
+                    }
                     JsonObject user = result.get(0).getAsJsonObject();
 
                     String dbEmail = getStr(user, "email");
@@ -95,7 +123,7 @@ public class ProfileUser {
                     initialEmail = dbEmail;
                     initialPhone = dbPhone;
 
-                    
+
                     if (user.has("email_confirmed") && !user.get("email_confirmed").isJsonNull()) {
                         emailConfirmed = user.get("email_confirmed").getAsBoolean();
                     } else {
@@ -109,17 +137,17 @@ public class ProfileUser {
                 });
     }
 
-    
+
     private void updateEmailStatusCard(String currentEmail) {
         if (emailStatusCard == null) return;
 
         if (emailConfirmed) {
-            
+
             emailStatusCard.setStyle(
                     "-fx-background-color: #f0fdf4; -fx-background-radius: 14; " +
                             "-fx-border-color: #86efac; -fx-border-radius: 14; -fx-border-width: 1.5; -fx-padding: 18 22;"
             );
-            if (emailStatusIcon  != null) emailStatusIcon.setText("✅");
+            if (emailStatusIcon != null) emailStatusIcon.setText("✅");
             if (emailStatusTitle != null) {
                 emailStatusTitle.setText("Email подтверждён");
                 emailStatusTitle.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #15803d;");
@@ -140,12 +168,12 @@ public class ProfileUser {
                 resendConfirmBtn.setManaged(false);
             }
         } else {
-            
+
             emailStatusCard.setStyle(
                     "-fx-background-color: #fffbeb; -fx-background-radius: 14; " +
                             "-fx-border-color: #fcd34d; -fx-border-radius: 14; -fx-border-width: 1.5; -fx-padding: 18 22;"
             );
-            if (emailStatusIcon  != null) emailStatusIcon.setText("⚠️");
+            if (emailStatusIcon != null) emailStatusIcon.setText("⚠️");
             if (emailStatusTitle != null) {
                 emailStatusTitle.setText("Email не подтверждён");
                 emailStatusTitle.setStyle("-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #b45309;");
@@ -168,7 +196,7 @@ public class ProfileUser {
         }
     }
 
-    
+
     @FXML
     private void onResendConfirmation() {
         if (initialEmail.isEmpty()) {
@@ -244,11 +272,7 @@ public class ProfileUser {
         }
     }
 
-    
-    
-    
 
-    
     @FXML
     private void onSendPasswordCode() {
         if (initialEmail.isEmpty()) {
@@ -265,7 +289,7 @@ public class ProfileUser {
         sendPasswordCodeBtn.setText("⏳ Отправка...");
         showPasswordStatus("", "");
 
-        
+
         String otpCode = String.format("%06d", new SecureRandom().nextInt(1_000_000));
         OtpStore.save(initialEmail, otpCode);
 
@@ -275,7 +299,7 @@ public class ProfileUser {
                     if (ok) {
                         sendPasswordCodeBtn.setText("📧 Отправить повторно");
                         showPasswordStatus("Код отправлен на " + maskEmail(initialEmail), "#16a34a");
-                        
+
                         if (passwordStep2Box != null) {
                             passwordStep2Box.setVisible(true);
                             passwordStep2Box.setManaged(true);
@@ -297,7 +321,7 @@ public class ProfileUser {
                 });
     }
 
-    
+
     @FXML
     private void onVerifyPasswordCode() {
         String code = passwordOtpField.getText().trim();
@@ -309,21 +333,30 @@ public class ProfileUser {
         verifyPasswordCodeBtn.setDisable(true);
         showPasswordStatus("Проверяем код...", "#2563eb");
 
-        
+
         boolean verified = OtpStore.verify(initialEmail, code);
         verifyPasswordCodeBtn.setDisable(false);
         if (verified) {
             showPasswordStatus("Код подтверждён! Введите новый пароль.", "#16a34a");
-            if (passwordStep1Box != null) { passwordStep1Box.setVisible(false); passwordStep1Box.setManaged(false); }
-            if (passwordStep2Box != null) { passwordStep2Box.setVisible(false); passwordStep2Box.setManaged(false); }
-            if (passwordStep3Box != null) { passwordStep3Box.setVisible(true); passwordStep3Box.setManaged(true); }
+            if (passwordStep1Box != null) {
+                passwordStep1Box.setVisible(false);
+                passwordStep1Box.setManaged(false);
+            }
+            if (passwordStep2Box != null) {
+                passwordStep2Box.setVisible(false);
+                passwordStep2Box.setManaged(false);
+            }
+            if (passwordStep3Box != null) {
+                passwordStep3Box.setVisible(true);
+                passwordStep3Box.setManaged(true);
+            }
             return;
         } else {
             showPasswordStatus("Неверный или истёкший код.", "#dc2626");
         }
     }
 
-    
+
     @FXML
     private void onSaveNewPassword() {
         String newPass = profileNewPassword.getText().trim();
@@ -402,7 +435,7 @@ public class ProfileUser {
 
         if (!newEmail.isEmpty() && !newEmail.equals(initialEmail)) {
             updates.addProperty("email", newEmail);
-            
+
             updates.addProperty("email_confirmed", false);
             hasChanges = true;
         }
@@ -411,7 +444,10 @@ public class ProfileUser {
             hasChanges = true;
         }
 
-        if (!hasChanges) { showStatus("Нет изменений", "orange"); return; }
+        if (!hasChanges) {
+            showStatus("Нет изменений", "orange");
+            return;
+        }
 
         SupabaseClient supabase = new SupabaseClient();
         String encodedLogin = URLEncoder.encode(currentUser, StandardCharsets.UTF_8);
@@ -423,7 +459,7 @@ public class ProfileUser {
                         initialEmail = newEmail;
                         email.setPromptText(newEmail);
                         email.clear();
-                        
+
                         emailConfirmed = false;
                         updateEmailStatusCard(newEmail);
                     }
@@ -487,6 +523,17 @@ public class ProfileUser {
             statusLabel.setStyle("");
         } else {
             statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+        }
+    }
+
+    @FXML
+    private void goToCompany() {
+        try {
+            CompanyPanelController.companyPanel(
+                    (Stage) LabelUser.getScene().getWindow(), currentUser);
+        } catch (Exception e) {
+            e.printStackTrace();
+            showStatus("Ошибка перехода", "red");
         }
     }
 

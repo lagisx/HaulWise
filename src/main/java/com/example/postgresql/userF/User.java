@@ -1,7 +1,7 @@
 package com.example.postgresql.UserF;
 
 public class User {
-    private int    id;
+    private int id;
     private String login;
     private String email;
     private String phone;
@@ -20,12 +20,35 @@ public class User {
         this.role = role;
     }
 
-    public int     getId()        { return id; }
-    public String  getLogin()     { return login; }
-    public String  getEmail()     { return email; }
-    public String  getPhone()     { return phone; }
-    public String  getCreatedAt() { return createdAt; }
-    public boolean getStatus()    { return status; }
-    public String  getRole()      { return role; }
-    public void    setStatus(boolean status) { this.status = status; }
+    public int getId() {
+        return id;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public boolean getStatus() {
+        return status;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
 }

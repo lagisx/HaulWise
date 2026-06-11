@@ -15,27 +15,35 @@ import java.util.regex.Pattern;
 
 public class RegController {
 
-    @FXML public  TextField     login;
-    @FXML private PasswordField password;
-    @FXML public  TextField     email;
-    @FXML public  TextField     phone;
-    @FXML public  TextField     passVisible;
-    @FXML private Label         statusLabel;
-    @FXML private Hyperlink     agreement;
+    @FXML
+    public TextField login;
+    @FXML
+    private PasswordField password;
+    @FXML
+    public TextField email;
+    @FXML
+    public TextField phone;
+    @FXML
+    public TextField passVisible;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Hyperlink agreement;
 
     private boolean visiblePass = false;
     private final AuthService auth = new AuthService();
 
-    @FXML private void AgreementPanelOpen(ActionEvent e) {
+    @FXML
+    private void AgreementPanelOpen(ActionEvent e) {
         new AgreementPanelController().AgreementPanel(e);
     }
 
     @FXML
     private void Register() {
-        String user  = login.getText().trim().toLowerCase();
-        String pass  = visiblePass ? passVisible.getText().trim() : password.getText().trim();
-        String mail  = email.getText().trim();
-        String tel   = phone.getText().trim();
+        String user = login.getText().trim().toLowerCase();
+        String pass = visiblePass ? passVisible.getText().trim() : password.getText().trim();
+        String mail = email.getText().trim();
+        String tel = phone.getText().trim();
         if (user.isEmpty() || pass.isEmpty() || tel.isEmpty() || mail.isEmpty()) {
             setStatus("Заполните все обязательные поля (включая email)");
             return;
@@ -69,7 +77,10 @@ public class RegController {
                 });
     }
 
-    @FXML private void goBack(ActionEvent event) { back(); }
+    @FXML
+    private void goBack(ActionEvent event) {
+        back();
+    }
 
     private void back() {
         Stage stage = (Stage) login.getScene().getWindow();
@@ -82,14 +93,20 @@ public class RegController {
         visiblePass = !visiblePass;
         if (visiblePass) {
             passVisible.setText(password.getText());
-            passVisible.setVisible(true);  passVisible.setManaged(true);
-            password.setVisible(false);    password.setManaged(false);
-            passVisible.requestFocus();    passVisible.positionCaret(passVisible.getLength());
+            passVisible.setVisible(true);
+            passVisible.setManaged(true);
+            password.setVisible(false);
+            password.setManaged(false);
+            passVisible.requestFocus();
+            passVisible.positionCaret(passVisible.getLength());
         } else {
             password.setText(passVisible.getText());
-            password.setVisible(true);     password.setManaged(true);
-            passVisible.setVisible(false); passVisible.setManaged(false);
-            password.requestFocus();       password.positionCaret(password.getLength());
+            password.setVisible(true);
+            password.setManaged(true);
+            passVisible.setVisible(false);
+            passVisible.setManaged(false);
+            password.requestFocus();
+            password.positionCaret(password.getLength());
         }
     }
 

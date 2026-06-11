@@ -184,7 +184,7 @@ public class HelloController {
             stage.sizeToScene();
             stage.centerOnScreen();
         } catch (IOException _) {
-            statusLabel.setText("Ошибка регистрации" );
+            statusLabel.setText("Ошибка регистрации");
         }
     }
 

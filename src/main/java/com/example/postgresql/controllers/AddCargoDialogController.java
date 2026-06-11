@@ -2,6 +2,7 @@ package com.example.postgresql.controllers;
 
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.API.Bitrix24Client;
+import com.example.postgresql.API.CompanyService;
 import com.example.postgresql.UserF.Cargo;
 import com.google.gson.JsonObject;
 import javafx.animation.KeyFrame;
@@ -18,10 +19,14 @@ import java.time.format.DateTimeFormatter;
 
 public class AddCargoDialogController {
 
-    @FXML private TextField typeTS, weight, volume, product, loadingType, priceCard, priceNDS, details;
-    @FXML private ComboBox<String> from, to, trade;
-    @FXML private DatePicker dateFrom, dateTo;
-    @FXML private Label statusLabel;
+    @FXML
+    private TextField typeTS, weight, volume, product, loadingType, priceCard, priceNDS, details;
+    @FXML
+    private ComboBox<String> from, to, trade;
+    @FXML
+    private DatePicker dateFrom, dateTo;
+    @FXML
+    private Label statusLabel;
 
     private final AuthService authService = new AuthService();
     private String currentUser;
@@ -47,14 +52,20 @@ public class AddCargoDialogController {
         setupAutoComplete(to);
 
         from.valueProperty().addListener((obs, o, n) -> preventSameCities(true));
-        to.valueProperty().addListener((obs, o, n)   -> preventSameCities(false));
+        to.valueProperty().addListener((obs, o, n) -> preventSameCities(false));
         from.getEditor().textProperty().addListener((obs, o, n) -> preventSameCities(true));
-        to.getEditor().textProperty().addListener((obs, o, n)   -> preventSameCities(false));
+        to.getEditor().textProperty().addListener((obs, o, n) -> preventSameCities(false));
 
         priceCard.textProperty().addListener((obs, oldValue, newValue) -> {
-            if (newValue == null || newValue.isEmpty()) { priceNDS.setText(""); return; }
+            if (newValue == null || newValue.isEmpty()) {
+                priceNDS.setText("");
+                return;
+            }
             String digits = newValue.replaceAll("[^0-9]", "");
-            if (digits.isEmpty()) { priceNDS.setText(""); return; }
+            if (digits.isEmpty()) {
+                priceNDS.setText("");
+                return;
+            }
             try {
                 double price = Double.parseDouble(digits);
                 priceNDS.setText(String.format("%,.0f", price * 1.2));
@@ -85,7 +96,7 @@ public class AddCargoDialogController {
 
     private void preventSameCities(boolean changedFrom) {
         String fromVal = from.getEditor().getText();
-        String toVal   = to.getEditor().getText();
+        String toVal = to.getEditor().getText();
         if (fromVal != null && toVal != null && !fromVal.isEmpty() && fromVal.equals(toVal)) {
             showStatus("Откуда и Куда не могут совпадать", "#ef4444");
         }
@@ -93,8 +104,8 @@ public class AddCargoDialogController {
 
     public void setUser(String login, String phone, Runnable onSuccess) {
         this.currentUser = login;
-        this.userPhone   = phone == null || phone.isEmpty() ? "Не указан" : phone;
-        this.onSuccess   = onSuccess;
+        this.userPhone = phone == null || phone.isEmpty() ? "Не указан" : phone;
+        this.onSuccess = onSuccess;
     }
 
     @FXML
@@ -117,25 +128,41 @@ public class AddCargoDialogController {
                     showStatus("Груз успешно опубликован!", "#16a34a");
 
                     Cargo cargoObj = new Cargo(
-                        0,
-                        getStr(cargo, "ТипТС"),
-                        getDbl(cargo, "Вес"),
-                        getDbl(cargo, "Объем"),
-                        getStr(cargo, "Товар"),
-                        getStr(cargo, "Откуда"),
-                        getStr(cargo, "Куда"),
-                        getStr(cargo, "ТипПогрузки"),
-                        getStr(cargo, "ДеталиПогрузки"),
-                        getStr(cargo, "Даты"),
-                        getDbl(cargo, "ЦенаПоКарте"),
-                        getDbl(cargo, "ЦенаНДС"),
-                        getStr(cargo, "Торг_без_торга"),
-                        getStr(cargo, "КонтактныйТелефон"),
-                        0
+                            0,
+                            getStr(cargo, "ТипТС"),
+                            getDbl(cargo, "Вес"),
+                            getDbl(cargo, "Объем"),
+                            getStr(cargo, "Товар"),
+                            getStr(cargo, "Откуда"),
+                            getStr(cargo, "Куда"),
+                            getStr(cargo, "ТипПогрузки"),
+                            getStr(cargo, "ДеталиПогрузки"),
+                            getStr(cargo, "Даты"),
+                            getDbl(cargo, "ЦенаПоКарте"),
+                            getDbl(cargo, "ЦенаНДС"),
+                            getStr(cargo, "Торг_без_торга"),
+                            getStr(cargo, "КонтактныйТелефон"),
+                            0
                     );
-                    Bitrix24Client.getInstance().createDealFromCargo(cargoObj)
-                        .thenAccept(dealId -> System.out.println("[Bitrix24] Сделка создана, ID=" + dealId))
-                        .exceptionally(ex -> { System.err.println("[Bitrix24] Ошибка сделки: " + ex.getMessage()); return null; });
+                    new CompanyService().getWebhookForUser(currentUser).thenAccept(webhook -> {
+                        if (webhook != null && !webhook.isEmpty()) {
+                            Bitrix24Client.getInstance()
+                                    .createDealFromCargo(webhook, cargoObj)
+                                    .thenAccept(dealId -> {
+                                        System.out.println("[Bitrix24] Сделка создана, ID=" + dealId);
+                                        /**/
+                                    })
+                                    .exceptionally(ex -> {
+                                        System.err.println("[Bitrix24] " + ex.getMessage());
+                                        return null;
+                                    });
+                        } else {
+                            System.out.println("[Bitrix24] Пользователь не в компании — сделка не создаётся");
+                        }
+                    }).exceptionally(ex -> {
+                        System.err.println("[Bitrix24] webhook: " + ex.getMessage());
+                        return null;
+                    });
 
                     new Timeline(new KeyFrame(javafx.util.Duration.seconds(1.5), e -> {
                         if (onSuccess != null) onSuccess.run();
@@ -164,50 +191,53 @@ public class AddCargoDialogController {
 
     private JsonObject buildCargoObject() {
         String fromCity = from.getEditor().getText().trim();
-        String toCity   = to.getEditor().getText().trim();
+        String toCity = to.getEditor().getText().trim();
 
         String dateFromStr = dateFrom.getValue() != null
                 ? dateFrom.getValue().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "";
-        String dateToStr   = dateTo.getValue() != null
+        String dateToStr = dateTo.getValue() != null
                 ? dateTo.getValue().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) : "";
-        String datesText   = dateFromStr.isEmpty() ? dateToStr
+        String datesText = dateFromStr.isEmpty() ? dateToStr
                 : (dateToStr.isEmpty() ? dateFromStr : dateFromStr + " – " + dateToStr);
 
         JsonObject cargo = new JsonObject();
         cargo.addProperty("ТипТС", typeTS.getText().trim());
-        cargo.addProperty("Вес",       getNumber(weight.getText()));
-        cargo.addProperty("Объем",       getNumber(volume.getText()));
-        cargo.addProperty("Товар",      product.getText().trim());
-        cargo.addProperty("Откуда",    fromCity);
-        cargo.addProperty("Куда",      toCity);
-        cargo.addProperty("ТипПогрузки",    loadingType.getText().trim());
-        cargo.addProperty("Даты",        datesText);
+        cargo.addProperty("Вес", getNumber(weight.getText()));
+        cargo.addProperty("Объем", getNumber(volume.getText()));
+        cargo.addProperty("Товар", product.getText().trim());
+        cargo.addProperty("Откуда", fromCity);
+        cargo.addProperty("Куда", toCity);
+        cargo.addProperty("ТипПогрузки", loadingType.getText().trim());
+        cargo.addProperty("Даты", datesText);
         cargo.addProperty("ДеталиПогрузки", details.getText().trim().isEmpty() ? "—" : details.getText().trim());
-        cargo.addProperty("ЦенаПоКарте",   getNumber(priceCard.getText()));
-        cargo.addProperty("ЦенаНДС",    getNumber(priceNDS.getText()));
-        cargo.addProperty("Торг_без_торга",      trade.getValue());
+        cargo.addProperty("ЦенаПоКарте", getNumber(priceCard.getText()));
+        cargo.addProperty("ЦенаНДС", getNumber(priceNDS.getText()));
+        cargo.addProperty("Торг_без_торга", trade.getValue());
         cargo.addProperty("КонтактныйТелефон", userPhone);
         return cargo;
     }
 
     private String validateFields() {
         StringBuilder sb = new StringBuilder();
-        if (typeTS.getText().trim().isEmpty())               sb.append("• Тип ТС\n");
-        if (from.getEditor().getText().trim().isEmpty())     sb.append("• Откуда\n");
-        if (to.getEditor().getText().trim().isEmpty())       sb.append("• Куда\n");
+        if (typeTS.getText().trim().isEmpty()) sb.append("• Тип ТС\n");
+        if (from.getEditor().getText().trim().isEmpty()) sb.append("• Откуда\n");
+        if (to.getEditor().getText().trim().isEmpty()) sb.append("• Куда\n");
         String fromVal = from.getEditor().getText().trim();
-        String toVal   = to.getEditor().getText().trim();
-        if (!fromVal.isEmpty() && fromVal.equals(toVal))    sb.append("• Откуда и Куда совпадают\n");
-        if (weight.getText().trim().isEmpty())               sb.append("• Вес\n");
-        if (volume.getText().trim().isEmpty())               sb.append("• Объём\n");
-        if (product.getText().trim().isEmpty())              sb.append("• Товар\n");
+        String toVal = to.getEditor().getText().trim();
+        if (!fromVal.isEmpty() && fromVal.equals(toVal)) sb.append("• Откуда и Куда совпадают\n");
+        if (weight.getText().trim().isEmpty()) sb.append("• Вес\n");
+        if (volume.getText().trim().isEmpty()) sb.append("• Объём\n");
+        if (product.getText().trim().isEmpty()) sb.append("• Товар\n");
         return sb.toString();
     }
 
     private double getNumber(String text) {
         if (text == null || text.trim().isEmpty()) return 0;
-        try { return Double.parseDouble(text.trim().replaceAll("[^0-9.]", "")); }
-        catch (NumberFormatException e) { return 0; }
+        try {
+            return Double.parseDouble(text.trim().replaceAll("[^0-9.]", ""));
+        } catch (NumberFormatException e) {
+            return 0;
+        }
     }
 
     private void showStatus(String msg, String color) {
@@ -224,11 +254,17 @@ public class AddCargoDialogController {
 
     private double getDbl(JsonObject obj, String key) {
         if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
-        try { return obj.get(key).getAsDouble(); } catch (Exception e) { return 0; }
+        try {
+            return obj.get(key).getAsDouble();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     @FXML
-    private void onCancel() { closeWindow(); }
+    private void onCancel() {
+        closeWindow();
+    }
 
     private void closeWindow() {
         Stage stage = (Stage) statusLabel.getScene().getWindow();

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.postgresql.controllers.CreateCompanyController"
+      spacing="20" style="-fx-padding: 32; -fx-background-color: white;">
+
+    <Label text="🏢 Создать компанию"
+           style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+
+    <VBox spacing="6">
+        <Label text="Название компании *"
+               style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+        <TextField fx:id="companyNameField"
+                   promptText="ООО Транспорт Логистик"
+                   style="-fx-font-size: 13; -fx-padding: 9 12;
+                          -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+    </VBox>
+
+    <VBox spacing="6">
+        <Label text="Вебхук Битрикс24 (можно добавить позже)"
+               style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+        <TextField fx:id="webhookField"
+                   promptText="https://ДОМЕН.bitrix24.ru/rest/USERID/ТОКЕН/"
+                   style="-fx-font-size: 12; -fx-padding: 9 12;
+                          -fx-background-radius: 8; -fx-border-color: #e2e8f0; -fx-border-radius: 8;"/>
+        <Label text="Битрикс24 → Приложения → Разработчикам → Входящий вебхук"
+               style="-fx-font-size: 11; -fx-text-fill: #94a3b8;"/>
+    </VBox>
+
+    <Label fx:id="statusLabel" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="cancelBtn" text="Отмена" onAction="#onCancel"
+                style="-fx-background-color: #f1f5f9; -fx-text-fill: #374151;
+                       -fx-font-weight: bold; -fx-padding: 9 20;
+                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+        <Button fx:id="createBtn" text="✅ Создать" onAction="#onCreate"
+                style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-padding: 9 20;
+                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+    </HBox>
+</VBox>

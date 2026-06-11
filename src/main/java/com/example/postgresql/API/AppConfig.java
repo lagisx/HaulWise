@@ -51,7 +51,8 @@ public class AppConfig {
     }
 
     public String getBitrix24WebhookUrl() {
-        return get("bitrix24.webhook_url");
+        String value = props.getProperty("bitrix24.webhook_url");
+        return (value == null || value.isBlank()) ? "" : value.trim();
     }
 
 

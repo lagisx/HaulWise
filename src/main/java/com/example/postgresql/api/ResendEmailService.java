@@ -19,17 +19,17 @@ public class ResendEmailService {
     private final String fromAddress;
 
     private static ResendEmailService instance;
+
     public static ResendEmailService getInstance() {
         if (instance == null) instance = new ResendEmailService();
         return instance;
     }
 
     private ResendEmailService() {
-        this.apiKey      = AppConfig.getInstance().getResendApiKey();
+        this.apiKey = AppConfig.getInstance().getResendApiKey();
         this.fromAddress = AppConfig.getInstance().getResendFrom();
     }
 
-    
 
     public CompletableFuture<Boolean> sendOtpCode(String toEmail, String code) {
         String subject = "Код сброса пароля — Биржа грузоперевозок Haulwise";
@@ -37,16 +37,15 @@ public class ResendEmailService {
         return sendEmail(toEmail, subject, html);
     }
 
-    
 
     public CompletableFuture<Boolean> sendEmail(String to, String subject, String html) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
         JsonObject body = new JsonObject();
-        body.addProperty("from",    fromAddress);
-        body.addProperty("to",      to);
+        body.addProperty("from", fromAddress);
+        body.addProperty("to", to);
         body.addProperty("subject", subject);
-        body.addProperty("html",    html);
+        body.addProperty("html", html);
 
         Request req = new Request.Builder()
                 .url(RESEND_URL)
@@ -75,7 +74,6 @@ public class ResendEmailService {
         return future;
     }
 
-    
 
     private String buildOtpEmail(String code) {
         try (var is = getClass().getResourceAsStream("/otp_email.html")) {

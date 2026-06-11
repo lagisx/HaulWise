@@ -18,8 +18,8 @@ public class RealtimeClient {
 
     private static final String REALTIME_URL =
             SupabaseClient.SUPABASE_URL.replace("https://", "wss://")
-            + "/realtime/v1/websocket?apikey=" + SupabaseClient.SUPABASE_ANON_KEY
-            + "&vsn=1.0.0";
+                    + "/realtime/v1/websocket?apikey=" + SupabaseClient.SUPABASE_ANON_KEY
+                    + "&vsn=1.0.0";
 
     private static final String CHANNEL_TOPIC = "realtime:public:messages";
 
@@ -27,7 +27,7 @@ public class RealtimeClient {
     private WebSocket webSocket;
     private Consumer<JsonObject> onNewMessage;
 
-    private final AtomicBoolean connected  = new AtomicBoolean(false);
+    private final AtomicBoolean connected = new AtomicBoolean(false);
     private final AtomicBoolean shouldStop = new AtomicBoolean(false);
 
     private final ScheduledExecutorService scheduler =
@@ -40,7 +40,6 @@ public class RealtimeClient {
     private ScheduledFuture<?> heartbeatTask;
     private int refCounter = 0;
 
-    
 
     public void connect(Consumer<JsonObject> onNewMessage) {
         this.onNewMessage = onNewMessage;
@@ -53,12 +52,13 @@ public class RealtimeClient {
         connected.set(false);
         stopHeartbeat();
         if (webSocket != null) {
-            try { webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "bye"); }
-            catch (Exception ignored) {}
+            try {
+                webSocket.sendClose(WebSocket.NORMAL_CLOSURE, "bye");
+            } catch (Exception ignored) {
+            }
         }
     }
 
-    
 
     private void doConnect() {
         HttpClient.newHttpClient()
@@ -111,7 +111,6 @@ public class RealtimeClient {
         }
     }
 
-    
 
     private void sendHeartbeat() {
         JsonObject hb = new JsonObject();
@@ -135,28 +134,27 @@ public class RealtimeClient {
         }
     }
 
-    
 
     private void subscribeToMessages() {
-        
+
         JsonObject pgChange = new JsonObject();
-        pgChange.addProperty("event",  "INSERT");
+        pgChange.addProperty("event", "INSERT");
         pgChange.addProperty("schema", "public");
-        pgChange.addProperty("table",  "messages");
+        pgChange.addProperty("table", "messages");
 
         com.google.gson.JsonArray pgChanges = new com.google.gson.JsonArray();
         pgChanges.add(pgChange);
 
         JsonObject broadcastCfg = new JsonObject();
-        broadcastCfg.addProperty("ack",  false);
+        broadcastCfg.addProperty("ack", false);
         broadcastCfg.addProperty("self", false);
 
         JsonObject presenceCfg = new JsonObject();
         presenceCfg.addProperty("key", "");
 
         JsonObject config = new JsonObject();
-        config.add("broadcast",       broadcastCfg);
-        config.add("presence",        presenceCfg);
+        config.add("broadcast", broadcastCfg);
+        config.add("presence", presenceCfg);
         config.add("postgres_changes", pgChanges);
 
         JsonObject payload = new JsonObject();
@@ -171,7 +169,6 @@ public class RealtimeClient {
         sendJson(sub);
     }
 
-    
 
     private void handleMessage(String raw) {
         try {
@@ -180,7 +177,7 @@ public class RealtimeClient {
 
             String event = msg.has("event") ? msg.get("event").getAsString() : "";
 
-            
+
             if ("postgres_changes".equals(event) && msg.has("payload")) {
                 JsonObject payload = msg.getAsJsonObject("payload");
                 if (payload.has("data")) {
@@ -192,7 +189,7 @@ public class RealtimeClient {
                 }
             }
 
-            
+
             if (msg.has("payload")) {
                 JsonObject payload = msg.getAsJsonObject("payload");
                 if (payload.has("type") && "INSERT".equals(payload.get("type").getAsString())
@@ -201,15 +198,18 @@ public class RealtimeClient {
                 }
             }
 
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
     }
 
-    
 
     private void sendJson(JsonObject obj) {
         if (webSocket != null && connected.get()) {
-            try { webSocket.sendText(gson.toJson(obj), true); }
-            catch (Exception e) { System.err.println("[Realtime] send error: " + e.getMessage()); }
+            try {
+                webSocket.sendText(gson.toJson(obj), true);
+            } catch (Exception e) {
+                System.err.println("[Realtime] send error: " + e.getMessage());
+            }
         }
     }
 }

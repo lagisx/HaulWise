@@ -20,7 +20,7 @@ public class RouteService {
 
         List<double[]> route = List.of(
                 new double[]{startLon, startLat},
-                new double[]{endLon,   endLat}
+                new double[]{endLon, endLat}
         );
 
         CACHE.put(key, route);
