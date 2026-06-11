@@ -22,6 +22,10 @@ import javafx.stage.Stage;
 
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.Bitrix24Client;
+import com.example.postgresql.UserF.Cargo;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import com.example.postgresql.controllers.CardControllers.UserCargoCardController;
 import com.example.postgresql.UserF.ProfileUser;
 import com.example.postgresql.utils.CargoImageLoader;
@@ -327,7 +331,36 @@ public class UserPanelController {
         if (!ownerLogin.isEmpty() && !ownerLogin.equals(currentUser)) {
             ctrl.chatButton.setVisible(true);
             ctrl.chatButton.setManaged(true);
-            ctrl.chatButton.setOnAction(e -> openChatInline(ownerLogin));
+            ctrl.chatButton.setOnAction(e -> {
+                try {
+                    Cargo cargoObj = new Cargo(
+                        safeInt(cargo, "id"),
+                        safeStr(cargo, "ТипТС"),
+                        safeDbl(cargo, "Вес"),
+                        safeDbl(cargo, "Объем"),
+                        safeStr(cargo, "Товар"),
+                        safeStr(cargo, "Откуда"),
+                        safeStr(cargo, "Куда"),
+                        safeStr(cargo, "ТипПогрузки"),
+                        safeStr(cargo, "ДеталиПогрузки"),
+                        safeStr(cargo, "Даты"),
+                        safeDbl(cargo, "ЦенаПоКарте"),
+                        safeDbl(cargo, "ЦенаНДС"),
+                        safeStr(cargo, "Торг_без_торга"),
+                        safeStr(cargo, "КонтактныйТелефон"),
+                        0
+                    );
+                    String deadline = LocalDate.now().plusDays(7)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T23:59:59+03:00";
+                    Bitrix24Client.getInstance()
+                        .createTaskForCarrier(cargoObj, currentUser, deadline)
+                        .thenAccept(taskId -> System.out.println("[Bitrix24] Задача создана, ID=" + taskId))
+                        .exceptionally(ex -> { System.err.println("[Bitrix24] Ошибка задачи: " + ex.getMessage()); return null; });
+                } catch (Exception ex) {
+                    System.err.println("[Bitrix24] Ошибка при создании задачи: " + ex.getMessage());
+                }
+                openChatInline(ownerLogin);
+            });
         }
         card.setOnMouseClicked(event -> {
             Node target = (Node) event.getTarget();
@@ -588,5 +621,18 @@ public class UserPanelController {
             container.getChildren().add(createInfoLabel("Ошибка: " + ex.getMessage()));
         });
         return null;
+    }
+
+    private static String safeStr(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return "";
+        return obj.get(key).getAsString();
+    }
+    private static double safeDbl(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
+        try { return obj.get(key).getAsDouble(); } catch (Exception e) { return 0; }
+    }
+    private static int safeInt(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
+        try { return obj.get(key).getAsInt(); } catch (Exception e) { return 0; }
     }
 }

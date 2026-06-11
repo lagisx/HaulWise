@@ -24,8 +24,6 @@ public class AppConfig {
         return instance;
     }
 
-    
-
     public String getSupabaseUrl() {
         return get("supabase.url");
     }
@@ -38,13 +36,11 @@ public class AppConfig {
         return get("supabase.service_key");
     }
 
-    
 
     public String getGeocoderApiKey() {
         return get("geocoder.api_key");
     }
 
-    
 
     public String getResendApiKey() {
         return get("resend.api_key");
@@ -54,7 +50,10 @@ public class AppConfig {
         return get("resend.from");
     }
 
-    
+    public String getBitrix24WebhookUrl() {
+        return get("bitrix24.webhook_url");
+    }
+
 
     private String get(String key) {
         String value = props.getProperty(key);

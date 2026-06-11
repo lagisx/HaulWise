@@ -1,6 +1,8 @@
 package com.example.postgresql.controllers;
 
 import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.Bitrix24Client;
+import com.example.postgresql.UserF.Cargo;
 import com.google.gson.JsonObject;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -113,6 +115,28 @@ public class AddCargoDialogController {
                 })
                 .thenAccept(v -> Platform.runLater(() -> {
                     showStatus("Груз успешно опубликован!", "#16a34a");
+
+                    Cargo cargoObj = new Cargo(
+                        0,
+                        getStr(cargo, "ТипТС"),
+                        getDbl(cargo, "Вес"),
+                        getDbl(cargo, "Объем"),
+                        getStr(cargo, "Товар"),
+                        getStr(cargo, "Откуда"),
+                        getStr(cargo, "Куда"),
+                        getStr(cargo, "ТипПогрузки"),
+                        getStr(cargo, "ДеталиПогрузки"),
+                        getStr(cargo, "Даты"),
+                        getDbl(cargo, "ЦенаПоКарте"),
+                        getDbl(cargo, "ЦенаНДС"),
+                        getStr(cargo, "Торг_без_торга"),
+                        getStr(cargo, "КонтактныйТелефон"),
+                        0
+                    );
+                    Bitrix24Client.getInstance().createDealFromCargo(cargoObj)
+                        .thenAccept(dealId -> System.out.println("[Bitrix24] Сделка создана, ID=" + dealId))
+                        .exceptionally(ex -> { System.err.println("[Bitrix24] Ошибка сделки: " + ex.getMessage()); return null; });
+
                     new Timeline(new KeyFrame(javafx.util.Duration.seconds(1.5), e -> {
                         if (onSuccess != null) onSuccess.run();
                         closeWindow();
@@ -191,6 +215,16 @@ public class AddCargoDialogController {
         statusLabel.setStyle("-fx-text-fill: " + color + "; -fx-font-size: 13;");
         statusLabel.setVisible(true);
         statusLabel.setManaged(true);
+    }
+
+    private String getStr(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return "";
+        return obj.get(key).getAsString();
+    }
+
+    private double getDbl(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
+        try { return obj.get(key).getAsDouble(); } catch (Exception e) { return 0; }
     }
 
     @FXML
