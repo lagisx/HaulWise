@@ -144,6 +144,19 @@
                             </VBox>
                         </VBox>
 
+                        <!-- Блок входящих заявок на вступление -->
+                        <VBox fx:id="profileInvitesSection" spacing="12"
+                              visible="false" managed="false"
+                              style="-fx-background-color: white; -fx-background-radius: 20;
+                                     -fx-padding: 28 32;
+                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
+                            <Label text="📬 Приглашения в компанию"
+                                   style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e40af;"/>
+                            <Label text="Вас пригласили в следующие компании:"
+                                   style="-fx-font-size: 12; -fx-text-fill: #64748b;"/>
+                            <VBox fx:id="profileInvitesContainer" spacing="10"/>
+                        </VBox>
+
                         <!-- Блок компании (встроен прямо здесь) -->
                         <VBox fx:id="profileCompanyBox" spacing="16"
                               style="-fx-background-color: white; -fx-background-radius: 20;
@@ -205,8 +218,9 @@
                                     </HBox>
                                 </VBox>
 
-                                <!-- Пригласить -->
-                                <VBox spacing="8">
+                                <!-- Пригласить — только для owner, управляется через java -->
+                                <VBox fx:id="profileInviteBox" spacing="8"
+                                      visible="false" managed="false">
                                     <Label text="👥 Пригласить сотрудника"
                                            style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
                                     <HBox spacing="8" alignment="CENTER_LEFT">
@@ -230,7 +244,7 @@
                                     <VBox fx:id="profileMembersBox" spacing="6"/>
                                 </VBox>
 
-                                <!-- Кнопка удалить (owner) -->
+                                <!-- Кнопка удалить компанию (только owner) -->
                                 <HBox fx:id="profileDeleteCompanyBox" alignment="CENTER_RIGHT"
                                       visible="false" managed="false">
                                     <Button onAction="#onProfileDeleteCompany"
@@ -239,6 +253,16 @@
                                                    -fx-font-weight: bold; -fx-font-size: 11;
                                                    -fx-padding: 7 14; -fx-background-radius: 8;
                                                    -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-cursor: hand;"/>
+                                </HBox>
+                                <!-- Кнопка покинуть компанию (только employee) -->
+                                <HBox fx:id="profileLeaveCompanyBox" alignment="CENTER_RIGHT"
+                                      visible="false" managed="false">
+                                    <Button onAction="#onProfileLeaveCompany"
+                                            text="🚪 Покинуть компанию"
+                                            style="-fx-background-color: #fffbeb; -fx-text-fill: #92400e;
+                                                   -fx-font-weight: bold; -fx-font-size: 11;
+                                                   -fx-padding: 7 14; -fx-background-radius: 8;
+                                                   -fx-border-color: #fde68a; -fx-border-radius: 8; -fx-cursor: hand;"/>
                                 </HBox>
                             </VBox>
 

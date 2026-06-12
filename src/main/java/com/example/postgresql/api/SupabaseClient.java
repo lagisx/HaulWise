@@ -95,6 +95,42 @@ public class SupabaseClient {
         return future;
     }
 
+    public CompletableFuture<JsonArray> selectWithServiceRoleTwoFilters(String table, String select,
+                                                                        String filter1, String filter2) {
+        CompletableFuture<JsonArray> future = new CompletableFuture<>();
+        HttpUrl.Builder ub = HttpUrl.parse(REST_URL + "/" + table).newBuilder();
+        ub.addQueryParameter("select", select);
+        addFilter(ub, filter1);
+        addFilter(ub, filter2);
+        System.out.println("[SupabaseServiceRole] GET " + ub.build());
+        Request req = new Request.Builder().url(ub.build())
+                .addHeader("apikey", SUPABASE_SERVICE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                .addHeader("Accept", "application/json")
+                .get().build();
+        http.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call c, java.io.IOException e) {
+                System.err.println("[SupabaseServiceRole] GET FAIL: " + e.getMessage());
+                future.completeExceptionally(e);
+            }
+
+            @Override
+            public void onResponse(Call c, Response r) throws java.io.IOException {
+                String body = r.body() != null ? r.body().string() : "[]";
+                System.out.println("[SupabaseServiceRole] GET " + r.code() + " body=" + body);
+                r.close();
+                try {
+                    future.complete(new com.google.gson.Gson().fromJson(body,
+                            com.google.gson.JsonArray.class));
+                } catch (Exception ex) {
+                    future.completeExceptionally(new java.io.IOException("Parse error: " + body, ex));
+                }
+            }
+        });
+        return future;
+    }
+
     public CompletableFuture<JsonArray> insert(String table, JsonObject data) {
         return insertWithToken(table, data, SUPABASE_ANON_KEY);
     }
@@ -132,10 +168,11 @@ public class SupabaseClient {
             int eq = filter.indexOf('=');
             if (eq > 0) ub.addQueryParameter(filter.substring(0, eq), filter.substring(eq + 1));
         }
+        String jsonBody = new com.google.gson.GsonBuilder().serializeNulls().create().toJson(data);
         Request req = new Request.Builder()
                 .url(ub.build())
                 .headers(baseHeaders(SUPABASE_ANON_KEY))
-                .patch(json(gson.toJson(data))).build();
+                .patch(RequestBody.create(jsonBody, MediaType.parse("application/json"))).build();
         http.newCall(req).enqueue(new BoolCallback(future));
         return future;
     }
@@ -151,6 +188,74 @@ public class SupabaseClient {
                 .url(ub.build())
                 .headers(baseHeaders(SUPABASE_ANON_KEY))
                 .delete().build();
+        http.newCall(req).enqueue(new BoolCallback(future));
+        return future;
+    }
+
+    public CompletableFuture<Boolean> updateServiceRole(String table, JsonObject data, String filter) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        HttpUrl.Builder ub = HttpUrl.parse(REST_URL + "/" + table).newBuilder();
+        if (filter != null && !filter.isEmpty()) {
+            int eq = filter.indexOf('=');
+            if (eq > 0) ub.addQueryParameter(filter.substring(0, eq), filter.substring(eq + 1));
+        }
+        String jsonBody = new com.google.gson.GsonBuilder().serializeNulls().create().toJson(data);
+        System.out.println("[SupabaseServiceRole] PATCH " + ub.build() + " data=" + jsonBody);
+        Request req = new Request.Builder()
+                .url(ub.build())
+                .addHeader("apikey", SUPABASE_SERVICE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Prefer", "return=representation")
+                .patch(RequestBody.create(jsonBody, MediaType.parse("application/json"))).build();
+        http.newCall(req).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call c, java.io.IOException e) {
+                System.err.println("[SupabaseServiceRole] FAIL: " + e.getMessage());
+                future.complete(false);
+            }
+
+            @Override
+            public void onResponse(Call c, Response r) throws java.io.IOException {
+                String body = r.body() != null ? r.body().string() : "";
+                System.out.println("[SupabaseServiceRole] " + r.code() + " body=" + body);
+                future.complete(r.isSuccessful());
+                r.close();
+            }
+        });
+        return future;
+    }
+
+    public CompletableFuture<Boolean> deleteServiceRole(String table, String filter) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        HttpUrl.Builder ub = HttpUrl.parse(REST_URL + "/" + table).newBuilder();
+        if (filter != null && !filter.isEmpty()) {
+            int eq = filter.indexOf('=');
+            if (eq > 0) ub.addQueryParameter(filter.substring(0, eq), filter.substring(eq + 1));
+        }
+        Request req = new Request.Builder()
+                .url(ub.build())
+                .addHeader("apikey", SUPABASE_SERVICE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                .addHeader("Content-Type", "application/json")
+                .delete().build();
+        http.newCall(req).enqueue(new BoolCallback(future));
+        return future;
+    }
+
+    public CompletableFuture<Boolean> updateServiceRoleTwoFilters(String table, JsonObject data,
+                                                                  String filter1, String filter2) {
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        HttpUrl.Builder ub = HttpUrl.parse(REST_URL + "/" + table).newBuilder();
+        addFilter(ub, filter1);
+        addFilter(ub, filter2);
+        String jsonBody = new com.google.gson.GsonBuilder().serializeNulls().create().toJson(data);
+        Request req = new Request.Builder()
+                .url(ub.build())
+                .addHeader("apikey", SUPABASE_SERVICE_KEY)
+                .addHeader("Authorization", "Bearer " + SUPABASE_SERVICE_KEY)
+                .addHeader("Content-Type", "application/json")
+                .patch(RequestBody.create(jsonBody, MediaType.parse("application/json"))).build();
         http.newCall(req).enqueue(new BoolCallback(future));
         return future;
     }

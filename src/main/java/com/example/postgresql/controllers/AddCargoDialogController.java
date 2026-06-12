@@ -150,7 +150,6 @@ public class AddCargoDialogController {
                                     .createDealFromCargo(webhook, cargoObj)
                                     .thenAccept(dealId -> {
                                         System.out.println("[Bitrix24] Сделка создана, ID=" + dealId);
-                                        /**/
                                     })
                                     .exceptionally(ex -> {
                                         System.err.println("[Bitrix24] " + ex.getMessage());

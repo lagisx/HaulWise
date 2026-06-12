@@ -6,6 +6,7 @@ import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.UserPanelController;
 import com.example.postgresql.controllers.CompanyPanelController;
 import com.example.postgresql.controllers.CreateCompanyController;
+import com.example.postgresql.controllers.InviteCardController;
 import com.example.postgresql.API.CompanyService;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -85,23 +86,44 @@ public class ProfileUser {
     private String initialPhone = "";
     private boolean emailConfirmed = false;
 
-    @FXML private VBox  profileCompanyBox;
-    @FXML private VBox  profileNoCompanyBox;
-    @FXML private VBox  profileCompanyInfoBox;
-    @FXML private Label profileCompanyName;
-    @FXML private Label profileCompanyRole;
-    @FXML private VBox  profileWebhookBox;
-    @FXML private TextField profileWebhookField;
-    @FXML private TextField profileInviteField;
-    @FXML private Label profileInviteStatus;
-    @FXML private VBox  profileMembersBox;
-    @FXML private HBox profileDeleteCompanyBox;
-    @FXML private Label profileCompanyStatus;
+    @FXML
+    private VBox profileCompanyBox;
+    @FXML
+    private VBox profileNoCompanyBox;
+    @FXML
+    private VBox profileCompanyInfoBox;
+    @FXML
+    private Label profileCompanyName;
+    @FXML
+    private Label profileCompanyRole;
+    @FXML
+    private VBox profileWebhookBox;
+    @FXML
+    private TextField profileWebhookField;
+    @FXML
+    private TextField profileInviteField;
+    @FXML
+    private Label profileInviteStatus;
+    @FXML
+    private VBox profileMembersBox;
+    @FXML
+    private HBox profileDeleteCompanyBox;
+    @FXML
+    private HBox profileLeaveCompanyBox;
+    @FXML
+    private Label profileCompanyStatus;
 
     private int profileCompanyId = -1;
     private String profileMyRole = "";
 
-    private final AuthService    authService    = new AuthService();
+    @FXML
+    private VBox profileInvitesSection;
+    @FXML
+    private VBox profileInvitesContainer;
+    @FXML
+    private VBox profileInviteBox;
+
+    private final AuthService authService = new AuthService();
     private final CompanyService companyService = new CompanyService();
 
     @FXML
@@ -124,6 +146,7 @@ public class ProfileUser {
 
         loadProfileDataFromSupabase();
         loadProfileCompany();
+        loadPendingInvites();
     }
 
     private void loadProfileDataFromSupabase() {
@@ -590,6 +613,14 @@ public class ProfileUser {
         profileWebhookBox.setManaged(isOwner);
         profileDeleteCompanyBox.setVisible(isOwner);
         profileDeleteCompanyBox.setManaged(isOwner);
+        if (profileLeaveCompanyBox != null) {
+            profileLeaveCompanyBox.setVisible(!isOwner);
+            profileLeaveCompanyBox.setManaged(!isOwner);
+        }
+        if (profileInviteBox != null) {
+            profileInviteBox.setVisible(isOwner);
+            profileInviteBox.setManaged(isOwner);
+        }
 
         if (isOwner) {
             profileWebhookField.setText(getStr(company, "bitrix24_webhook"));
@@ -612,7 +643,7 @@ public class ProfileUser {
                     for (JsonElement el : members) {
                         com.google.gson.JsonObject m = el.getAsJsonObject();
                         String login = getStr(m, "login");
-                        String role  = getStr(m, "company_role");
+                        String role = getStr(m, "company_role");
                         javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(8);
                         row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
                         row.setStyle("-fx-padding: 6 10; -fx-background-color: #f8fafc; -fx-background-radius: 6;");
@@ -662,7 +693,10 @@ public class ProfileUser {
     private void onProfileSaveWebhook() {
         if (profileCompanyId < 0) return;
         String webhook = profileWebhookField.getText().trim();
-        if (webhook.isEmpty()) { showProfileCompanyStatus("Введите URL вебхука", "orange"); return; }
+        if (webhook.isEmpty()) {
+            showProfileCompanyStatus("Введите URL вебхука", "orange");
+            return;
+        }
         companyService.updateWebhook(profileCompanyId, webhook)
                 .thenAccept(ok -> javafx.application.Platform.runLater(() ->
                         showProfileCompanyStatus(ok ? "✅ Вебхук сохранён" : "Ошибка сохранения", ok ? "#16a34a" : "red")
@@ -671,20 +705,19 @@ public class ProfileUser {
 
     @FXML
     private void onProfileInvite() {
-        if (profileCompanyId < 0) return;
+        if (profileCompanyId < 0 || !"owner".equals(profileMyRole)) return;
         String login = profileInviteField.getText().trim();
         if (login.isEmpty() || login.equals(currentUser)) {
             setProfileInviteStatus("Введите логин другого пользователя", "orange");
             return;
         }
-        companyService.inviteEmployee(login, profileCompanyId)
+        companyService.sendInvite(profileCompanyId, currentUser, login)
                 .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
                     if (ok) {
-                        setProfileInviteStatus("✅ " + login + " добавлен", "#16a34a");
+                        setProfileInviteStatus("✅ Приглашение отправлено " + login, "#16a34a");
                         profileInviteField.clear();
-                        loadProfileMembers();
                     } else {
-                        setProfileInviteStatus("Не найден или уже в компании", "red");
+                        setProfileInviteStatus("Не найден, уже в компании или уже приглашён", "red");
                     }
                 })).exceptionally(ex -> null);
     }
@@ -697,7 +730,88 @@ public class ProfileUser {
             if (btn == ButtonType.YES) {
                 companyService.deleteCompany(profileCompanyId)
                         .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
-                            if (ok) { profileCompanyId = -1; showProfileNoCompany(); }
+                            if (ok) {
+                                profileCompanyId = -1;
+                                showProfileNoCompany();
+                            }
+                        })).exceptionally(ex -> null);
+            }
+        });
+    }
+
+    private void loadPendingInvites() {
+        if (currentUser.isEmpty()) return;
+        companyService.getPendingInvites(currentUser)
+                .thenAccept(invites -> Platform.runLater(() -> {
+                    if (profileInvitesSection == null || profileInvitesContainer == null) return;
+                    if (invites == null || invites.isEmpty()) {
+                        profileInvitesSection.setVisible(false);
+                        profileInvitesSection.setManaged(false);
+                        return;
+                    }
+                    profileInvitesSection.setVisible(true);
+                    profileInvitesSection.setManaged(true);
+                    profileInvitesContainer.getChildren().clear();
+
+                    for (com.google.gson.JsonElement el : invites) {
+                        com.google.gson.JsonObject inv = el.getAsJsonObject();
+                        int inviteId = inv.get("id").getAsInt();
+                        int companyId = inv.get("company_id").getAsInt();
+                        String from = inv.has("from_login") && !inv.get("from_login").isJsonNull()
+                                ? inv.get("from_login").getAsString() : "?";
+
+                        companyService.getCompanyName(companyId)
+                                .thenAccept(name -> Platform.runLater(() -> {
+                                    try {
+                                        FXMLLoader loader = new FXMLLoader(
+                                                HelloApplication.class.getResource("InviteCard.fxml"));
+                                        javafx.scene.layout.VBox card = loader.load();
+                                        InviteCardController ctrl = loader.getController();
+                                        ctrl.setData(
+                                                inviteId, companyId, name, from, currentUser,
+                                                () -> {
+                                                    profileInvitesContainer.getChildren().remove(card);
+                                                    if (profileInvitesContainer.getChildren().isEmpty()) {
+                                                        profileInvitesSection.setVisible(false);
+                                                        profileInvitesSection.setManaged(false);
+                                                    }
+                                                    loadProfileCompany();
+                                                },
+                                                () -> {
+                                                    profileInvitesContainer.getChildren().remove(card);
+                                                    if (profileInvitesContainer.getChildren().isEmpty()) {
+                                                        profileInvitesSection.setVisible(false);
+                                                        profileInvitesSection.setManaged(false);
+                                                    }
+                                                }
+                                        );
+                                        profileInvitesContainer.getChildren().add(card);
+                                    } catch (Exception e) {
+                                        System.err.println("[InviteCard] Ошибка загрузки FXML: " + e.getMessage());
+                                    }
+                                }));
+                    }
+                })).exceptionally(ex -> null);
+    }
+
+    @FXML
+    private void onProfileLeaveCompany() {
+        Alert confirm = new Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION,
+                "Покинуть компанию? Вы потеряете доступ к её инструментам.",
+                javafx.scene.control.ButtonType.YES, javafx.scene.control.ButtonType.NO);
+        confirm.setTitle("Подтверждение");
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == javafx.scene.control.ButtonType.YES) {
+                companyService.leaveCompany(currentUser)
+                        .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                            if (ok) {
+                                profileCompanyId = -1;
+                                profileMyRole = "";
+                                showProfileNoCompany();
+                                showProfileCompanyStatus("Вы покинули компанию", "#64748b");
+                            } else {
+                                showProfileCompanyStatus("Не удалось покинуть компанию", "red");
+                            }
                         })).exceptionally(ex -> null);
             }
         });

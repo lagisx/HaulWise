@@ -31,7 +31,7 @@ public class CompanyService {
                     String enc = java.net.URLEncoder.encode(ownerLogin,
                             java.nio.charset.StandardCharsets.UTF_8);
                     return supabase.selectWithServiceRole("companies", "id",
-                            "owner_login=eq." + enc)
+                                    "owner_login=eq." + enc)
                             .thenApply(rows -> {
                                 if (rows == null || rows.isEmpty()) return -1;
                                 JsonObject row = rows.get(0).getAsJsonObject();
@@ -50,7 +50,7 @@ public class CompanyService {
 
         String encodedLogin = java.net.URLEncoder.encode(login,
                 java.nio.charset.StandardCharsets.UTF_8);
-        return supabase.update("users", data, "login=eq." + encodedLogin);
+        return supabase.updateServiceRole("users", data, "login=eq." + encodedLogin);
     }
 
 
@@ -119,14 +119,14 @@ public class CompanyService {
         data.add("company_role", com.google.gson.JsonNull.INSTANCE);
         String enc = java.net.URLEncoder.encode(login,
                 java.nio.charset.StandardCharsets.UTF_8);
-        return supabase.update("users", data, "login=eq." + enc);
+        return supabase.updateServiceRole("users", data, "login=eq." + enc);
     }
 
 
     public CompletableFuture<Boolean> updateWebhook(int companyId, String newWebhook) {
         JsonObject data = new JsonObject();
         data.addProperty("bitrix24_webhook", newWebhook);
-        return supabase.update("companies", data, "id=eq." + companyId);
+        return supabase.updateServiceRole("companies", data, "id=eq." + companyId);
     }
 
 
@@ -134,9 +134,65 @@ public class CompanyService {
         JsonObject nullData = new JsonObject();
         nullData.add("company_id", com.google.gson.JsonNull.INSTANCE);
         nullData.add("company_role", com.google.gson.JsonNull.INSTANCE);
+        return supabase.updateServiceRole("users", nullData, "company_id=eq." + companyId)
+                .thenCompose(ok -> supabase.deleteServiceRole("company_invites", "company_id=eq." + companyId))
+                .thenCompose(ok -> supabase.deleteServiceRole("companies", "id=eq." + companyId));
+    }
 
-        return supabase.update("users", nullData, "company_id=eq." + companyId)
-                .thenCompose(ok -> supabase.delete("companies", "id=eq." + companyId));
+    public CompletableFuture<Boolean> sendInvite(int companyId, String fromLogin, String toLogin) {
+        String encTo = java.net.URLEncoder.encode(toLogin, java.nio.charset.StandardCharsets.UTF_8);
+        return supabase.selectWithServiceRole("users", "login,company_id", "login=eq." + encTo)
+                .thenCompose(rows -> {
+                    if (rows == null || rows.isEmpty()) return done(false);
+                    JsonObject user = rows.get(0).getAsJsonObject();
+                    if (user.has("company_id") && !user.get("company_id").isJsonNull()) return done(false);
+                    return supabase.selectWithServiceRole("company_invites", "id",
+                                    "to_login=eq." + encTo + ",status=eq.pending")
+                            .thenCompose(existing -> {
+                                if (existing != null && !existing.isEmpty()) return done(false);
+                                JsonObject data = new JsonObject();
+                                data.addProperty("company_id", companyId);
+                                data.addProperty("from_login", fromLogin);
+                                data.addProperty("to_login", toLogin);
+                                data.addProperty("status", "pending");
+                                return supabase.insertServiceRole("company_invites", data)
+                                        .thenApply(arr -> arr != null);
+                            });
+                });
+    }
+
+    public CompletableFuture<com.google.gson.JsonArray> getPendingInvites(String login) {
+        String enc = java.net.URLEncoder.encode(login, java.nio.charset.StandardCharsets.UTF_8);
+        return supabase.selectWithServiceRoleTwoFilters("company_invites",
+                "id,company_id,from_login,status,created_at",
+                "to_login=eq." + enc,
+                "status=eq.pending");
+    }
+
+    public CompletableFuture<Boolean> acceptInvite(int inviteId, String toLogin, int companyId) {
+        JsonObject upd = new JsonObject();
+        upd.addProperty("status", "accepted");
+        return supabase.updateServiceRole("company_invites", upd, "id=eq." + inviteId)
+                .thenCompose(ok -> {
+                    if (!ok) return done(false);
+                    return linkUserToCompany(toLogin, companyId, "employee");
+                });
+    }
+
+    public CompletableFuture<Boolean> declineInvite(int inviteId) {
+        JsonObject upd = new JsonObject();
+        upd.addProperty("status", "declined");
+        return supabase.updateServiceRole("company_invites", upd, "id=eq." + inviteId);
+    }
+
+    public CompletableFuture<String> getCompanyName(int companyId) {
+        return supabase.selectWithServiceRole("companies", "name", "id=eq." + companyId)
+                .thenApply(rows -> {
+                    if (rows == null || rows.isEmpty()) return "Неизвестная компания";
+                    JsonObject row = rows.get(0).getAsJsonObject();
+                    return row.has("name") && !row.get("name").isJsonNull()
+                            ? row.get("name").getAsString() : "Неизвестная компания";
+                });
     }
 
     private <T> CompletableFuture<T> done(T value) {
