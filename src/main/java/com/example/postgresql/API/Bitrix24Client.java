@@ -74,33 +74,15 @@ public class Bitrix24Client {
     }
 
 
-    public CompletableFuture<Integer> createTaskForCarrier(String webhook,
-                                                           com.example.postgresql.UserF.Cargo cargo, String carrierName, String deadline) {
-        if (webhook == null || webhook.isBlank()) return CompletableFuture.completedFuture(-1);
-
+    private CompletableFuture<Integer> getResponsibleId(String webhook) {
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        JsonObject fields = new JsonObject();
-        fields.addProperty("TITLE", "Перевозка: " + cargo.getFromCity()
-                + " → " + cargo.getToCity() + " | " + cargo.getProduct());
-        fields.addProperty("DESCRIPTION",
-                "Логист: " + carrierName + "\n" +
-                        "Груз: " + cargo.getProduct() + "\n" +
-                        "Откуда: " + cargo.getFromCity() + "\n" +
-                        "Куда: " + cargo.getToCity() + "\n" +
-                        "Вес: " + cargo.getWeight() + " т\n" +
-                        "Объём: " + cargo.getVolume() + " м³\n" +
-                        "Дата отправки: " + cargo.getDate() + "\n" +
-                        "Телефон: " + cargo.getContactPhone());
-        fields.addProperty("DEADLINE", deadline);
-        fields.addProperty("PRIORITY", "1");
-        JsonObject body = new JsonObject();
-        body.add("fields", fields);
-
-        http.newCall(buildPost(webhook, "tasks.task.add.json", body)).enqueue(new Callback() {
+        Request req = new Request.Builder()
+                .url(webhook.endsWith("/") ? webhook + "profile.json" : webhook + "/profile.json")
+                .get().build();
+        http.newCall(req).enqueue(new Callback() {
             @Override
             public void onFailure(Call c, IOException e) {
-                System.err.println("[Bitrix24] createTask error: " + e.getMessage());
-                future.completeExceptionally(e);
+                future.complete(1);
             }
 
             @Override
@@ -108,25 +90,75 @@ public class Bitrix24Client {
                 String raw = bodyStr(r);
                 try {
                     JsonObject json = gson.fromJson(raw, JsonObject.class);
-                    if (json.has("result")) {
-                        JsonObject res = json.getAsJsonObject("result");
-                        if (res.has("task")) {
-                            int id = res.getAsJsonObject("task").get("id").getAsInt();
-                            System.out.println("[Bitrix24] Задача создана, ID=" + id);
-                            future.complete(id);
-                        } else {
-                            future.complete(-1);
-                        }
+                    if (json.has("result") && json.getAsJsonObject("result").has("ID")) {
+                        future.complete(json.getAsJsonObject("result").get("ID").getAsInt());
                     } else {
-                        System.err.println("[Bitrix24] createTask: " + raw);
-                        future.complete(-1);
+                        future.complete(1);
                     }
                 } catch (Exception ex) {
-                    future.completeExceptionally(new IOException(raw, ex));
+                    future.complete(1);
                 }
             }
         });
         return future;
+    }
+
+    public CompletableFuture<Integer> createTaskForCarrier(String webhook,
+                                                           com.example.postgresql.UserF.Cargo cargo, String carrierName, String deadline) {
+        if (webhook == null || webhook.isBlank()) return CompletableFuture.completedFuture(-1);
+
+        return getResponsibleId(webhook).thenCompose(responsibleId -> {
+            CompletableFuture<Integer> future = new CompletableFuture<>();
+            JsonObject fields = new JsonObject();
+            fields.addProperty("TITLE", "Перевозка: " + cargo.getFromCity()
+                    + " → " + cargo.getToCity() + " | " + cargo.getProduct());
+            fields.addProperty("DESCRIPTION",
+                    "Логист: " + carrierName + "\n" +
+                            "Груз: " + cargo.getProduct() + "\n" +
+                            "Откуда: " + cargo.getFromCity() + "\n" +
+                            "Куда: " + cargo.getToCity() + "\n" +
+                            "Вес: " + cargo.getWeight() + " т\n" +
+                            "Объём: " + cargo.getVolume() + " м³\n" +
+                            "Дата отправки: " + cargo.getDate() + "\n" +
+                            "Телефон: " + cargo.getContactPhone());
+            fields.addProperty("DEADLINE", deadline);
+            fields.addProperty("PRIORITY", "1");
+            fields.addProperty("RESPONSIBLE_ID", responsibleId);
+            JsonObject body = new JsonObject();
+            body.add("fields", fields);
+
+            http.newCall(buildPost(webhook, "tasks.task.add.json", body)).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call c, IOException e) {
+                    System.err.println("[Bitrix24] createTask error: " + e.getMessage());
+                    future.completeExceptionally(e);
+                }
+
+                @Override
+                public void onResponse(Call c, Response r) throws IOException {
+                    String raw = bodyStr(r);
+                    try {
+                        JsonObject json = gson.fromJson(raw, JsonObject.class);
+                        if (json.has("result")) {
+                            JsonObject res = json.getAsJsonObject("result");
+                            if (res.has("task")) {
+                                int id = res.getAsJsonObject("task").get("id").getAsInt();
+                                System.out.println("[Bitrix24] Задача создана, ID=" + id);
+                                future.complete(id);
+                            } else {
+                                future.complete(-1);
+                            }
+                        } else {
+                            System.err.println("[Bitrix24] createTask: " + raw);
+                            future.complete(-1);
+                        }
+                    } catch (Exception ex) {
+                        future.completeExceptionally(new IOException(raw, ex));
+                    }
+                }
+            });
+            return future;
+        });
     }
 
 

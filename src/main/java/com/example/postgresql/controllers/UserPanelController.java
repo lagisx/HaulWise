@@ -204,8 +204,7 @@ public class UserPanelController {
         JsonArray filtered = new JsonArray();
         for (JsonElement el : allCargos) {
             JsonObject c = el.getAsJsonObject();
-            boolean ok = true;
-            if (!from.isEmpty() && !getStr(c, "Откуда").toLowerCase().contains(from)) ok = false;
+            boolean ok = from.isEmpty() || getStr(c, "Откуда").toLowerCase().contains(from);
             if (!to.isEmpty() && !getStr(c, "Куда").toLowerCase().contains(to)) ok = false;
             double w = getDbl(c, "Вес"), p = getDbl(c, "ЦенаПоКарте");
             if (w < minW || w > maxW || p < minP || p > maxP) ok = false;
@@ -357,16 +356,19 @@ public class UserPanelController {
             ctrl.chatButton.setVisible(true);
             ctrl.chatButton.setManaged(true);
             ctrl.chatButton.setOnAction(e -> {
+                Cargo cargoObj = new Cargo(
+                        safeInt(cargo, "id"), safeStr(cargo, "ТипТС"),
+                        safeDbl(cargo, "Вес"), safeDbl(cargo, "Объем"),
+                        safeStr(cargo, "Товар"), safeStr(cargo, "Откуда"),
+                        safeStr(cargo, "Куда"), safeStr(cargo, "ТипПогрузки"),
+                        safeStr(cargo, "ДеталиПогрузки"), safeStr(cargo, "Даты"),
+                        safeDbl(cargo, "ЦенаПоКарте"), safeDbl(cargo, "ЦенаНДС"),
+                        safeStr(cargo, "Торг_без_торга"), safeStr(cargo, "КонтактныйТелефон"), 0);
+
+                chatManager.openChatInlineWithCargo(ownerLogin, cargoObj, ownerLogin);
+
                 companyService.getWebhookForUser(currentUser).thenAccept(myWebhook -> {
                     if (!myWebhook.isEmpty()) {
-                        Cargo cargoObj = new Cargo(
-                                safeInt(cargo, "id"), safeStr(cargo, "ТипТС"),
-                                safeDbl(cargo, "Вес"), safeDbl(cargo, "Объем"),
-                                safeStr(cargo, "Товар"), safeStr(cargo, "Откуда"),
-                                safeStr(cargo, "Куда"), safeStr(cargo, "ТипПогрузки"),
-                                safeStr(cargo, "ДеталиПогрузки"), safeStr(cargo, "Даты"),
-                                safeDbl(cargo, "ЦенаПоКарте"), safeDbl(cargo, "ЦенаНДС"),
-                                safeStr(cargo, "Торг_без_торга"), safeStr(cargo, "КонтактныйТелефон"), 0);
                         String deadline = LocalDate.now().plusDays(7)
                                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) + "T23:59:59+03:00";
                         Bitrix24Client.getInstance()
@@ -394,7 +396,7 @@ public class UserPanelController {
                             if (!ownerWebhook.isEmpty()) {
                                 Bitrix24Client.getInstance()
                                         .updateDealStageInProgress(ownerWebhook, bitrixDealId)
-                                        .thenAccept(ok -> System.out.println("[Bitrix24] Сделка переведена в 'В работе': " + ok))
+                                        .thenAccept(ok -> System.out.println("[Bitrix24] Сделка переведена: " + ok))
                                         .exceptionally(ex -> {
                                             System.err.println("[Bitrix24] update: " + ex.getMessage());
                                             return null;
@@ -406,7 +408,6 @@ public class UserPanelController {
                     System.err.println("[Bitrix24] webhook: " + ex.getMessage());
                     return null;
                 });
-                openChatInline(ownerLogin);
             });
         }
         card.setOnMouseClicked(event -> {

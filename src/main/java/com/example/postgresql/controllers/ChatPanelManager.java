@@ -2,6 +2,7 @@ package com.example.postgresql.controllers;
 
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
+import com.example.postgresql.UserF.Cargo;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -137,6 +138,10 @@ public class ChatPanelManager {
 
 
     public void openChatInline(String partnerLogin) {
+        openChatInlineWithCargo(partnerLogin, null, null);
+    }
+
+    public void openChatInlineWithCargo(String partnerLogin, Cargo cargo, String ownerLogin) {
         openedChats.add(partnerLogin);
         activeChatPartner = partnerLogin;
         Platform.runLater(this::renderChatList);
@@ -144,7 +149,11 @@ public class ChatPanelManager {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("Chat.fxml"));
             Parent chatRoot = loader.load();
             activeChatController = loader.getController();
-            activeChatController.init(currentUser, partnerLogin);
+            if (cargo != null) {
+                activeChatController.initWithCargo(currentUser, partnerLogin, cargo, ownerLogin);
+            } else {
+                activeChatController.init(currentUser, partnerLogin);
+            }
             chatContentPane.getChildren().clear();
             VBox.setVgrow(chatRoot, Priority.ALWAYS);
             if (chatRoot instanceof Region region) {
