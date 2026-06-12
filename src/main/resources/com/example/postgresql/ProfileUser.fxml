@@ -17,26 +17,22 @@
                   style="-fx-background: linear-gradient(to right, #1e40af, #3b82f6);
                          -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.15), 12, 0, 0, 6);">
                 <padding><Insets top="12" right="30" bottom="12" left="30"/></padding>
-                <children>
-                    <Label text="Биржа грузоперевозок"
-                           style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: black;">
-                        <font><Font name="System Bold" size="26"/></font>
-                    </Label>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="logoutButton" onAction="#goBackUserPanel" text="Назад"
-                            style="-fx-background-color: white; -fx-text-fill: #1e40af;
-                                   -fx-font-weight: bold; -fx-font-size: 14px;
-                                   -fx-padding: 10 24; -fx-background-radius: 12;
-                                   -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;
-                                   -fx-cursor: hand;"/>
-                </children>
+                <Label text="Биржа грузоперевозок"
+                       style="-fx-font-size: 26px; -fx-font-weight: 900; -fx-text-fill: black;">
+                    <font><Font name="System Bold" size="26"/></font>
+                </Label>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="logoutButton" onAction="#goBackUserPanel" text="Назад"
+                        style="-fx-background-color: white; -fx-text-fill: #1e40af;
+                               -fx-font-weight: bold; -fx-font-size: 14px;
+                               -fx-padding: 10 24; -fx-background-radius: 12;
+                               -fx-border-color: #60a5fa; -fx-border-width: 2; -fx-border-radius: 12;
+                               -fx-cursor: hand;"/>
             </HBox>
             <HBox prefHeight="4.0" style="-fx-background-color: #60a5fa;">
-                <children>
-                    <Region prefWidth="180"/>
-                    <Region HBox.hgrow="ALWAYS"/>
-                    <Region prefWidth="120" style="-fx-background-color: #fbbf24;"/>
-                </children>
+                <Region prefWidth="180"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Region prefWidth="120" style="-fx-background-color: #fbbf24;"/>
             </HBox>
         </VBox>
     </top>
@@ -48,131 +44,210 @@
                 <HBox alignment="TOP_CENTER" spacing="40"
                       style="-fx-padding: 50 40 80 40;">
 
-                    
-                    <VBox spacing="28"
-                          style="-fx-background-color: white; -fx-background-radius: 20;
-                                 -fx-padding: 40;
-                                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);"
-                          HBox.hgrow="ALWAYS" maxWidth="700" minWidth="500">
+                    <!-- Левая колонка: профиль + компания -->
+                    <VBox spacing="24" HBox.hgrow="ALWAYS" maxWidth="700" minWidth="500">
 
-                        <VBox spacing="8">
-                            <Label text="Мой профиль"
-                                   style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #1e293b;"/>
-                            <Label fx:id="LabelUser"
-                                   style="-fx-font-size: 18; -fx-text-fill: #334155;"
-                                   text="Пользователь"/>
-                        </VBox>
+                        <!-- Блок профиля -->
+                        <VBox spacing="28"
+                              style="-fx-background-color: white; -fx-background-radius: 20;
+                                     -fx-padding: 40;
+                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
 
-                        <GridPane hgap="20" vgap="20">
-                            <columnConstraints>
-                                <ColumnConstraints prefWidth="130" hgrow="NEVER"/>
-                                <ColumnConstraints hgrow="ALWAYS"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints/>
-                                <RowConstraints/>
-                                <RowConstraints/>
-                            </rowConstraints>
+                            <VBox spacing="8">
+                                <Label text="Мой профиль"
+                                       style="-fx-font-size: 28; -fx-font-weight: 800; -fx-text-fill: #1e293b;"/>
+                                <Label fx:id="LabelUser"
+                                       style="-fx-font-size: 18; -fx-text-fill: #334155;"
+                                       text="Пользователь"/>
+                            </VBox>
 
-                            <Label text="Логин" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
-                            <TextField fx:id="login" editable="false"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12;
-                                              -fx-border-color: #e2e8f0; -fx-padding: 12;"
-                                       GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                            <GridPane hgap="20" vgap="20">
+                                <columnConstraints>
+                                    <ColumnConstraints prefWidth="130" hgrow="NEVER"/>
+                                    <ColumnConstraints hgrow="ALWAYS"/>
+                                </columnConstraints>
+                                <rowConstraints>
+                                    <RowConstraints/>
+                                    <RowConstraints/>
+                                    <RowConstraints/>
+                                </rowConstraints>
+                                <Label text="Логин" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                                <TextField fx:id="login" editable="false"
+                                           style="-fx-background-radius: 12; -fx-border-radius: 12;
+                                                  -fx-border-color: #e2e8f0; -fx-padding: 12;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                                <Label text="Email" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                                <TextField fx:id="email"
+                                           style="-fx-background-radius: 12; -fx-border-radius: 12;
+                                                  -fx-border-color: #e2e8f0; -fx-padding: 12;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                                <Label text="Телефон" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                                <TextField fx:id="phone"
+                                           style="-fx-background-radius: 12; -fx-border-radius: 12;
+                                                  -fx-border-color: #e2e8f0; -fx-padding: 12;"
+                                           GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                            </GridPane>
 
-                            <Label text="Email" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
-                            <TextField fx:id="email"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12;
-                                              -fx-border-color: #e2e8f0; -fx-padding: 12;"
-                                       GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-
-                            <Label text="Телефон" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-                            <TextField fx:id="phone"
-                                       style="-fx-background-radius: 12; -fx-border-radius: 12;
-                                              -fx-border-color: #e2e8f0; -fx-padding: 12;"
-                                       GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                        </GridPane>
-
-                        
-                        <HBox spacing="20">
-                            <Button fx:id="saveProfileBtn" onAction="#changeParam"
-                                    text="💾 Сохранить изменения"
-                                    style="-fx-background-color: #10b981; -fx-text-fill: white;
-                                           -fx-font-weight: bold; -fx-background-radius: 12;
-                                           -fx-padding: 14 32; -fx-cursor: hand;"/>
-                            <Button fx:id="deleteUser" onAction="#deleteUser"
-                                    text="🗑 Удалить аккаунт"
-                                    style="-fx-background-color: #ef4444; -fx-text-fill: white;
-                                           -fx-font-weight: bold; -fx-background-radius: 12;
-                                           -fx-padding: 14 32; -fx-cursor: hand;"/>
-                        </HBox>
-                        <Button onAction="#goToCompany"
-                                text="🏢 Моя компания"
-                                style="-fx-background-color: #1e40af; -fx-text-fill: white;
-                                       -fx-font-weight: bold; -fx-background-radius: 12;
-                                       -fx-padding: 14 32; -fx-cursor: hand;"/>
-
-                        <Label fx:id="statusLabel"
-                               style="-fx-font-size: 14; -fx-text-fill: #dc2626;" wrapText="true"/>
-
-                        
-                        
-                        
-                        <VBox fx:id="emailStatusCard" spacing="12"
-                              style="-fx-background-color: #fffbeb; -fx-background-radius: 14;
-                                     -fx-border-color: #fcd34d; -fx-border-radius: 14;
-                                     -fx-border-width: 1.5; -fx-padding: 18 22;">
-
-                            
-                            <HBox spacing="12" alignment="CENTER_LEFT">
-                                <Label fx:id="emailStatusIcon" text="⚠️"
-                                       style="-fx-font-size: 22;"/>
-                                <VBox spacing="3" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="emailStatusTitle"
-                                           text="Email не подтверждён"
-                                           style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #b45309;"/>
-                                    <Label fx:id="emailStatusDesc" wrapText="true"
-                                           text="Подтвердите почту, чтобы восстанавливать пароль и получать уведомления."
-                                           style="-fx-font-size: 13; -fx-text-fill: #92400e;"/>
-                                </VBox>
-                                <Label fx:id="emailStatusBadge"
-                                       text="● Не подтверждён"
-                                       style="-fx-background-color: #fef3c7; -fx-text-fill: #92400e;
-                                              -fx-background-radius: 20; -fx-padding: 4 14;
-                                              -fx-font-size: 12; -fx-font-weight: bold;"/>
+                            <HBox spacing="16">
+                                <Button onAction="#changeParam" text="💾 Сохранить изменения"
+                                        style="-fx-background-color: #10b981; -fx-text-fill: white;
+                                               -fx-font-weight: bold; -fx-background-radius: 12;
+                                               -fx-padding: 14 32; -fx-cursor: hand;"/>
+                                <Button onAction="#deleteUser" text="🗑 Удалить аккаунт"
+                                        style="-fx-background-color: #ef4444; -fx-text-fill: white;
+                                               -fx-font-weight: bold; -fx-background-radius: 12;
+                                               -fx-padding: 14 32; -fx-cursor: hand;"/>
                             </HBox>
 
-                            
-                            <Button fx:id="resendConfirmBtn"
-                                    onAction="#onResendConfirmation"
-                                    text="📧 Отправить код подтверждения"
-                                    style="-fx-background-color: #f59e0b; -fx-text-fill: white;
-                                           -fx-font-weight: bold; -fx-background-radius: 10;
-                                           -fx-padding: 10 22; -fx-cursor: hand;
-                                           -fx-font-size: 13;"/>
+                            <Label fx:id="statusLabel"
+                                   style="-fx-font-size: 14; -fx-text-fill: #dc2626;" wrapText="true"/>
 
-                            <VBox fx:id="emailOtpBox" spacing="8"
-                                  visible="false" managed="false">
-                                <Label text="Введите код из письма:"
-                                       style="-fx-font-size: 13; -fx-text-fill: #92400e;"/>
-                                <TextField fx:id="emailOtpField"
-                                           promptText="6-значный код"
-                                           style="-fx-background-radius: 10; -fx-border-radius: 10;
-                                                  -fx-border-color: #fcd34d; -fx-padding: 10;
-                                                  -fx-font-size: 16; -fx-alignment: center;
-                                                  -fx-font-weight: bold;"/>
-                                <Button fx:id="verifyEmailBtn"
-                                        onAction="#onVerifyEmailCode"
-                                        text="✅ Подтвердить email"
-                                        style="-fx-background-color: #059669; -fx-text-fill: white;
+                            <!-- Email статус -->
+                            <VBox fx:id="emailStatusCard" spacing="12"
+                                  style="-fx-background-color: #fffbeb; -fx-background-radius: 14;
+                                         -fx-border-color: #fcd34d; -fx-border-radius: 14;
+                                         -fx-border-width: 1.5; -fx-padding: 18 22;">
+                                <HBox spacing="12" alignment="CENTER_LEFT">
+                                    <Label fx:id="emailStatusIcon" text="⚠️" style="-fx-font-size: 22;"/>
+                                    <VBox spacing="3" HBox.hgrow="ALWAYS">
+                                        <Label fx:id="emailStatusTitle"
+                                               text="Email не подтверждён"
+                                               style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #b45309;"/>
+                                        <Label fx:id="emailStatusDesc" wrapText="true"
+                                               text="Подтвердите почту, чтобы восстанавливать пароль и получать уведомления."
+                                               style="-fx-font-size: 13; -fx-text-fill: #92400e;"/>
+                                    </VBox>
+                                    <Label fx:id="emailStatusBadge" text="● Не подтверждён"
+                                           style="-fx-background-color: #fef3c7; -fx-text-fill: #92400e;
+                                                  -fx-background-radius: 20; -fx-padding: 4 14;
+                                                  -fx-font-size: 12; -fx-font-weight: bold;"/>
+                                </HBox>
+                                <Button fx:id="resendConfirmBtn" onAction="#onResendConfirmation"
+                                        text="📧 Отправить код подтверждения"
+                                        style="-fx-background-color: #f59e0b; -fx-text-fill: white;
                                                -fx-font-weight: bold; -fx-background-radius: 10;
                                                -fx-padding: 10 22; -fx-cursor: hand; -fx-font-size: 13;"/>
+                                <VBox fx:id="emailOtpBox" spacing="8" visible="false" managed="false">
+                                    <Label text="Введите код из письма:"
+                                           style="-fx-font-size: 13; -fx-text-fill: #92400e;"/>
+                                    <TextField fx:id="emailOtpField" promptText="6-значный код"
+                                               style="-fx-background-radius: 10; -fx-border-radius: 10;
+                                                      -fx-border-color: #fcd34d; -fx-padding: 10;
+                                                      -fx-font-size: 16; -fx-alignment: center;
+                                                      -fx-font-weight: bold;"/>
+                                    <Button fx:id="verifyEmailBtn" onAction="#onVerifyEmailCode"
+                                            text="✅ Подтвердить email"
+                                            style="-fx-background-color: #059669; -fx-text-fill: white;
+                                                   -fx-font-weight: bold; -fx-background-radius: 10;
+                                                   -fx-padding: 10 22; -fx-cursor: hand; -fx-font-size: 13;"/>
+                                </VBox>
                             </VBox>
+                        </VBox>
+
+                        <!-- Блок компании (встроен прямо здесь) -->
+                        <VBox fx:id="profileCompanyBox" spacing="16"
+                              style="-fx-background-color: white; -fx-background-radius: 20;
+                                     -fx-padding: 32;
+                                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.1), 15, 0, 0, 5);">
+
+                            <Label text="🏢 Моя компания"
+                                   style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #1e293b;"/>
+
+                            <!-- Нет компании -->
+                            <VBox fx:id="profileNoCompanyBox" spacing="12" alignment="CENTER"
+                                  style="-fx-padding: 20 0;">
+                                <Label text="Вы не состоите в компании"
+                                       style="-fx-font-size: 14; -fx-text-fill: #64748b;"/>
+                                <Label text="Создайте компанию чтобы подключить Битрикс24 и работать с командой"
+                                       style="-fx-font-size: 12; -fx-text-fill: #94a3b8; -fx-wrap-text: true;"
+                                       maxWidth="400" textAlignment="CENTER"/>
+                                <Button onAction="#onProfileCreateCompany"
+                                        text="+ Создать компанию"
+                                        style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                                               -fx-font-weight: bold; -fx-font-size: 13;
+                                               -fx-padding: 10 24; -fx-background-radius: 10; -fx-cursor: hand;"/>
+                            </VBox>
+
+                            <!-- Есть компания -->
+                            <VBox fx:id="profileCompanyInfoBox" spacing="14"
+                                  visible="false" managed="false">
+
+                                <!-- Название и роль -->
+                                <HBox spacing="12" alignment="CENTER_LEFT"
+                                      style="-fx-background-color: #eff6ff; -fx-background-radius: 10;
+                                             -fx-padding: 12 16;">
+                                    <Label text="🏢" style="-fx-font-size: 24;"/>
+                                    <VBox spacing="3">
+                                        <Label fx:id="profileCompanyName"
+                                               style="-fx-font-size: 16; -fx-font-weight: bold; -fx-text-fill: #0f172a;"
+                                               text="Название компании"/>
+                                        <Label fx:id="profileCompanyRole"
+                                               style="-fx-font-size: 12; -fx-text-fill: #64748b;"
+                                               text="👤 Сотрудник"/>
+                                    </VBox>
+                                </HBox>
+
+                                <!-- Webhook (только owner) -->
+                                <VBox fx:id="profileWebhookBox" spacing="8"
+                                      visible="false" managed="false">
+                                    <Label text="🔗 Вебхук Битрикс24"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <TextField fx:id="profileWebhookField" HBox.hgrow="ALWAYS"
+                                                   promptText="https://ДОМЕН.bitrix24.ru/rest/USERID/ТОКЕН/"
+                                                   style="-fx-font-size: 11; -fx-padding: 8 10;
+                                                          -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                                          -fx-border-radius: 8;"/>
+                                        <Button onAction="#onProfileSaveWebhook" text="💾"
+                                                style="-fx-background-color: #16a34a; -fx-text-fill: white;
+                                                       -fx-font-weight: bold; -fx-padding: 8 12;
+                                                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                    </HBox>
+                                </VBox>
+
+                                <!-- Пригласить -->
+                                <VBox spacing="8">
+                                    <Label text="👥 Пригласить сотрудника"
+                                           style="-fx-font-size: 13; -fx-font-weight: bold; -fx-text-fill: #374151;"/>
+                                    <HBox spacing="8" alignment="CENTER_LEFT">
+                                        <TextField fx:id="profileInviteField" HBox.hgrow="ALWAYS"
+                                                   promptText="Логин пользователя"
+                                                   style="-fx-font-size: 12; -fx-padding: 8 10;
+                                                          -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                                          -fx-border-radius: 8;"/>
+                                        <Button onAction="#onProfileInvite" text="➕"
+                                                style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                                                       -fx-font-weight: bold; -fx-padding: 8 12;
+                                                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+                                    </HBox>
+                                    <Label fx:id="profileInviteStatus" style="-fx-font-size: 11;"/>
+                                </VBox>
+
+                                <!-- Сотрудники -->
+                                <VBox spacing="6">
+                                    <Label text="Сотрудники:"
+                                           style="-fx-font-size: 12; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+                                    <VBox fx:id="profileMembersBox" spacing="6"/>
+                                </VBox>
+
+                                <!-- Кнопка удалить (owner) -->
+                                <HBox fx:id="profileDeleteCompanyBox" alignment="CENTER_RIGHT"
+                                      visible="false" managed="false">
+                                    <Button onAction="#onProfileDeleteCompany"
+                                            text="🗑 Удалить компанию"
+                                            style="-fx-background-color: #fff1f2; -fx-text-fill: #ef4444;
+                                                   -fx-font-weight: bold; -fx-font-size: 11;
+                                                   -fx-padding: 7 14; -fx-background-radius: 8;
+                                                   -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-cursor: hand;"/>
+                                </HBox>
+                            </VBox>
+
+                            <Label fx:id="profileCompanyStatus" style="-fx-font-size: 12;"/>
                         </VBox>
 
                     </VBox>
 
-                    
+                    <!-- Правая колонка: подсказки + смена пароля -->
                     <VBox prefWidth="360" maxWidth="420" spacing="12"
                           style="-fx-background-color: white; -fx-background-radius: 20;
                                  -fx-padding: 32;
@@ -183,65 +258,45 @@
                         <Label text="• Email используется для восстановления пароля." wrapText="true" style="-fx-font-size: 12; -fx-text-fill: #475569;"/>
                         <Label text="• При смене email потребуется повторное подтверждение." wrapText="true" style="-fx-font-size: 12; -fx-text-fill: #475569;"/>
                         <Label text="• Перед сохранением проверьте данные." wrapText="true" style="-fx-font-size: 12; -fx-text-fill: #475569;"/>
-                        <Label text="• Изменения применяются сразу." wrapText="true" style="-fx-font-size: 12; -fx-text-fill: #475569;"/>
 
-                        
-                        
-                        
                         <Separator style="-fx-padding: 8 0;"/>
 
                         <Label text="🔑 Смена пароля"
                                style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #1e3a8a;"/>
 
-                        
                         <VBox fx:id="passwordStep1Box" spacing="10">
                             <Label text="Для смены пароля мы отправим код на вашу почту." maxWidth="340"
-                                   wrapText="true"
-                                   style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
-                            <Button fx:id="sendPasswordCodeBtn"
-                                    onAction="#onSendPasswordCode"
+                                   wrapText="true" style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
+                            <Button fx:id="sendPasswordCodeBtn" onAction="#onSendPasswordCode"
                                     text="📧 Отправить код"
                                     style="-fx-background-color: #1e40af; -fx-text-fill: white;
                                            -fx-font-weight: bold; -fx-background-radius: 10;
                                            -fx-padding: 10 22; -fx-cursor: hand; -fx-font-size: 13;"/>
                         </VBox>
 
-                        
-                        <VBox fx:id="passwordStep2Box" spacing="10"
-                              visible="false" managed="false">
-                            <Label text="Введите код из письма:"
-                                   style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
-                            <TextField fx:id="passwordOtpField"
-                                       promptText="6-значный код"
+                        <VBox fx:id="passwordStep2Box" spacing="10" visible="false" managed="false">
+                            <Label text="Введите код из письма:" style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
+                            <TextField fx:id="passwordOtpField" promptText="6-значный код"
                                        style="-fx-background-radius: 10; -fx-border-radius: 10;
                                               -fx-border-color: #e2e8f0; -fx-padding: 10;
-                                              -fx-font-size: 16; -fx-alignment: center;
-                                              -fx-font-weight: bold;"/>
-                            <Button fx:id="verifyPasswordCodeBtn"
-                                    onAction="#onVerifyPasswordCode"
+                                              -fx-font-size: 16; -fx-alignment: center; -fx-font-weight: bold;"/>
+                            <Button fx:id="verifyPasswordCodeBtn" onAction="#onVerifyPasswordCode"
                                     text="✅ Подтвердить"
                                     style="-fx-background-color: #059669; -fx-text-fill: white;
                                            -fx-font-weight: bold; -fx-background-radius: 10;
                                            -fx-padding: 10 22; -fx-cursor: hand; -fx-font-size: 13;"/>
                         </VBox>
 
-                        
-                        <VBox fx:id="passwordStep3Box" spacing="10"
-                              visible="false" managed="false">
-                            <Label text="Новый пароль:"
-                                   style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
-                            <PasswordField fx:id="profileNewPassword"
-                                           promptText="Минимум 6 символов"
+                        <VBox fx:id="passwordStep3Box" spacing="10" visible="false" managed="false">
+                            <Label text="Новый пароль:" style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
+                            <PasswordField fx:id="profileNewPassword" promptText="Минимум 6 символов"
                                            style="-fx-background-radius: 10; -fx-border-radius: 10;
                                                   -fx-border-color: #e2e8f0; -fx-padding: 10;"/>
-                            <Label text="Подтвердите пароль:"
-                                   style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
-                            <PasswordField fx:id="profileConfirmPassword"
-                                           promptText="Повторите пароль"
+                            <Label text="Подтвердите пароль:" style="-fx-font-size: 13; -fx-text-fill: #475569;"/>
+                            <PasswordField fx:id="profileConfirmPassword" promptText="Повторите пароль"
                                            style="-fx-background-radius: 10; -fx-border-radius: 10;
                                                   -fx-border-color: #e2e8f0; -fx-padding: 10;"/>
-                            <Button fx:id="saveNewPasswordBtn"
-                                    onAction="#onSaveNewPassword"
+                            <Button fx:id="saveNewPasswordBtn" onAction="#onSaveNewPassword"
                                     text="🔑 Сменить пароль"
                                     style="-fx-background-color: #1e3a8a; -fx-text-fill: white;
                                            -fx-font-weight: bold; -fx-background-radius: 10;

@@ -15,16 +15,28 @@ public class CompanyService {
                                                     String ownerLogin) {
         JsonObject data = new JsonObject();
         data.addProperty("name", name);
-        data.addProperty("bitrix24_webhook", bitrix24Webhook);
+        if (bitrix24Webhook != null && !bitrix24Webhook.isBlank()) {
+            data.addProperty("bitrix24_webhook", bitrix24Webhook.trim());
+        }
         data.addProperty("owner_login", ownerLogin);
 
         return supabase.insertServiceRole("companies", data)
-                .thenApply(arr -> {
+                .thenCompose(arr -> {
                     if (arr != null && !arr.isEmpty()) {
                         JsonObject row = arr.get(0).getAsJsonObject();
-                        return row.has("id") ? row.get("id").getAsInt() : -1;
+                        int id = row.has("id") && !row.get("id").isJsonNull()
+                                ? row.get("id").getAsInt() : -1;
+                        if (id > 0) return java.util.concurrent.CompletableFuture.completedFuture(id);
                     }
-                    return -1;
+                    String enc = java.net.URLEncoder.encode(ownerLogin,
+                            java.nio.charset.StandardCharsets.UTF_8);
+                    return supabase.selectWithServiceRole("companies", "id",
+                            "owner_login=eq." + enc)
+                            .thenApply(rows -> {
+                                if (rows == null || rows.isEmpty()) return -1;
+                                JsonObject row = rows.get(0).getAsJsonObject();
+                                return row.has("id") ? row.get("id").getAsInt() : -1;
+                            });
                 });
     }
 
@@ -46,7 +58,7 @@ public class CompanyService {
         String encodedLogin = java.net.URLEncoder.encode(login,
                 java.nio.charset.StandardCharsets.UTF_8);
 
-        return supabase.select("users", "company_id,company_role", "login=eq." + encodedLogin)
+        return supabase.selectWithServiceRole("users", "company_id,company_role", "login=eq." + encodedLogin)
                 .thenCompose(rows -> {
                     if (rows == null || rows.isEmpty()) return done(null);
                     JsonObject user = rows.get(0).getAsJsonObject();
@@ -54,7 +66,7 @@ public class CompanyService {
                         return done(null);
 
                     int companyId = user.get("company_id").getAsInt();
-                    return supabase.select("companies",
+                    return supabase.selectWithServiceRole("companies",
                                     "id,name,bitrix24_webhook,owner_login,created_at",
                                     "id=eq." + companyId)
                             .thenApply(companies -> {
@@ -78,7 +90,7 @@ public class CompanyService {
 
 
     public CompletableFuture<JsonArray> getCompanyMembers(int companyId) {
-        return supabase.select("users", "id,login,email,phone,company_role",
+        return supabase.selectWithServiceRole("users", "id,login,email,phone,company_role",
                 "company_id=eq." + companyId);
     }
 
@@ -87,7 +99,7 @@ public class CompanyService {
         String enc = java.net.URLEncoder.encode(employeeLogin,
                 java.nio.charset.StandardCharsets.UTF_8);
 
-        return supabase.select("users", "login,company_id", "login=eq." + enc)
+        return supabase.selectWithServiceRole("users", "login,company_id", "login=eq." + enc)
                 .thenCompose(rows -> {
                     if (rows == null || rows.isEmpty())
                         return CompletableFuture.completedFuture(false);

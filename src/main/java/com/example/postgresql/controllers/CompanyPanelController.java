@@ -121,13 +121,14 @@ public class CompanyPanelController {
                     HelloApplication.class.getResource("CreateCompany.fxml"));
             Scene scene = new Scene(loader.load());
             CreateCompanyController ctrl = loader.getController();
-            ctrl.setData(currentUser, () -> loadCompanyData());
+            ctrl.setData(currentUser, () -> Platform.runLater(this::loadCompanyData));
 
             Stage stage = new Stage();
             stage.setTitle("Создать компанию");
             stage.setScene(scene);
             stage.setMinWidth(500);
-            stage.setMinHeight(350);
+            stage.setMinHeight(400);
+            stage.centerOnScreen();
             stage.show();
         } catch (Exception e) {
             showStatus("Ошибка открытия формы: " + e.getMessage(), "red");

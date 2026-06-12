@@ -5,6 +5,10 @@ import com.example.postgresql.API.OtpStore;
 import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.UserPanelController;
 import com.example.postgresql.controllers.CompanyPanelController;
+import com.example.postgresql.controllers.CreateCompanyController;
+import com.example.postgresql.API.CompanyService;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.example.postgresql.HelloApplication;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -12,6 +16,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import com.example.postgresql.API.ResendEmailService;
@@ -80,7 +85,24 @@ public class ProfileUser {
     private String initialPhone = "";
     private boolean emailConfirmed = false;
 
-    private final AuthService authService = new AuthService();
+    @FXML private VBox  profileCompanyBox;
+    @FXML private VBox  profileNoCompanyBox;
+    @FXML private VBox  profileCompanyInfoBox;
+    @FXML private Label profileCompanyName;
+    @FXML private Label profileCompanyRole;
+    @FXML private VBox  profileWebhookBox;
+    @FXML private TextField profileWebhookField;
+    @FXML private TextField profileInviteField;
+    @FXML private Label profileInviteStatus;
+    @FXML private VBox  profileMembersBox;
+    @FXML private HBox profileDeleteCompanyBox;
+    @FXML private Label profileCompanyStatus;
+
+    private int profileCompanyId = -1;
+    private String profileMyRole = "";
+
+    private final AuthService    authService    = new AuthService();
+    private final CompanyService companyService = new CompanyService();
 
     @FXML
     private void initialize() {
@@ -101,6 +123,7 @@ public class ProfileUser {
         phone.setPromptText(this.initialPhone.isEmpty() ? "Не указан" : this.initialPhone);
 
         loadProfileDataFromSupabase();
+        loadProfileCompany();
     }
 
     private void loadProfileDataFromSupabase() {
@@ -526,15 +549,170 @@ public class ProfileUser {
         }
     }
 
-    @FXML
-    private void goToCompany() {
-        try {
-            CompanyPanelController.companyPanel(
-                    (Stage) LabelUser.getScene().getWindow(), currentUser);
-        } catch (Exception e) {
-            e.printStackTrace();
-            showStatus("Ошибка перехода", "red");
+    private void loadProfileCompany() {
+        if (currentUser.isEmpty()) return;
+        companyService.getUserCompany(currentUser)
+                .thenAccept(company -> javafx.application.Platform.runLater(() -> {
+                    if (company == null) {
+                        showProfileNoCompany();
+                    } else {
+                        showProfileCompany(company);
+                    }
+                }))
+                .exceptionally(ex -> null);
+    }
+
+    private void showProfileNoCompany() {
+        if (profileNoCompanyBox == null) return;
+        profileNoCompanyBox.setVisible(true);
+        profileNoCompanyBox.setManaged(true);
+        if (profileCompanyInfoBox != null) {
+            profileCompanyInfoBox.setVisible(false);
+            profileCompanyInfoBox.setManaged(false);
         }
+    }
+
+    private void showProfileCompany(com.google.gson.JsonObject company) {
+        if (profileCompanyInfoBox == null) return;
+        profileCompanyId = company.get("id").getAsInt();
+        profileMyRole = getStr(company, "my_role");
+
+        profileNoCompanyBox.setVisible(false);
+        profileNoCompanyBox.setManaged(false);
+        profileCompanyInfoBox.setVisible(true);
+        profileCompanyInfoBox.setManaged(true);
+
+        profileCompanyName.setText(getStr(company, "name"));
+        profileCompanyRole.setText("owner".equals(profileMyRole) ? "👑 Владелец" : "👤 Сотрудник");
+
+        boolean isOwner = "owner".equals(profileMyRole);
+        profileWebhookBox.setVisible(isOwner);
+        profileWebhookBox.setManaged(isOwner);
+        profileDeleteCompanyBox.setVisible(isOwner);
+        profileDeleteCompanyBox.setManaged(isOwner);
+
+        if (isOwner) {
+            profileWebhookField.setText(getStr(company, "bitrix24_webhook"));
+        }
+
+        loadProfileMembers();
+    }
+
+    private void loadProfileMembers() {
+        if (profileMembersBox == null || profileCompanyId < 0) return;
+        profileMembersBox.getChildren().clear();
+        companyService.getCompanyMembers(profileCompanyId)
+                .thenAccept(members -> javafx.application.Platform.runLater(() -> {
+                    if (members == null || members.isEmpty()) {
+                        Label empty = new Label("Сотрудников пока нет");
+                        empty.setStyle("-fx-font-size: 12; -fx-text-fill: #94a3b8;");
+                        profileMembersBox.getChildren().add(empty);
+                        return;
+                    }
+                    for (JsonElement el : members) {
+                        com.google.gson.JsonObject m = el.getAsJsonObject();
+                        String login = getStr(m, "login");
+                        String role  = getStr(m, "company_role");
+                        javafx.scene.layout.HBox row = new javafx.scene.layout.HBox(8);
+                        row.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
+                        row.setStyle("-fx-padding: 6 10; -fx-background-color: #f8fafc; -fx-background-radius: 6;");
+                        Label icon = new Label("owner".equals(role) ? "👑" : "👤");
+                        Label name = new Label(login);
+                        name.setStyle("-fx-font-size: 12; -fx-font-weight: bold;");
+                        javafx.scene.layout.Region sp = new javafx.scene.layout.Region();
+                        javafx.scene.layout.HBox.setHgrow(sp, javafx.scene.layout.Priority.ALWAYS);
+                        row.getChildren().addAll(icon, name, sp);
+                        if ("owner".equals(profileMyRole) && !"owner".equals(role)) {
+                            javafx.scene.control.Button kick = new javafx.scene.control.Button("✕");
+                            kick.setStyle("-fx-background-color: #fff1f2; -fx-text-fill: #ef4444; -fx-font-size: 10; -fx-padding: 2 6; -fx-background-radius: 4; -fx-cursor: hand;");
+                            kick.setOnAction(e -> {
+                                companyService.leaveCompany(login)
+                                        .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                                            if (ok) loadProfileMembers();
+                                        }));
+                            });
+                            row.getChildren().add(kick);
+                        }
+                        profileMembersBox.getChildren().add(row);
+                    }
+                }))
+                .exceptionally(ex -> null);
+    }
+
+    @FXML
+    private void onProfileCreateCompany() {
+        try {
+            FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("CreateCompany.fxml"));
+            javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
+            CreateCompanyController ctrl = loader.getController();
+            ctrl.setData(currentUser, () -> javafx.application.Platform.runLater(this::loadProfileCompany));
+            Stage stage = new Stage();
+            stage.setTitle("Создать компанию");
+            stage.setScene(scene);
+            stage.setMinWidth(500);
+            stage.setMinHeight(400);
+            stage.centerOnScreen();
+            stage.show();
+        } catch (Exception e) {
+            showProfileCompanyStatus("Ошибка: " + e.getMessage(), "red");
+        }
+    }
+
+    @FXML
+    private void onProfileSaveWebhook() {
+        if (profileCompanyId < 0) return;
+        String webhook = profileWebhookField.getText().trim();
+        if (webhook.isEmpty()) { showProfileCompanyStatus("Введите URL вебхука", "orange"); return; }
+        companyService.updateWebhook(profileCompanyId, webhook)
+                .thenAccept(ok -> javafx.application.Platform.runLater(() ->
+                        showProfileCompanyStatus(ok ? "✅ Вебхук сохранён" : "Ошибка сохранения", ok ? "#16a34a" : "red")
+                )).exceptionally(ex -> null);
+    }
+
+    @FXML
+    private void onProfileInvite() {
+        if (profileCompanyId < 0) return;
+        String login = profileInviteField.getText().trim();
+        if (login.isEmpty() || login.equals(currentUser)) {
+            setProfileInviteStatus("Введите логин другого пользователя", "orange");
+            return;
+        }
+        companyService.inviteEmployee(login, profileCompanyId)
+                .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                    if (ok) {
+                        setProfileInviteStatus("✅ " + login + " добавлен", "#16a34a");
+                        profileInviteField.clear();
+                        loadProfileMembers();
+                    } else {
+                        setProfileInviteStatus("Не найден или уже в компании", "red");
+                    }
+                })).exceptionally(ex -> null);
+    }
+
+    @FXML
+    private void onProfileDeleteCompany() {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Удалить компанию? Все сотрудники будут отвязаны.", ButtonType.YES, ButtonType.NO);
+        confirm.showAndWait().ifPresent(btn -> {
+            if (btn == ButtonType.YES) {
+                companyService.deleteCompany(profileCompanyId)
+                        .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                            if (ok) { profileCompanyId = -1; showProfileNoCompany(); }
+                        })).exceptionally(ex -> null);
+            }
+        });
+    }
+
+    private void showProfileCompanyStatus(String text, String color) {
+        if (profileCompanyStatus == null) return;
+        profileCompanyStatus.setText(text);
+        profileCompanyStatus.setStyle("-fx-text-fill: " + color + "; -fx-font-weight: bold;");
+    }
+
+    private void setProfileInviteStatus(String text, String color) {
+        if (profileInviteStatus == null) return;
+        profileInviteStatus.setText(text);
+        profileInviteStatus.setStyle("-fx-text-fill: " + color + ";");
     }
 
     @FXML
