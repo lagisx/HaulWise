@@ -1,7 +1,7 @@
 package com.example.postgresql.UserF;
 
 public class BlockUsers {
-    private int    id;
+    private int id;
     private String login;
     private String email;
     private String phone;
@@ -20,11 +20,31 @@ public class BlockUsers {
         this.createdAt = createdAt;
     }
 
-    public int    getId()        { return id; }
-    public String getLogin()     { return login; }
-    public String getEmail()     { return email; }
-    public String getPhone()     { return phone; }
-    public String getReason()    { return reason; }
-    public String getBlockedBy() { return blockedBy; }
-    public String getCreatedAt() { return createdAt; }
+    public int getId() {
+        return id;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public String getBlockedBy() {
+        return blockedBy;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
 }

@@ -13,8 +13,19 @@ public class FavoritesCargo {
         this.createdAt = createdAt;
     }
 
-    public int getId()          { return id; }
-    public int getUserId()      { return userId; }
-    public int getCargoId()     { return cargoId; }
-    public String getCreatedAt(){ return createdAt; }
+    public int getId() {
+        return id;
+    }
+
+    public int getUserId() {
+        return userId;
+    }
+
+    public int getCargoId() {
+        return cargoId;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
 }
