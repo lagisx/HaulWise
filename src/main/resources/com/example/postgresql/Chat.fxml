@@ -31,13 +31,26 @@
                     style="-fx-background-color: #16a34a; -fx-text-fill: white;
                            -fx-font-weight: bold; -fx-font-size: 11px;
                            -fx-padding: 6 14; -fx-background-radius: 8; -fx-cursor: hand;"/>
-            <Button fx:id="cancelDealBtn2" text="✕ Отменить сделку"
+            <Button fx:id="cancelDealBtn2" text="✕ Отменить"
                     onAction="#onCancelDeal"
                     style="-fx-background-color: #fff1f2; -fx-text-fill: #ef4444;
                            -fx-font-weight: bold; -fx-font-size: 11px;
                            -fx-padding: 6 14; -fx-background-radius: 8;
                            -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-cursor: hand;"/>
         </HBox>
+    </HBox>
+
+    <HBox fx:id="cargoSwitcherBox" spacing="6" alignment="CENTER_LEFT"
+          visible="false" managed="false"
+          style="-fx-background-color: #f8fafc; -fx-padding: 8 20;
+                 -fx-border-color: #e2e8f0; -fx-border-width: 0 0 1 0;">
+        <Label text="📦 Грузы:" style="-fx-font-size: 11; -fx-text-fill: #64748b; -fx-font-weight: bold;"/>
+        <ScrollPane fitToHeight="true" hbarPolicy="AS_NEEDED" vbarPolicy="NEVER"
+                    HBox.hgrow="ALWAYS" prefHeight="34"
+                    style="-fx-background: transparent; -fx-background-color: transparent; -fx-border-color: transparent;">
+            <HBox fx:id="cargoTabsContainer" spacing="6" alignment="CENTER_LEFT"
+                  style="-fx-padding: 2 0;"/>
+        </ScrollPane>
     </HBox>
 
     <HBox fx:id="cargoInfoBox" spacing="8" alignment="CENTER_LEFT"

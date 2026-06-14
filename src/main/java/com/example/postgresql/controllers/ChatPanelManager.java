@@ -3,6 +3,9 @@ package com.example.postgresql.controllers;
 import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
 import com.example.postgresql.UserF.Cargo;
+
+import java.util.List;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import javafx.application.Platform;
@@ -34,6 +37,9 @@ public class ChatPanelManager {
     private String activeChatPartner = null;
     private ChatController activeChatController = null;
     private final LinkedHashSet<String> openedChats = new LinkedHashSet<>();
+    private final java.util.Map<String, Cargo> cargoByPartner = new java.util.HashMap<>();
+    private final java.util.Map<String, String> ownerByPartner = new java.util.HashMap<>();
+    private final java.util.Map<String, List<Cargo>> cargoListByPartner = new java.util.HashMap<>();
 
     public ChatPanelManager(AuthService authService,
                             VBox chatListContainer,
@@ -138,19 +144,43 @@ public class ChatPanelManager {
 
 
     public void openChatInline(String partnerLogin) {
-        openChatInlineWithCargo(partnerLogin, null, null);
+        Cargo savedCargo = cargoByPartner.get(partnerLogin);
+        String savedOwner = ownerByPartner.get(partnerLogin);
+        List<Cargo> savedList = cargoListByPartner.get(partnerLogin);
+        if (savedCargo != null) {
+            openChatInlineWithCargoList(partnerLogin, savedCargo, savedOwner, savedList);
+        } else {
+            openChatInlineWithCargo(partnerLogin, null, null);
+        }
     }
 
     public void openChatInlineWithCargo(String partnerLogin, Cargo cargo, String ownerLogin) {
+        openChatInlineWithCargoList(partnerLogin, cargo, ownerLogin, null);
+    }
+
+    public void openChatInlineWithCargoList(String partnerLogin, Cargo cargo,
+                                            String ownerLogin, List<Cargo> allCargos) {
         openedChats.add(partnerLogin);
         activeChatPartner = partnerLogin;
+        if (cargo != null) {
+            cargoByPartner.put(partnerLogin, cargo);
+            ownerByPartner.put(partnerLogin, ownerLogin);
+        }
+        if (allCargos != null && !allCargos.isEmpty()) {
+            cargoListByPartner.put(partnerLogin, allCargos);
+        }
         Platform.runLater(this::renderChatList);
         try {
             FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("Chat.fxml"));
             Parent chatRoot = loader.load();
             activeChatController = loader.getController();
             if (cargo != null) {
-                activeChatController.initWithCargo(currentUser, partnerLogin, cargo, ownerLogin);
+                if (allCargos != null && allCargos.size() > 1) {
+                    activeChatController.initWithCargoList(currentUser, partnerLogin,
+                            cargo, ownerLogin, allCargos);
+                } else {
+                    activeChatController.initWithCargo(currentUser, partnerLogin, cargo, ownerLogin);
+                }
             } else {
                 activeChatController.init(currentUser, partnerLogin);
             }
