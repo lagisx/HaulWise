@@ -11,12 +11,6 @@ public class AppConfig {
 
     private AppConfig() {
         try (InputStream is = getClass().getResourceAsStream("/config.properties")) {
-            if (is == null) {
-                throw new RuntimeException(
-                    "Файл config.properties не найден!\n" +
-                    "Создайте src/main/resources/config.properties"
-                );
-            }
             props.load(is);
         } catch (IOException e) {
             throw new RuntimeException("Ошибка чтения config.properties: " + e.getMessage(), e);
@@ -30,8 +24,6 @@ public class AppConfig {
         return instance;
     }
 
-    
-
     public String getSupabaseUrl() {
         return get("supabase.url");
     }
@@ -44,13 +36,11 @@ public class AppConfig {
         return get("supabase.service_key");
     }
 
-    
 
     public String getGeocoderApiKey() {
         return get("geocoder.api_key");
     }
 
-    
 
     public String getResendApiKey() {
         return get("resend.api_key");
@@ -60,7 +50,11 @@ public class AppConfig {
         return get("resend.from");
     }
 
-    
+    public String getBitrix24WebhookUrl() {
+        String value = props.getProperty("bitrix24.webhook_url");
+        return (value == null || value.isBlank()) ? "" : value.trim();
+    }
+
 
     private String get(String key) {
         String value = props.getProperty(key);

@@ -1,6 +1,7 @@
 package com.example.postgresql.API;
 
 import okhttp3.*;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +12,7 @@ public class SupabaseStorageClient {
 
     private static final String BUCKET = "image";
 
-    
-    
+
     private static final List<String> KNOWN_FILES = Arrays.asList(
             "BoxImage.png",
             "CarFour.png",
@@ -27,17 +27,13 @@ public class SupabaseStorageClient {
     private static final Random RANDOM = new Random();
     private final OkHttpClient http = new OkHttpClient();
 
-    
-    
-    
 
-    
     public String getRandomPublicImageUrl() {
         String fileName = KNOWN_FILES.get(RANDOM.nextInt(KNOWN_FILES.size()));
         return buildPublicUrl(fileName);
     }
 
-    
+
     public String buildPublicUrl(String fileName) {
         return SupabaseClient.SUPABASE_URL
                 + "/storage/v1/object/public/"
@@ -45,11 +41,7 @@ public class SupabaseStorageClient {
                 + fileName;
     }
 
-    
-    
-    
 
-    
     public CompletableFuture<List<String>> listFiles() {
         CompletableFuture<List<String>> future = new CompletableFuture<>();
 
@@ -67,7 +59,7 @@ public class SupabaseStorageClient {
         http.newCall(req).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                
+
                 future.complete(KNOWN_FILES);
             }
 
@@ -88,7 +80,7 @@ public class SupabaseStorageClient {
                         com.google.gson.JsonObject obj = el.getAsJsonObject();
                         if (obj.has("name") && !obj.get("name").isJsonNull()) {
                             String name = obj.get("name").getAsString();
-                            
+
                             if (name.matches("(?i).*\\.(png|jpg|jpeg|webp|gif)")) {
                                 names.add(name);
                             }
@@ -106,7 +98,7 @@ public class SupabaseStorageClient {
         return future;
     }
 
-    
+
     public CompletableFuture<String> getRandomPublicImageUrlAsync() {
         return listFiles().thenApply(files -> {
             if (files.isEmpty()) return buildPublicUrl(KNOWN_FILES.get(0));

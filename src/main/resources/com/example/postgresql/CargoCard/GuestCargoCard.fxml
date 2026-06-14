@@ -15,7 +15,7 @@
                    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.07), 12, 0.10, 0, 4);"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.postgresql.Controllers.CardControllers.GuestCargoCardController">
+            fx:controller="com.example.postgresql.controllers.CardControllers.GuestCargoCardController">
 
     <VBox spacing="0"
           AnchorPane.topAnchor="0" AnchorPane.bottomAnchor="0"

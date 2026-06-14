@@ -6,7 +6,7 @@
 
 <BorderPane xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.example.postgresql.Controllers.UserPanelController"
+            fx:controller="com.example.postgresql.controllers.UserPanelController"
             prefWidth="1280" prefHeight="800"
             style="-fx-background-color: #f1f5f9;">
 
@@ -121,7 +121,7 @@
                             <VBox fx:id="userCargoContainer" spacing="8">
                                 <VBox.margin><Insets top="14" right="14" bottom="14" left="14"/></VBox.margin>
                                 <Button fx:id="btnAddCargo" text="+ Добавить груз"
-                                        onAction="#AddUsersCargo"
+                                        onAction="#addUsersCargo"
                                         style="-fx-background-color: #1e40af; -fx-text-fill: white;
                                                -fx-font-weight: bold; -fx-font-size: 13;
                                                -fx-padding: 9 24; -fx-background-radius: 10;

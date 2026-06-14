@@ -7,11 +7,10 @@
 
 <VBox xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.example.postgresql.Controllers.CargoCardController"
+      fx:controller="com.example.postgresql.controllers.CargoCardController"
       prefWidth="1000" prefHeight="620"
       style="-fx-background-color: #f8fafc;">
 
-    <!-- ══ Шапка ══════════════════════════════════════════════════════════ -->
     <HBox alignment="CENTER_LEFT" spacing="12"
           style="-fx-background-color: #ffffff;
                  -fx-border-color: #e2e8f0;
@@ -32,24 +31,20 @@
                        -fx-cursor: hand;"/>
     </HBox>
 
-    <!-- ══ Основной контент: карта + инфо ════════════════════════════════ -->
     <HBox spacing="0" VBox.vgrow="ALWAYS">
 
-        <!-- Левая панель — карта -->
         <VBox prefWidth="540" style="-fx-background-color: #e8f0fe;
                                       -fx-border-color: #e2e8f0;
                                       -fx-border-width: 0 1 0 0;">
             <WebView fx:id="mapWebView" VBox.vgrow="ALWAYS"/>
         </VBox>
 
-        <!-- Правая панель — информация о грузе -->
         <ScrollPane fitToWidth="true" HBox.hgrow="ALWAYS"
                     style="-fx-background-color: transparent;
                            -fx-background: transparent;
                            -fx-border-color: transparent;">
             <VBox spacing="0" style="-fx-padding: 24 28 24 28; -fx-background-color: #ffffff;">
 
-                <!-- Секция: Груз -->
                 <Label text="О грузе"
                        style="-fx-font-size: 11px; -fx-font-weight: bold;
                               -fx-text-fill: #94a3b8; -fx-padding: 0 0 8 0;"/>
@@ -96,7 +91,6 @@
                     <Label fx:id="labelDate" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
                 </HBox>
 
-                <!-- Секция: Цена -->
                 <VBox style="-fx-padding: 18 0 0 0;">
                     <Label text="Стоимость"
                            style="-fx-font-size: 11px; -fx-font-weight: bold;
@@ -123,7 +117,6 @@
                     <Label fx:id="labelBargain" style="-fx-font-size: 13px; -fx-text-fill: #1e293b;"/>
                 </HBox>
 
-                <!-- Секция: Контакты -->
                 <VBox style="-fx-padding: 18 0 0 0;">
                     <Label text="Контакты"
                            style="-fx-font-size: 11px; -fx-font-weight: bold;

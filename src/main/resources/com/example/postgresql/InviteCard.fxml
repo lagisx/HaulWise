@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.example.postgresql.controllers.InviteCardController"
+      spacing="10"
+      style="-fx-background-color: #eff6ff; -fx-background-radius: 12;
+             -fx-border-color: #bfdbfe; -fx-border-radius: 12;
+             -fx-padding: 14 18;">
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="🏢" style="-fx-font-size: 20;"/>
+        <VBox spacing="2" HBox.hgrow="ALWAYS">
+            <Label fx:id="companyNameLabel"
+                   style="-fx-font-size: 14; -fx-font-weight: bold; -fx-text-fill: #1e40af;"
+                   text="Название компании"/>
+            <Label fx:id="fromLoginLabel"
+                   style="-fx-font-size: 11; -fx-text-fill: #64748b;"
+                   text="от: владелец"/>
+        </VBox>
+    </HBox>
+
+    <HBox spacing="10">
+        <Button fx:id="acceptBtn" onAction="#onAccept" text="✅ Принять"
+                style="-fx-background-color: #16a34a; -fx-text-fill: white;
+                       -fx-font-weight: bold; -fx-padding: 7 18;
+                       -fx-background-radius: 8; -fx-cursor: hand;"/>
+        <Button fx:id="declineBtn" onAction="#onDecline" text="✕ Отклонить"
+                style="-fx-background-color: #fff1f2; -fx-text-fill: #ef4444;
+                       -fx-font-weight: bold; -fx-padding: 7 18;
+                       -fx-background-radius: 8; -fx-border-color: #fecaca;
+                       -fx-border-radius: 8; -fx-cursor: hand;"/>
+    </HBox>
+
+    <Label fx:id="statusLabel" style="-fx-font-size: 11; -fx-font-weight: bold;"/>
+</VBox>

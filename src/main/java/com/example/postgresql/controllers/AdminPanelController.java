@@ -1,6 +1,6 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.AuthService;
+import com.example.postgresql.API.AuthService;
 import com.example.postgresql.HelloApplication;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -24,26 +24,36 @@ import java.util.concurrent.CompletableFuture;
 
 public class AdminPanelController {
 
-    @FXML private TableColumn<JsonObject, Void> colCargoActions;
-    @FXML private TableColumn<JsonObject, Void> colUserActions;
-    @FXML private TableColumn<JsonObject, Void> colBlacklistActions;
+    @FXML
+    private TableColumn<JsonObject, Void> colCargoActions;
+    @FXML
+    private TableColumn<JsonObject, Void> colUserActions;
+    @FXML
+    private TableColumn<JsonObject, Void> colBlacklistActions;
 
-    @FXML private TableView<JsonObject> cargoTable, userTable, blacklistTable, logsListTable;
+    @FXML
+    private TableView<JsonObject> cargoTable, userTable, blacklistTable, logsListTable;
 
-    @FXML private TableColumn<JsonObject, String> colCargoId, colCargoOwner, colCargoType, colCargoWeight,
+    @FXML
+    private TableColumn<JsonObject, String> colCargoId, colCargoOwner, colCargoType, colCargoWeight,
             colCargoVolume, colCargoProduct, colCargoFrom, colCargoTo, colCargoLoadType,
             colCargoLoadDetails, colCargoDates, colCargoPriceCard, colCargoPriceNDC, colCargoTorg, colCargoContact;
 
-    @FXML private TableColumn<JsonObject, String> colUserId, colUserLogin,
+    @FXML
+    private TableColumn<JsonObject, String> colUserId, colUserLogin,
             colUserEmail, colUserPhone, colUserCreated_at, colUserStatus;
 
-    @FXML private TableColumn<JsonObject, String> colBlockUserId, colBlockUserLogin, colBlockUserEmail,
+    @FXML
+    private TableColumn<JsonObject, String> colBlockUserId, colBlockUserLogin, colBlockUserEmail,
             colBlockUserPhone, colBlockUserReason, colBlockUserBlocked_by, colBlockUserCreated_at;
 
-    @FXML private TableColumn<JsonObject, String> colLogsListId, colLogsListUser, colLogsListDescription, colLogsListCreated_at;
+    @FXML
+    private TableColumn<JsonObject, String> colLogsListId, colLogsListUser, colLogsListDescription, colLogsListCreated_at;
 
-    @FXML private Label statusLabelUsers, statusLabelBlockUsers, LabelUser;
-    @FXML private TabPane adminTabPane;
+    @FXML
+    private Label statusLabelUsers, statusLabelBlockUsers, LabelUser;
+    @FXML
+    private TabPane adminTabPane;
 
     private final AuthService authService = new AuthService();
     private static String Adminuser = "admin";
@@ -72,12 +82,14 @@ public class AdminPanelController {
         loadAllData();
         TabHidePunktire();
     }
+
     private String safeString(JsonObject obj, String key) {
         if (obj == null || !obj.has(key)) return "";
         JsonElement el = obj.get(key);
         if (el == null || el.isJsonNull()) return "";
         return el.getAsString();
     }
+
     private void setupCargoColumns() {
         colCargoId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
         colCargoOwner.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "owner_display")));
@@ -95,6 +107,7 @@ public class AdminPanelController {
         colCargoTorg.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "Торг/без_торга")));
         colCargoContact.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "КонтактныйТелефон")));
     }
+
     private void setupUserColumns() {
         colUserId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
         colUserLogin.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "login")));
@@ -107,6 +120,7 @@ public class AdminPanelController {
             return new SimpleStringProperty(blocked ? "Заблокирован" : "Активен");
         });
     }
+
     private void setupBlacklistColumns() {
         colBlockUserId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
         colBlockUserLogin.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "login")));
@@ -116,6 +130,7 @@ public class AdminPanelController {
         colBlockUserBlocked_by.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "blocked_by")));
         colBlockUserCreated_at.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "created_at")));
     }
+
     private void setupLogsColumns() {
         colLogsListId.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "id")));
         colLogsListUser.setCellValueFactory(cell -> new SimpleStringProperty(safeString(cell.getValue(), "users")));
@@ -129,7 +144,9 @@ public class AdminPanelController {
         loadBlacklist();
         loadLogs();
     }
-    @FXML private void loadCargos() {
+
+    @FXML
+    private void loadCargos() {
         cargos.clear();
         statusLabelUsers.setText("Загрузка грузов...");
         statusLabelUsers.setStyle("-fx-text-fill: blue;");
@@ -178,7 +195,9 @@ public class AdminPanelController {
             return null;
         });
     }
-    @FXML private void loadUsers() {
+
+    @FXML
+    private void loadUsers() {
         users.clear();
         authService.getAllUsers().thenAccept(array -> Platform.runLater(() -> {
             if (array != null) {
@@ -192,7 +211,9 @@ public class AdminPanelController {
             return null;
         });
     }
-    @FXML private void loadBlacklist() {
+
+    @FXML
+    private void loadBlacklist() {
         blacklist.clear();
         authService.getBlacklist().thenAccept(array -> Platform.runLater(() -> {
             if (array != null) {
@@ -206,7 +227,9 @@ public class AdminPanelController {
             return null;
         });
     }
-    @FXML private void loadLogs() {
+
+    @FXML
+    private void loadLogs() {
         logs.clear();
         authService.getLogs().thenAccept(array -> Platform.runLater(() -> {
             if (array != null) {
@@ -229,7 +252,8 @@ public class AdminPanelController {
         });
     }
 
-    @FXML private void deleteCargo() {
+    @FXML
+    private void deleteCargo() {
         JsonObject selected = cargoTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             showStatus("Выберите груз для удаления", "orange");
@@ -245,7 +269,8 @@ public class AdminPanelController {
                 }));
     }
 
-    @FXML private void blockUser() {
+    @FXML
+    private void blockUser() {
         JsonObject user = userTable.getSelectionModel().getSelectedItem();
         if (user == null) {
             showStatus("Выберите пользователя", "orange");
@@ -276,7 +301,8 @@ public class AdminPanelController {
         });
     }
 
-    @FXML private void unblockUser() {
+    @FXML
+    private void unblockUser() {
         JsonObject blocked = blacklistTable.getSelectionModel().getSelectedItem();
         if (blocked == null) {
             showStatus("Выберите пользователя для разблокировки", "red");
@@ -308,7 +334,9 @@ public class AdminPanelController {
                     return null;
                 });
     }
-    @FXML private void deleteUser() {
+
+    @FXML
+    private void deleteUser() {
         JsonObject user = userTable.getSelectionModel().getSelectedItem();
         if (user == null) {
             showStatus("Выберите пользователя", "orange");
@@ -492,7 +520,8 @@ public class AdminPanelController {
         });
     }
 
-    @FXML private void goBack() throws IOException {
+    @FXML
+    private void goBack() throws IOException {
         FXMLLoader loader = new FXMLLoader(HelloApplication.class.getResource("main.fxml"));
         Parent root = loader.load();
         Stage stage = (Stage) cargoTable.getScene().getWindow();
@@ -521,4 +550,5 @@ public class AdminPanelController {
     private void TabHidePunktire() {
         adminTabPane.setFocusTraversable(false);
         adminTabPane.getTabs().forEach(tab -> tab.setClosable(false));
-    }}
+    }
+}

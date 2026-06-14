@@ -21,9 +21,18 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import com.example.postgresql.HelloApplication;
-import com.example.postgresql.api.AuthService;
+import com.example.postgresql.API.AuthService;
+import com.example.postgresql.API.Bitrix24Client;
+import com.example.postgresql.API.CompanyService;
+import com.example.postgresql.UserF.Cargo;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.time.format.DateTimeFormatter;
+
 import com.example.postgresql.controllers.CardControllers.UserCargoCardController;
-import com.example.postgresql.userF.ProfileUser;
+import com.example.postgresql.UserF.ProfileUser;
 import com.example.postgresql.utils.CargoImageLoader;
 import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
@@ -32,7 +41,8 @@ import com.google.gson.JsonObject;
 
 public class UserPanelController {
 
-@FXML private VBox cargoContainer;
+    @FXML
+    private VBox cargoContainer;
     @FXML
     private VBox userCargoContainer;
     @FXML
@@ -41,13 +51,18 @@ public class UserPanelController {
     private TabPane tabPane;
     @FXML
     private Button btnAddCargo;
-    @FXML private Label LabelUser;
-    @FXML private TextField fromFilter, toFilter;
+    @FXML
+    private Label LabelUser;
+    @FXML
+    private TextField fromFilter, toFilter;
     @FXML
     private TextField minWeightFilter, maxWeightFilter;
-    @FXML private TextField minPriceFilter, maxPriceFilter;
-    @FXML private Button applyFilterButton;
-    @FXML private VBox chatListContainer;
+    @FXML
+    private TextField minPriceFilter, maxPriceFilter;
+    @FXML
+    private Button applyFilterButton;
+    @FXML
+    private VBox chatListContainer;
     @FXML
     private VBox chatContentPane;
     @FXML
@@ -56,6 +71,7 @@ public class UserPanelController {
     private JsonArray allCargos;
     private static String currentUser;
     private final AuthService authService = new AuthService();
+    private final CompanyService companyService = new CompanyService();
 
     private ChatPanelManager chatManager;
 
@@ -153,7 +169,6 @@ public class UserPanelController {
                 }))
                 .exceptionally(ex -> handleError(favoritesContainer, ex));
     }
-
 
 
     private void loadAllCargos() {
@@ -276,7 +291,23 @@ public class UserPanelController {
 
         ctrl.deleteLabel.setVisible(true);
         ctrl.deleteLabel.setManaged(true);
-        ctrl.deleteLabel.setOnMouseClicked(e -> deleteCargo(cargoId, card));
+        ctrl.deleteLabel.setOnMouseClicked(e -> {
+            int bitrixDealId = safeInt(cargo, "bitrix_deal_id");
+            if (bitrixDealId > 0) {
+                companyService.getWebhookForUser(currentUser).thenAccept(webhook -> {
+                    if (!webhook.isEmpty()) {
+                        Bitrix24Client.getInstance()
+                                .deleteDeal(webhook, bitrixDealId)
+                                .thenAccept(ok -> System.out.println("[Bitrix24] Сделка удалена: " + ok))
+                                .exceptionally(ex -> {
+                                    System.err.println("[Bitrix24] " + ex.getMessage());
+                                    return null;
+                                });
+                    }
+                });
+            }
+            deleteCargo(cargoId, card);
+        });
 
         ctrl.chatButton.setVisible(false);
         ctrl.chatButton.setManaged(false);
@@ -327,7 +358,43 @@ public class UserPanelController {
         if (!ownerLogin.isEmpty() && !ownerLogin.equals(currentUser)) {
             ctrl.chatButton.setVisible(true);
             ctrl.chatButton.setManaged(true);
-            ctrl.chatButton.setOnAction(e -> openChatInline(ownerLogin));
+            ctrl.chatButton.setOnAction(e -> {
+                Cargo cargoObj = new Cargo(
+                        safeInt(cargo, "id"), safeStr(cargo, "ТипТС"),
+                        safeDbl(cargo, "Вес"), safeDbl(cargo, "Объем"),
+                        safeStr(cargo, "Товар"), safeStr(cargo, "Откуда"),
+                        safeStr(cargo, "Куда"), safeStr(cargo, "ТипПогрузки"),
+                        safeStr(cargo, "ДеталиПогрузки"), safeStr(cargo, "Даты"),
+                        safeDbl(cargo, "ЦенаПоКарте"), safeDbl(cargo, "ЦенаНДС"),
+                        safeStr(cargo, "Торг_без_торга"), safeStr(cargo, "КонтактныйТелефон"), 0);
+
+                authService.getUserCargos(ownerLogin).thenAccept(ownerCargos -> {
+                    List<Cargo> cargoList = new ArrayList<>();
+                    if (ownerCargos != null) {
+                        for (com.google.gson.JsonElement el : ownerCargos) {
+                            com.google.gson.JsonObject c = el.getAsJsonObject();
+                            cargoList.add(new Cargo(
+                                    safeInt(c, "id"), safeStr(c, "ТипТС"),
+                                    safeDbl(c, "Вес"), safeDbl(c, "Объем"),
+                                    safeStr(c, "Товар"), safeStr(c, "Откуда"),
+                                    safeStr(c, "Куда"), safeStr(c, "ТипПогрузки"),
+                                    safeStr(c, "ДеталиПогрузки"), safeStr(c, "Даты"),
+                                    safeDbl(c, "ЦенаПоКарте"), safeDbl(c, "ЦенаНДС"),
+                                    safeStr(c, "Торг_без_торга"), safeStr(c, "КонтактныйТелефон"), 0));
+                        }
+                    }
+                    final List<Cargo> finalList = cargoList;
+                    javafx.application.Platform.runLater(() ->
+                            chatManager.openChatInlineWithCargoList(ownerLogin, cargoObj, ownerLogin, finalList)
+                    );
+                }).exceptionally(ex -> {
+                    javafx.application.Platform.runLater(() ->
+                            chatManager.openChatInlineWithCargo(ownerLogin, cargoObj, ownerLogin)
+                    );
+                    return null;
+                });
+
+            });
         }
         card.setOnMouseClicked(event -> {
             Node target = (Node) event.getTarget();
@@ -588,5 +655,41 @@ public class UserPanelController {
             container.getChildren().add(createInfoLabel("Ошибка: " + ex.getMessage()));
         });
         return null;
+    }
+
+    private void cancelCarrierDeal(UserCargoCardController ctrl, String webhook, int taskId) {
+        Bitrix24Client.getInstance().completeTask(webhook, taskId)
+                .thenAccept(ok -> javafx.application.Platform.runLater(() -> {
+                    System.out.println("[Bitrix24] Задача завершена: " + ok);
+                    ctrl.cancelDealBtn.setVisible(false);
+                    ctrl.cancelDealBtn.setManaged(false);
+                }))
+                .exceptionally(ex -> {
+                    System.err.println("[Bitrix24] completeTask error: " + ex.getMessage());
+                    return null;
+                });
+    }
+
+    private static String safeStr(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return "";
+        return obj.get(key).getAsString();
+    }
+
+    private static double safeDbl(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
+        try {
+            return obj.get(key).getAsDouble();
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private static int safeInt(JsonObject obj, String key) {
+        if (!obj.has(key) || obj.get(key).isJsonNull()) return 0;
+        try {
+            return obj.get(key).getAsInt();
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

@@ -8,7 +8,7 @@
             style="-fx-background-color: #f8fafc;"
             xmlns="http://javafx.com/javafx/17.0.12"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.example.postgresql.Controllers.ForgetPasswordController">
+            fx:controller="com.example.postgresql.controllers.ForgetPasswordController">
 
     
     <VBox alignment="TOP_CENTER" prefHeight="700" prefWidth="500" spacing="40"

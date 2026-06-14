@@ -1,10 +1,10 @@
 package com.example.postgresql.controllers;
 
-import com.example.postgresql.api.SupabaseClient;
+import com.example.postgresql.API.SupabaseClient;
 import com.example.postgresql.controllers.CardControllers.GuestCargoCardController;
 import com.example.postgresql.utils.CargoImageLoader;
 import com.example.postgresql.HelloApplication;
-import com.example.postgresql.userF.Cargo;
+import com.example.postgresql.UserF.Cargo;
 import com.example.postgresql.utils.MapManager;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -25,13 +25,19 @@ import java.util.List;
 
 public class GuestPanelController {
 
-    @FXML private VBox cargoContainer;
+    @FXML
+    private VBox cargoContainer;
 
-    @FXML private TextField fromFilter;
-    @FXML private TextField toFilter;
-    @FXML private TextField minWeightFilter;
-    @FXML private TextField maxWeightFilter;
-    @FXML private Button applyFilterButton;
+    @FXML
+    private TextField fromFilter;
+    @FXML
+    private TextField toFilter;
+    @FXML
+    private TextField minWeightFilter;
+    @FXML
+    private TextField maxWeightFilter;
+    @FXML
+    private Button applyFilterButton;
 
     private final SupabaseClient supabase = new SupabaseClient();
 
@@ -151,7 +157,9 @@ public class GuestPanelController {
         }
     }
 
-    private String nullToEmpty(String s) { return s == null ? "" : s; }
+    private String nullToEmpty(String s) {
+        return s == null ? "" : s;
+    }
 
     private List<Cargo> parse(JsonArray a) {
         List<Cargo> list = new ArrayList<>();
@@ -168,16 +176,21 @@ public class GuestPanelController {
                         s(o, "Торг_без_торга"), s(o, "КонтактныйТелефон"),
                         o.has("заказчик_id") && !o.get("заказчик_id").isJsonNull()
                                 ? o.get("заказчик_id").getAsInt() : 0));
-            } catch (Exception ex) { System.err.println("Ошибка парсинга груза: " + ex.getMessage()); }
+            } catch (Exception ex) {
+                System.err.println("Ошибка парсинга груза: " + ex.getMessage());
+            }
         }
         return list;
     }
 
     private String s(JsonObject o, String k) {
-        var e = o.get(k); return e == null || e.isJsonNull() ? "" : e.getAsString();
+        var e = o.get(k);
+        return e == null || e.isJsonNull() ? "" : e.getAsString();
     }
+
     private double d(JsonObject o, String k) {
-        var e = o.get(k); return e == null || e.isJsonNull() ? 0 : e.getAsDouble();
+        var e = o.get(k);
+        return e == null || e.isJsonNull() ? 0 : e.getAsDouble();
     }
 
     private Label loadingLabel() {
@@ -199,9 +212,20 @@ public class GuestPanelController {
         cargoContainer.getChildren().add(l);
     }
 
-    @FXML private void goBack() throws IOException { switchTo("main.fxml", "Авторизация"); }
-    @FXML private void goAutoriz() throws IOException { switchTo("main.fxml", "Авторизация"); }
-    @FXML private void goReg() throws IOException { switchTo("reg.fxml", "Регистрация"); }
+    @FXML
+    private void goBack() throws IOException {
+        switchTo("main.fxml", "Авторизация");
+    }
+
+    @FXML
+    private void goAutoriz() throws IOException {
+        switchTo("main.fxml", "Авторизация");
+    }
+
+    @FXML
+    private void goReg() throws IOException {
+        switchTo("reg.fxml", "Регистрация");
+    }
 
     private void switchTo(String fxml, String title) throws IOException {
         Parent root = FXMLLoader.load(HelloApplication.class.getResource(fxml));

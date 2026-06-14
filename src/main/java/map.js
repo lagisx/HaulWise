@@ -1,35 +1,4 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="utf-8">
-    <title>Маршрут</title>
-    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=8425e739-546d-42ca-aa84-772542533179" type="text/javascript"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        html, body, #map { width: 100%; height: 100%; background: #f1f5f9; }
-        #loading {
-            position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            font-family: sans-serif; font-size: 18px; color: #64748b; z-index: 10;
-        }
-        #info-bar {
-            position: absolute; bottom: 16px; left: 50%;
-            transform: translateX(-50%);
-            background: rgba(255,255,255,0.97);
-            border-radius: 12px; padding: 10px 24px;
-            font-family: sans-serif; font-size: 14px; color: #1e293b;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            display: none; z-index: 100; white-space: nowrap;
-        }
-    </style>
-</head>
-<body>
-<div id="loading">Загружаем карту…</div>
-<div id="map"></div>
-<div id="info-bar"></div>
-
-<script>
-    var myMap    = null;
+var myMap    = null;
     var geoObjs  = [];
     var infoBar  = document.getElementById('info-bar');
     var mapReady = false;
@@ -138,6 +107,3 @@
             onBothReady();
         }, function () { coords.to = null; onBothReady(); });
     }
-</script>
-</body>
-</html>

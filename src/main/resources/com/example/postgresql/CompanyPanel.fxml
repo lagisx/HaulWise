@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.example.postgresql.controllers.CompanyPanelController"
+            style="-fx-background-color: #f1f5f9;">
+
+    <top>
+        <HBox style="-fx-background-color: #1e40af; -fx-padding: 16 24;"
+              alignment="CENTER_LEFT" spacing="12">
+            <Button fx:id="backBtn" text="← Назад" onAction="#onBack"
+                    style="-fx-background-color: transparent; -fx-text-fill: white;
+                           -fx-font-size: 13; -fx-cursor: hand;"/>
+            <Label text="🏢 Моя компания"
+                   style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: white;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="statusLabel"
+                   style="-fx-font-size: 12; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        </HBox>
+    </top>
+
+    <center>
+        <ScrollPane fitToWidth="true" style="-fx-background: transparent; -fx-background-color: transparent;">
+            <VBox spacing="20" style="-fx-padding: 32 40;">
+
+                <VBox fx:id="noCompanyBox" spacing="16" alignment="CENTER"
+                      style="-fx-background-color: white; -fx-background-radius: 16;
+                             -fx-padding: 48; -fx-border-color: #e2e8f0;
+                             -fx-border-radius: 16;">
+                    <Label text="🏢" style="-fx-font-size: 48;"/>
+                    <Label text="Вы не состоите в компании"
+                           style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                    <Label text="Создайте компанию чтобы подключить Битрикс24 и управлять грузами вместе с командой"
+                           style="-fx-font-size: 13; -fx-text-fill: #64748b; -fx-wrap-text: true;"
+                           maxWidth="400" textAlignment="CENTER"/>
+                    <Button fx:id="createCompanyBtn" text="+ Создать компанию"
+                            onAction="#onCreateCompany"
+                            style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                                   -fx-font-weight: bold; -fx-font-size: 14;
+                                   -fx-padding: 10 28; -fx-background-radius: 10; -fx-cursor: hand;"/>
+                </VBox>
+
+                <VBox fx:id="companyBox" spacing="20" visible="false" managed="false">
+
+                    <HBox spacing="16" alignment="CENTER_LEFT"
+                          style="-fx-background-color: white; -fx-background-radius: 14;
+                                 -fx-padding: 20 24; -fx-border-color: #e2e8f0; -fx-border-radius: 14;">
+                        <Label text="🏢" style="-fx-font-size: 32;"/>
+                        <VBox spacing="4">
+                            <Label fx:id="companyNameLabel"
+                                   style="-fx-font-size: 20; -fx-font-weight: bold; -fx-text-fill: #0f172a;"
+                                   text="Название компании"/>
+                            <Label fx:id="companyRoleLabel"
+                                   style="-fx-font-size: 13; -fx-text-fill: #64748b;"
+                                   text="👤 Сотрудник"/>
+                        </VBox>
+                    </HBox>
+
+                    <VBox fx:id="ownerSettingsBox" spacing="12"
+                          style="-fx-background-color: white; -fx-background-radius: 14;
+                                 -fx-padding: 20 24; -fx-border-color: #e2e8f0; -fx-border-radius: 14;">
+                        <Label text="🔗 Интеграция с Битрикс24"
+                               style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <Label text="Вставьте URL входящего вебхука из Битрикс24 → Приложения → Разработчикам"
+                               style="-fx-font-size: 12; -fx-text-fill: #64748b; -fx-wrap-text: true;"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="webhookField" HBox.hgrow="ALWAYS"
+                                       promptText="https://ДОМЕН.bitrix24.ru/rest/USERID/ТОКЕН/"
+                                       style="-fx-font-size: 12; -fx-padding: 8 12;
+                                              -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                              -fx-border-radius: 8;"/>
+                            <Button fx:id="saveWebhookBtn" text="💾 Сохранить"
+                                    onAction="#onSaveWebhook"
+                                    style="-fx-background-color: #16a34a; -fx-text-fill: white;
+                                           -fx-font-weight: bold; -fx-padding: 8 16;
+                                           -fx-background-radius: 8; -fx-cursor: hand;"/>
+                        </HBox>
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button fx:id="deleteCompanyBtn" text="🗑 Удалить компанию"
+                                    onAction="#onDeleteCompany"
+                                    style="-fx-background-color: #fff1f2; -fx-text-fill: #ef4444;
+                                           -fx-font-weight: bold; -fx-font-size: 12;
+                                           -fx-padding: 7 16; -fx-background-radius: 8;
+                                           -fx-border-color: #fecaca; -fx-border-radius: 8; -fx-cursor: hand;"/>
+                        </HBox>
+                    </VBox>
+
+                    <VBox spacing="10"
+                          style="-fx-background-color: white; -fx-background-radius: 14;
+                                 -fx-padding: 20 24; -fx-border-color: #e2e8f0; -fx-border-radius: 14;">
+                        <Label text="👥 Пригласить сотрудника"
+                               style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <TextField fx:id="inviteLoginField" HBox.hgrow="ALWAYS"
+                                       promptText="Введите логин пользователя"
+                                       style="-fx-font-size: 13; -fx-padding: 8 12;
+                                              -fx-background-radius: 8; -fx-border-color: #e2e8f0;
+                                              -fx-border-radius: 8;"/>
+                            <Button fx:id="inviteBtn" text="➕ Пригласить"
+                                    onAction="#onInvite"
+                                    style="-fx-background-color: #1e40af; -fx-text-fill: white;
+                                           -fx-font-weight: bold; -fx-padding: 8 16;
+                                           -fx-background-radius: 8; -fx-cursor: hand;"/>
+                        </HBox>
+                        <Label fx:id="inviteStatusLabel" style="-fx-font-size: 12;"/>
+                    </VBox>
+
+                    <VBox spacing="10"
+                          style="-fx-background-color: white; -fx-background-radius: 14;
+                                 -fx-padding: 20 24; -fx-border-color: #e2e8f0; -fx-border-radius: 14;">
+                        <Label text="👤 Сотрудники"
+                               style="-fx-font-size: 15; -fx-font-weight: bold; -fx-text-fill: #0f172a;"/>
+                        <VBox fx:id="membersContainer" spacing="8"/>
+                    </VBox>
+
+                </VBox>
+            </VBox>
+        </ScrollPane>
+    </center>
+</BorderPane>

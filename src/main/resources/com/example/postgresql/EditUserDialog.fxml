@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" prefHeight="620" prefWidth="500" spacing="32" style="-fx-background: white;              -fx-background-radius: 24;              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.Controllers.EditUserDialogController">
+<VBox alignment="CENTER" prefHeight="620" prefWidth="500" spacing="32" style="-fx-background: white;              -fx-background-radius: 24;              -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 40, 0.3, 0, 12);" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.example.postgresql.controllers.EditUserDialogController">
 
     <padding>
         <Insets bottom="45" left="55" right="55" top="45" />

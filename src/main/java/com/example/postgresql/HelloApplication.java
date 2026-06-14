@@ -20,10 +20,11 @@ public class HelloApplication extends Application {
         stage.setTitle("Биржа грузоперевозок");
         stage.setResizable(false);
         stage.setScene(scene);
-        stage.sizeToScene();   
+        stage.sizeToScene();
         stage.centerOnScreen();
         stage.show();
     }
+
     public static HostServices getAppHostServices() {
         return hostServices;
     }

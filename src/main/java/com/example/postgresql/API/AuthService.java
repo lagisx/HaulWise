@@ -97,7 +97,8 @@ public class AuthService {
                                         if (authResp.get("code").getAsInt() >= 400)
                                             return CompletableFuture.completedFuture(
                                                     authResp.get("msg").getAsString());
-                                    } catch (Exception ignored) {}
+                                    } catch (Exception ignored) {
+                                    }
                                 }
 
                                 String authUuid = null;
@@ -368,17 +369,34 @@ public class AuthService {
                             if (newPhone != null && !newPhone.isEmpty()) upd.addProperty("phone", newPhone);
                             if (upd.size() == 0) return CompletableFuture.completedFuture(true);
                             return supabase.update("users", upd, "id=eq." + uid)
-                                    .thenApply(v -> { logAction(username, "Обновил профиль"); return true; });
+                                    .thenApply(v -> {
+                                        logAction(username, "Обновил профиль");
+                                        return true;
+                                    });
                         })
                         .exceptionally(ex -> false).join();
-            } catch (Exception e) { e.printStackTrace(); return false; }
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
+            }
         });
     }
 
-    public CompletableFuture<JsonArray> getAllCargos()  { return supabase.select("cargo", "*", null); }
-    public CompletableFuture<JsonArray> getAllUsers()   { return supabase.select("users", "*", "role=neq.admin"); }
-    public CompletableFuture<JsonArray> getBlacklist() { return supabase.select("blacklist", "*", null); }
-    public CompletableFuture<JsonArray> getLogs()      { return supabase.select("logs", "*", "order=created_at.desc"); }
+    public CompletableFuture<JsonArray> getAllCargos() {
+        return supabase.select("cargo", "*", null);
+    }
+
+    public CompletableFuture<JsonArray> getAllUsers() {
+        return supabase.select("users", "*", "role=neq.admin");
+    }
+
+    public CompletableFuture<JsonArray> getBlacklist() {
+        return supabase.select("blacklist", "*", null);
+    }
+
+    public CompletableFuture<JsonArray> getLogs() {
+        return supabase.select("logs", "*", "order=created_at.desc");
+    }
 
     public CompletableFuture<JsonArray> getUserProfile(String login) {
         return supabase.select("users", "email,phone", "login=eq." + login);
@@ -549,7 +567,11 @@ public class AuthService {
     public static class BlockStatus {
         public final boolean isBlocked;
         public final String reason;
-        public BlockStatus(boolean isBlocked, String reason) { this.isBlocked = isBlocked; this.reason = reason; }
+
+        public BlockStatus(boolean isBlocked, String reason) {
+            this.isBlocked = isBlocked;
+            this.reason = reason;
+        }
     }
 
     public static class UserAuthResult {
@@ -557,24 +579,55 @@ public class AuthService {
         public final String role, message, blockReason;
         public final boolean emailConfirmed;
 
-        public UserAuthResult(boolean s, String r, String m) { this(s, r, m, null, false); }
-        public UserAuthResult(boolean s, String r, String m, String br) { this(s, r, m, br, false); }
+        public UserAuthResult(boolean s, String r, String m) {
+            this(s, r, m, null, false);
+        }
+
+        public UserAuthResult(boolean s, String r, String m, String br) {
+            this(s, r, m, br, false);
+        }
+
         public UserAuthResult(boolean s, String r, String m, String br, boolean emailConfirmed) {
-            success = s; role = r; message = m; blockReason = br;
+            success = s;
+            role = r;
+            message = m;
+            blockReason = br;
             this.emailConfirmed = emailConfirmed;
         }
 
-        public boolean isSuccess()        { return success; }
-        public String getRole()           { return role; }
-        public String getMessage()        { return message; }
-        public String getBlockReason()    { return blockReason; }
-        public boolean isEmailConfirmed() { return emailConfirmed; }
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public String getRole() {
+            return role;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getBlockReason() {
+            return blockReason;
+        }
+
+        public boolean isEmailConfirmed() {
+            return emailConfirmed;
+        }
     }
 
     public static class PasswordResetInfo {
         public final String login, email;
         public final boolean emailConfirmed;
-        public PasswordResetInfo(String l, String e) { this(l, e, false); }
-        public PasswordResetInfo(String l, String e, boolean confirmed) { login = l; email = e; emailConfirmed = confirmed; }
+
+        public PasswordResetInfo(String l, String e) {
+            this(l, e, false);
+        }
+
+        public PasswordResetInfo(String l, String e, boolean confirmed) {
+            login = l;
+            email = e;
+            emailConfirmed = confirmed;
+        }
     }
 }
